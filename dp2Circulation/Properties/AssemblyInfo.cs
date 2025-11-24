@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.103.*")]
-[assembly: AssemblyFileVersion("3.103.0.0")]
+[assembly: AssemblyVersion("3.108.*")]
+[assembly: AssemblyFileVersion("3.108.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -265,3 +265,14 @@ using System.Runtime.InteropServices;
 //       2025/10/14 RFID 工具窗，对上下文菜单中几个涉及到写入标签的命令，进行了改进，让上下文菜单事项在条件不适合的时候显示为 Disabled 状态，避免操作者误解
 //                  书目查询窗的导出读者详细信息 Excel 文件的功能，从以前的依据浏览列表中的证条码号列，改为依据册记录路径列。(以避免当读者证条码号内容中包含 . 的时候无法用 GetReaderInfo() API 成功获取到读者记录的问题)
 //       2025/10/20 dp2circulation_marc_autogen.cs 相关的 DetailHost 类增强了 BeforeSaveRecord() 对复制和移动操作的支持。
+// 3.104 2025/10/29 种册窗在重新装入记录的时候(因为复制或者移动)，如果书目库不同，则要自动重新触发一次 dp2circulation_marc_autogen.cs 创建菜单
+// 3.105 2025/11/1  盘点窗消除“创建 Excel 报表”按钮执行时报错"output_columns 数组中有非数字的字符串 '<all>'，格式错误"的 bug 已经消除
+//                  盘点窗第一个属性页增加“盘点库名” combobox，可以指定盘点库名字，为将来允许多盘点库操作做准备。但因为 dp2library 一端的相关 API 还没有来得及改进，所以此 combobox 的列表中暂时只填入第一个盘点库。
+//       2025/11/10 盘点窗第一个属性页获得馆藏地的对话框在打开前 disabled 了当前窗口，又因对话框中请求 dp2library 检索返回所有馆藏地可能遇到服务器运行缓慢导致时间较长，令弹出的对话框无法被鼠标操作，进退不得。这一 bug 得到改进解决。方法是不再 disable 当前窗口，由对话框自行获得 LibraryChannel，当对话框被操作者关闭时，会自动停止请求。请求 dp2library 服务器的过程，放到一个专门线程中执行，不影响对话框先行显示出来，避免让操作者焦虑。
+// 3.106 2025/11/12 改进了 MarcQuery 函数库，消除了 MarcNode.ChildNodes set 时抛出 Debug.AAssert() 异常的问题
+// 3.107 2025/11/17 日志统计窗增加了内置的统计方案“#出纳流水”
+//                  同类书区分号对话框增加了显示断裂号段的空行的功能。增加了“状态”列。对于状态列内容中包含“注销”的行显示为斜体，提醒操作者注意。自动取最大号的时候，可以设置考虑或者不考虑状态为“注销”的行
+// 3.108 2025/11/20 MARC 编辑器字体改变后，有时候会导致字段名 textbox 部分宽度不足引起字段名 3 字符折行，这个 bug 已经修正
+//                  DetailHost 类增加 UnimarcAddPublisher() 和 UnimarcManagePublisher() 两个函数
+//                  同类书区分号对话框继续改进重构。
+//                  各种脚本文件中都支持使用 LINQ 函数了。(加入了 System.Core.dll 引用)

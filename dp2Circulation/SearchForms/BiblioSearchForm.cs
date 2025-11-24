@@ -9099,7 +9099,8 @@ TaskScheduler.Default);
                         goto ERROR1;
                     }
 
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                    if (host.HistoryMode == HistoryMode.RecPath)
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
 
                     host.MainForm = Program.MainForm;
                     host.RecordPath = info.RecPath;
@@ -9432,7 +9433,7 @@ TaskScheduler.Default);
                                     "system.windows.forms.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
-
+                                    "System.Core.dll",  // Linq 需要
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
@@ -14094,7 +14095,10 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+            var to2709_prompt = new PromptInfo();
+
             int nCount = 0; // 导出的记录数
+            int nSkipCount = 0; // 跳过的记录数
             int instantly_save_count = 0;   // 立即保存的记录数
             bool bDontPrompt_instantlyChange = false;
             DialogResult instantly_change_dialog_result = DialogResult.Yes;
@@ -14480,6 +14484,7 @@ out string error);
                     }
                     else if (fileType == "iso")
                     {
+                    REDO_CONVERT:
                         // 将MARC机内格式转换为ISO2709格式
                         // parameters:
                         //      strSourceMARC   [in]机内格式MARC记录。
@@ -14499,7 +14504,24 @@ out string error);
                         if (nRet == -1)
                         {
                             strError = $"书目记录 {info.RecPath} 在构造 ISO2709 格式阶段出错: {strError}";
-                            goto ERROR1;
+                            var result = PromptError(to2709_prompt,
+                                strError,
+                                "导出");
+                            if (result.Value == -1)
+                                goto ERROR1;
+                            else if (result.ErrorCode == "redo")
+                                goto REDO_CONVERT;
+                            else if (result.ErrorCode == "skip")
+                            {
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"{info.RecPath} 被跳过").Replace("\r\n", "<br/>") + "</div>");
+                                nSkipCount++;
+                                goto CONTINUE;
+                            }
+                            else
+                            {
+                                strError = $"PromptError() 返回了不期望的 result 值 '{result.ToString()}' ({strError})";
+                                goto ERROR1;
+                            }
                         }
                     }
                     /*
@@ -14589,8 +14611,9 @@ out strError);
 
                     }
 
-                    looping.Progress.SetProgressValue(++i);
                     nCount++;
+                CONTINUE:
+                    looping.Progress.SetProgressValue(++i);
                 }
             }
             catch (Exception ex)
@@ -14646,6 +14669,10 @@ out strError);
             else
                 succeed_text = nCount.ToString()
                     + "条记录成功保存到新文件 " + this.LastIso2709FileName;
+
+            if (nSkipCount > 0)
+                succeed_text += $"。跳过 {nSkipCount} 条记录未能导出";
+
             if (instantly_save_count > 0)
                 succeed_text += $"。数据库修改兑现 {instantly_save_count} 条";
 
@@ -14664,6 +14691,62 @@ out strError);
             RefreshPropertyView(false);
 
             MessageDlg.Show(this, strError, "导出过程出错");
+        }
+
+        public class PromptInfo
+        {
+            // [in,out]
+            public bool DontPrompt { get; set; }
+
+            // [in,out]
+            public DialogResult DialogResult { get; set; } = DialogResult.Yes;
+
+            // [in,out]
+            public int RedoCount { get; set; } = 0;
+        }
+
+        // return:
+        //      result.Value -1 中断批处理
+        //      result.ErrorCode "redo" "skip" 其它
+        public NormalResult PromptError(PromptInfo info,
+            string error,
+            string action)
+        {
+            if (info.DontPrompt == false || info.RedoCount >= 10)
+            {
+                bool temp = info.DontPrompt;
+                string message = $"{error}\r\n---\r\n\r\n是否重试?\r\n\r\n注：\r\n[重试] 重试{action}\r\n[跳过] 放弃{action}当前记录，但继续后面的处理\r\n[中断] 中断整批操作";
+                info.DialogResult = this.TryGet(() =>
+                {
+                    return MessageDlg.Show(this,
+                    message,
+                    $"{action} 出错",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxDefaultButton.Button1,
+                    ref temp,
+                    new string[] { "重试", "跳过", "中断" },
+                    "下次不再询问");
+                });
+                info.DontPrompt = temp;
+            }
+
+            // 希望重试
+            if (info.DialogResult == DialogResult.Yes)
+            {
+                info.RedoCount++;
+                return new NormalResult { ErrorCode = "redo" };
+            }
+
+            // 希望跳过
+            if (info.DialogResult == DialogResult.No)
+                return new NormalResult { ErrorCode = "skip" };
+
+            // 希望中断
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = error
+            };
         }
 
         // 2025/8/22

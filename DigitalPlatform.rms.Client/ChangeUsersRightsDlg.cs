@@ -309,7 +309,7 @@ namespace DigitalPlatform.rms.Client
 				out strError);
 			if (nRet == -1)
 			{
-				MessageBox.Show(this, strError);
+				this.MessageBoxShow(strError);
 				return;
 			}
 		}

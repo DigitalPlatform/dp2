@@ -111,6 +111,7 @@ namespace dp2Circulation
 
             this.treeView_opacBrowseFormats.ImageList = this.imageList_opacBrowseFormatType;
 
+            this.treeView_zhongcihao.WatermarkText = "注意内务前端并不使用此处的配置参数\r\n要配置内务前端的种次号参数请切换到“排架体系”属性页";
             this.treeView_zhongcihao.ImageList = this.imageList_zhongcihao;
 
             this.treeView_arrangement.ImageList = this.imageList_arrangement;

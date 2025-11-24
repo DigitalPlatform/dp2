@@ -1,34 +1,34 @@
-﻿using System;
-using System.Drawing;
+﻿using DigitalPlatform;
+using DigitalPlatform.Core;
+using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
+using DigitalPlatform.Library;
+using DigitalPlatform.LibraryServer;
+using DigitalPlatform.Marc;
+using DigitalPlatform.MarcDom;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
 using System.Data;
+using System.Deployment.Application;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
-using System.IO;
 using System.Text;
-using System.Xml;
-
-using System.Reflection;
-using System.Deployment.Application;
+using System.Threading;
 using System.Threading.Tasks;
-
-using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.IO;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Library;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Text;
-using DigitalPlatform.Core;
-using DigitalPlatform.LibraryServer;
+using System.Windows.Forms;
+using System.Xml;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace dp2Batch
 {
@@ -6951,6 +6951,7 @@ this.checkBox_import_fastMode.Checked);
                     return;
                 font = Control.DefaultFont;
             }
+
             if (font.Name == control.Font.Name
                 && font.Style == control.Font.Style
                 && font.SizeInPoints == control.Font.SizeInPoints)

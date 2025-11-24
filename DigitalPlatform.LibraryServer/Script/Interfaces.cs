@@ -5,7 +5,6 @@ using System.Xml;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using Ionic.Zlib;
 
 // === 为脚本提供的各种接口 ===
 

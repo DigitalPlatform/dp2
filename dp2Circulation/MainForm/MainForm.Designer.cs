@@ -302,7 +302,7 @@
             this.toolStripSeparator14,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // toolStripMenuItem_runProject
@@ -373,7 +373,7 @@
             this.toolStripSeparator5,
             this.MenuItem_openChangePasswordForm});
             this.MenuItem_functionWindows.Name = "MenuItem_functionWindows";
-            this.MenuItem_functionWindows.Size = new System.Drawing.Size(142, 32);
+            this.MenuItem_functionWindows.Size = new System.Drawing.Size(142, 33);
             this.MenuItem_functionWindows.Text = "常用窗口(&R)";
             // 
             // MenuItem_openQuickChargingForm
@@ -590,7 +590,7 @@
             this.MenuItem_initFingerprintCache,
             this.MenuItem_palmprint});
             this.MenuItem_function.Name = "MenuItem_function";
-            this.MenuItem_function.Size = new System.Drawing.Size(102, 32);
+            this.MenuItem_function.Size = new System.Drawing.Size(102, 33);
             this.MenuItem_function.Text = "功能(&U)";
             // 
             // ToolStripMenuItem_openFunctionWindow
@@ -1069,7 +1069,7 @@
             this.toolStripSeparator17,
             this.MenuItem_openTestSearch});
             this.MenuItem_batch.Name = "MenuItem_batch";
-            this.MenuItem_batch.Size = new System.Drawing.Size(120, 32);
+            this.MenuItem_batch.Size = new System.Drawing.Size(120, 33);
             this.MenuItem_batch.Text = "批处理(&B)";
             // 
             // MenuItem_openQuickChangeEntityForm_1
@@ -1207,7 +1207,7 @@
             this.MenuItem_displayFixPanel});
             this.MenuItem_window.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_window.Name = "MenuItem_window";
-            this.MenuItem_window.Size = new System.Drawing.Size(107, 32);
+            this.MenuItem_window.Size = new System.Drawing.Size(107, 33);
             this.MenuItem_window.Text = "窗口(&W)";
             // 
             // MenuItem_tileHorizontal
@@ -1280,7 +1280,7 @@
             this.MenuItem_font,
             this.MenuItem_restoreDefaultFont});
             this.MenuItem_ui.Name = "MenuItem_ui";
-            this.MenuItem_ui.Size = new System.Drawing.Size(92, 32);
+            this.MenuItem_ui.Size = new System.Drawing.Size(92, 33);
             this.MenuItem_ui.Text = "外观(&I)";
             // 
             // MenuItem_font
@@ -1288,14 +1288,14 @@
             this.MenuItem_font.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_font.Image")));
             this.MenuItem_font.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_font.Name = "MenuItem_font";
-            this.MenuItem_font.Size = new System.Drawing.Size(306, 40);
+            this.MenuItem_font.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_font.Text = "字体(&F)...";
             this.MenuItem_font.Click += new System.EventHandler(this.MenuItem_font_Click);
             // 
             // MenuItem_restoreDefaultFont
             // 
             this.MenuItem_restoreDefaultFont.Name = "MenuItem_restoreDefaultFont";
-            this.MenuItem_restoreDefaultFont.Size = new System.Drawing.Size(306, 40);
+            this.MenuItem_restoreDefaultFont.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_restoreDefaultFont.Text = "恢复为缺省字体(&D)";
             this.MenuItem_restoreDefaultFont.Click += new System.EventHandler(this.MenuItem_restoreDefaultFont_Click);
             // 
@@ -1323,7 +1323,7 @@
             this.toolStripSeparator31,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_configuration
@@ -1826,7 +1826,7 @@
             this.tabPage_property.Location = new System.Drawing.Point(4, 40);
             this.tabPage_property.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(354, 465);
+            this.tabPage_property.Size = new System.Drawing.Size(354, 455);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -1836,7 +1836,7 @@
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 40);
             this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(354, 465);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(354, 455);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -1846,7 +1846,7 @@
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 40);
             this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(354, 465);
+            this.tabPage_generateData.Size = new System.Drawing.Size(354, 455);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -1856,7 +1856,7 @@
             this.tabPage_camera.Location = new System.Drawing.Point(4, 40);
             this.tabPage_camera.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(354, 465);
+            this.tabPage_camera.Size = new System.Drawing.Size(354, 455);
             this.tabPage_camera.TabIndex = 4;
             this.tabPage_camera.Text = "QR 识别";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1866,7 +1866,7 @@
             this.tabPage_accept.Location = new System.Drawing.Point(4, 40);
             this.tabPage_accept.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(354, 465);
+            this.tabPage_accept.Size = new System.Drawing.Size(354, 455);
             this.tabPage_accept.TabIndex = 5;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1878,7 +1878,7 @@
             this.tabPage_share.Controls.Add(this.tableLayoutPanel_messageHub);
             this.tabPage_share.Location = new System.Drawing.Point(4, 40);
             this.tabPage_share.Name = "tabPage_share";
-            this.tabPage_share.Size = new System.Drawing.Size(354, 465);
+            this.tabPage_share.Size = new System.Drawing.Size(354, 455);
             this.tabPage_share.TabIndex = 6;
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
@@ -1897,7 +1897,7 @@
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0F));
-            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(354, 465);
+            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(354, 455);
             this.tableLayoutPanel_messageHub.TabIndex = 2;
             // 
             // webBrowser_messageHub
@@ -1907,7 +1907,7 @@
             this.webBrowser_messageHub.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(35, 35);
             this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(344, 417);
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(344, 407);
             this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_messageHub
@@ -1918,7 +1918,7 @@
             this.toolStripButton_messageHub_userManage,
             this.toolStripButton_messageHub_relogin,
             this.toolStripButton_messageHub_command});
-            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 427);
+            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 417);
             this.toolStrip_messageHub.Name = "toolStrip_messageHub";
             this.toolStrip_messageHub.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip_messageHub.Size = new System.Drawing.Size(354, 38);
@@ -1960,7 +1960,7 @@
             this.tabPage_browse.Location = new System.Drawing.Point(4, 40);
             this.tabPage_browse.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_browse.Name = "tabPage_browse";
-            this.tabPage_browse.Size = new System.Drawing.Size(354, 465);
+            this.tabPage_browse.Size = new System.Drawing.Size(354, 455);
             this.tabPage_browse.TabIndex = 7;
             this.tabPage_browse.Text = "浏览";
             this.tabPage_browse.UseVisualStyleBackColor = true;

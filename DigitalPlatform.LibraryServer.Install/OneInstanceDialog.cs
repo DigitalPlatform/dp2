@@ -252,7 +252,7 @@ namespace DigitalPlatform.LibraryServer
             this.Close();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -616,7 +616,7 @@ namespace DigitalPlatform.LibraryServer
             this.textBox_bindings.Text = string.Join("\r\n", dlg.Urls);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         }
 
@@ -724,7 +724,7 @@ namespace DigitalPlatform.LibraryServer
                     this.VerifyDataDir(this, e1);
                     if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
                     {
-                        MessageBox.Show(this, e1.ErrorInfo);
+                        this.MessageBoxShow(e1.ErrorInfo);
                         return;
                     }
                 }
@@ -751,7 +751,7 @@ MessageBoxDefaultButton.Button1);
                         this.LoadXmlFileInfo(this, e1);
                         if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
                         {
-                            MessageBox.Show(this, e1.ErrorInfo);
+                            this.MessageBoxShow(e1.ErrorInfo);
                             return;
                         }
 
@@ -783,7 +783,7 @@ MessageBoxDefaultButton.Button1);
                     this.VerifyDataDir(this, e1);
                     if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
                     {
-                        MessageBox.Show(this, e1.ErrorInfo);
+                        this.MessageBoxShow(e1.ErrorInfo);
                         return;
                     }
                 }
@@ -810,7 +810,7 @@ MessageBoxDefaultButton.Button1);
                         this.LoadXmlFileInfo(this, e1);
                         if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
                         {
-                            MessageBox.Show(this, e1.ErrorInfo);
+                            this.MessageBoxShow(e1.ErrorInfo);
                             return;
                         }
 
@@ -850,7 +850,7 @@ MessageBoxDefaultButton.Button1);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, "将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '" + this.textBox_dataDir.Text + "' 时发生错误: " + ex.Message);
+                        this.MessageBoxShow("将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '" + this.textBox_dataDir.Text + "' 时发生错误: " + ex.Message);
                     }
 
                 }
@@ -1216,14 +1216,14 @@ MessageBoxDefaultButton.Button1);
             //    if (strSha1 != SerialCodeForm.GetCheckCode(strSerialCode) || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (String.IsNullOrEmpty(strSerialCode) == false)
-                    MessageBox.Show(this, "序列号无效。请重新输入");
+                    this.MessageBoxShow("序列号无效。请重新输入");
                 goto REDO_INPUT;
             }
 
             this.LineInfo.SerialNumber = strSerialCode;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 为 library.xml 配置 MSMQ 相关参数
@@ -1239,10 +1239,10 @@ MessageBoxDefaultButton.Button1);
 
             // 重新启动一次 dp2library? 没有必要，因为整个实例对话框进入以前，dp2library 已经暂停了。对话框退出后会重新启动。
 
-            MessageBox.Show(this, "配置成功");
+            this.MessageBoxShow("配置成功");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 为 library.xml 自动配置 MongoDB 参数
@@ -1258,10 +1258,10 @@ MessageBoxDefaultButton.Button1);
 
             // 重新启动一次 dp2library? 没有必要，因为整个实例对话框进入以前，dp2library 已经暂停了。对话框退出后会重新启动。
 
-            MessageBox.Show(this, "配置成功");
+            this.MessageBoxShow("配置成功");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 为 library.xml 配置服务器同步参数
@@ -1296,7 +1296,7 @@ MessageBoxDefaultButton.Button1);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow( strError);
         }
 
         private void checkBox_stopInstance_CheckedChanged(object sender, EventArgs e)
@@ -1318,7 +1318,7 @@ MessageBoxDefaultButton.Button1);
         {
             if (InstallHelper.IsValidInstanceName(this.textBox_instanceName.Text) == false)
             {
-                MessageBox.Show(this, $"实例名 '{this.textBox_instanceName.Text}' 中出现了非法字符");
+                this.MessageBoxShow($"实例名 '{this.textBox_instanceName.Text}' 中出现了非法字符");
                 e.Cancel = true;
             }
         }
@@ -1352,7 +1352,7 @@ MessageBoxDefaultButton.Button1);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 配置消息服务器
@@ -1383,7 +1383,7 @@ MessageBoxDefaultButton.Button1);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
     }
 }

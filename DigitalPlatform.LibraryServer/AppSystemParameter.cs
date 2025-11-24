@@ -1,14 +1,15 @@
-﻿using System;
+﻿using DigitalPlatform.IO;
+using DigitalPlatform.Marc;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-
-using DigitalPlatform.IO;
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -33,6 +34,23 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strDbName))
                 return 1;
 
+#if ITEM_ACCESS_RIGHTS
+            /*
+            // TODO: 归入 CheckGetBiblioInfoAccess()
+            var error = SequenceCheckAccess(sessioninfo,
+$"获取书目信息",
+strDbName,
+GetBiblioInfoAction("biblio"),
+"",
+out _,
+out _);
+            */
+            var error = CheckGetBiblioInfoAccess(
+    sessioninfo,
+    "biblio",
+    strDbName,
+    out _);
+#else
             // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
             // parameters:
             //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
@@ -46,6 +64,8 @@ namespace DigitalPlatform.LibraryServer
                 strDbName,
                 true,
                 out _);
+#endif
+
             if (error == null)
                 return 1;
             return 0;
@@ -176,9 +196,16 @@ namespace DigitalPlatform.LibraryServer
                         goto END1;
                     }
                     // 用于日志记载的前端地址，包括 IP 和 Via 两个部分
-                    if (strName == "getClientAddress")
+                    else if (strName == "getClientAddress")
                     {
                         strValue = sessioninfo.ClientAddress;
+                        goto END1;
+                    }
+                    // 2025/11/6
+                    // 获得 MARC 记录合并算法规定的 头标区 NULL 内容
+                    else if (strName == "null_marc_header")
+                    {
+                        strValue = MarcDiff.GetNullHeader();
                         goto END1;
                     }
                 }

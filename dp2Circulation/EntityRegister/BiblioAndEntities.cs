@@ -881,7 +881,8 @@ MessageBoxDefaultButton.Button2);
                 item.CallNumber = edit.AccessNo;
                 item.Location = edit.LocationString;
                 item.Barcode = edit.Barcode;
-
+                // 2025/11/17
+                item.State = edit.State;
                 results.Add(item);
             }
 

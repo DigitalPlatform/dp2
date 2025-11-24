@@ -137,7 +137,7 @@ namespace dp2Circulation
             this.ToolStripMenuItem_zhongcihao_insert_nstable = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_zhongcihao_modify = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_zhongcihao_remove = new System.Windows.Forms.ToolStripButton();
-            this.treeView_zhongcihao = new System.Windows.Forms.TreeView();
+            this.treeView_zhongcihao = new WatermarkTreeView();
             this.tabPage_bookshelf = new System.Windows.Forms.TabPage();
             this.toolStrip_arrangement = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_arrangement_save = new System.Windows.Forms.ToolStripButton();
@@ -2485,7 +2485,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_script_refresh;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_script_caretPos;
         private System.Windows.Forms.SplitContainer splitContainer_script;
-        private System.Windows.Forms.TreeView treeView_zhongcihao;
+        private WatermarkTreeView treeView_zhongcihao;
         private System.Windows.Forms.ImageList imageList_zhongcihao;
         private System.Windows.Forms.ToolStrip toolStrip_zhongcihao;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_insert;

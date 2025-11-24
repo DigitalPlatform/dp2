@@ -5,10 +5,6 @@
 获得一条书目记录的书目摘要信息。
 
 
-## 权限
-
-需要 getbibliosummary 或 order 普通权限，或同名存取定义权限。
-
 ## 接口定义
 ```csharp
         // 从册条码号(+册记录路径)获得种记录摘要，或者从订购记录路径、期记录路径、评注记录路径获得种记录摘要
@@ -54,7 +50,6 @@
 返回书目摘要信息。
 
 
-
 ## 返回值
 ### Result.Value
 -1 出错
@@ -64,6 +59,17 @@
 错误信息
 ### Result.ErrorCode
 错误码
+
+
+## 权限
+
+需要 getbibliosummary 或 order 普通权限，或同名存取定义权限。
+
+当利用存取定义的 getbibliosummary 权限时，可以精确指定哪些书目库允许获得书目摘要，哪些不允许。例如：
+`中文图书:getbibliosummary;`    注: 只允许中文图书这个库获得书目摘要，其它库不允许
+`中文图书:getbibliosummary=;*:getbibliosummary` 注: 禁止中文图书这个库获得书目摘要(等号后面为空表示禁止)，但允许其余的库获得书目摘要
+
+注: 利用 GetBiblioInfos() API 获得 summary 格式的数据时，也受此 getbibliosummary 权限控制。
 
 ## 实时统计
 

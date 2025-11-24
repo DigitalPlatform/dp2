@@ -108,6 +108,29 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
         // 翻译 getxxxinfo 权限
+        public static string SetInfoRight(string right)
+        {
+            /*
+            if (right == "setiteminfo"
+                || right == "setissueinfo"
+                || right == "setorderinfo"
+                || right == "setcommentinfo"
+                || right == "setbiblioinfo")
+            {
+#if DEBUG
+                if (StringUtil.IsInList("writerecord", right) == true)
+                    throw new ArgumentException($"在调用 SetInfoRight() 以前 right='{right}' 中已经包含了 writerecord。请精简它");
+#endif
+                return right + ",writerecord";
+            }
+            */
+            right += ",writerecord";
+            if (right.StartsWith("setbiblioinfo"))
+                right += ",order";
+            return right;
+        }
+
+        // 翻译 getxxxinfo 权限
         public static string GetInfoRight(string right)
         {
             if (right == "getiteminfo"
@@ -115,7 +138,8 @@ namespace DigitalPlatform.LibraryServer
                 || right == "getorderinfo"
                 || right == "getcommentinfo"
                 || right == "getbiblioinfo"/*2025/10/23*/
-                || right == "getbibliosummary")
+                || right == "getbibliosummary"
+                || right == "getauthorityinfo")
             {
 #if DEBUG
                 if (StringUtil.IsInList("getrecord,order", right) == true)
@@ -148,6 +172,26 @@ namespace DigitalPlatform.LibraryServer
             string strDbName,
             string strOperation)
         {
+            var results = GetDbOperRightsList(strAccessString,
+                strDbName,
+                strOperation);
+            if (results == null || results.Count == 0)
+                return null;
+            return results[0].Rights;
+        }
+
+        // 返回命中的 OperRights 集合
+        // parameters:
+        //      strDbNames   数据库名。如果为空，表示匹配权限字符串中的任意数据库名
+        //      strOperations    操作类型。比如 "setbiblioinfo" 或者 "setbiblioinfo,getbiblioinfo"
+        // return:
+        //      null    指定的操作类型的权限没有定义
+        //      匹配的权限对象的集合 返回后，调主一般只取用第一个元素。注意里面可能存在 .Rights 为 "" 的表示否定的元素
+        public static List<OperRights> GetDbOperRightsList(
+            string strAccessString,
+            string strDbName,
+            string strOperation)
+        {
             // 是否具有多个 operation
             bool multiple_operation = strOperation == null ? false : strOperation.Contains(",");
 
@@ -162,20 +206,28 @@ namespace DigitalPlatform.LibraryServer
                     results = RemoveDupOperation(results);
                 }
 
+                // 返回不是否定的
+                var temp = results.Where(r => string.IsNullOrEmpty(r.Rights) == false).ToList();
+                if (temp.Count > 0)
+                    return temp;
+                // 如果没有找到，继续往后。那么这里面就是全部是否定的了
+
+                /*
                 // 返回不是否定的第一个
                 foreach (var result in results)
                 {
                     if (string.IsNullOrEmpty(result.Rights) == false)
-                        return result.Rights;
+                        return result;
                 }
+                */
             }
 
             if (results.Count > 0)
-                return results[0].Rights;
+                return results;
             return null;
         }
 
-        // 先对 Operation 相同的进行去重，去掉第一个以后的其余的
+        // 先对 Operation 和 DbName 相同的进行去重，去掉第一个以后的其余的
         static List<OperRights> RemoveDupOperation(List<OperRights> items)
         {
             Hashtable hashtable = new Hashtable();
@@ -307,14 +359,17 @@ namespace DigitalPlatform.LibraryServer
         // 一个操作类型的权限
         public class OperRights
         {
-            // 命中的操作类型名字
+            // 命中的操作类型名字。比如 "setbiblioinfo"
             public string Operation { get; set; }
 
             // 命中的数据库名字
             public string DbNames { get; set; }
 
-            // 权限
+            // 权限。比如 "new,change,delte"。也可能是空，表示否定定义
             public string Rights { get; set; }
+
+            // 是否普通权限
+            public bool Normal { get; set; }
 
             public override string ToString()
             {
@@ -650,7 +705,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 创建新用户
-        // TODO: 对DOM加锁
+        // TODO: 对DOM加锁。或者考虑把修改 DOM 的操作放在一个 using( ... ) 中，此范围被锁定，确保和其它修改以及 Save() 互斥。加锁过程应该允许重入
         public int CreateUser(
             string strLibraryCodeList,
             string strUserName,

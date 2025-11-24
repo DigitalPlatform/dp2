@@ -218,7 +218,6 @@ namespace DigitalPlatform.CirculationClient
                 {
                     Debug.Assert(true, "若要用ap保存和恢复窗口外观状态，必须先设置ApCfgTitle成员");
                 }
-
             }
 
             if (dom != null)

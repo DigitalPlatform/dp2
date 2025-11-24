@@ -21,6 +21,76 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public class ManageHelper
     {
+        public delegate string delegate_change(string existing_role);
+
+        public static NormalResult ChangeDatabaseRole(
+            LibraryChannel channel,
+            string strBiblioDbName,
+            delegate_change func_changeRole)
+        {
+            var ret = channel.ManageDatabase(
+                null,
+                "getinfo",
+                strBiblioDbName,
+                "",
+                "",
+                out string xml,
+                out string error);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = error,
+                    ErrorCode = channel.ErrorCode.ToString()
+                };
+            XmlDocument info_dom = new XmlDocument();
+            info_dom.LoadXml(xml);
+
+            // 用于修改命令的DOM
+            XmlDocument change_dom = new XmlDocument();
+            change_dom.LoadXml("<root />");
+            XmlNode nodeChangeDatabase = change_dom.CreateElement("database");
+            change_dom.DocumentElement.AppendChild(nodeChangeDatabase);
+
+            // 用于创建命令的DOM
+            XmlDocument create_dom = new XmlDocument();
+            create_dom.LoadXml("<root />");
+
+            // 角色
+            var strOldRole = info_dom.DocumentElement.SelectSingleNode("//database/@role")?.Value;
+            //string strOldRole = DomUtil.GetAttr(info_dom.DocumentElement,
+            //    "role");
+            string strRole = func_changeRole(strOldRole);
+            if (strOldRole == strRole)
+                return new NormalResult();
+
+            if (strOldRole != strRole)
+            {
+                // 当XML中具有role属性的时候，才表示要修改这个因素
+                DomUtil.SetAttr(nodeChangeDatabase, "name", strBiblioDbName);
+                DomUtil.SetAttr(nodeChangeDatabase, "role",
+                    strRole);
+            }
+
+            ret = channel.ManageDatabase(
+                null,
+                "change",
+                strBiblioDbName,
+                change_dom.DocumentElement.OuterXml,
+                "",
+                out string temp,
+                out error);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = error,
+                    ErrorCode = channel.ErrorCode.ToString()
+                };
+
+            return new NormalResult { Value = 1 };
+        }
+
 
         // 出现提示
         // return:

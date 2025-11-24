@@ -38,6 +38,11 @@ namespace dp2Circulation
         /// </summary>
         public DateTime EndDate = new DateTime(0);
 
+        // 2025/11/17
+        // 用于为 GetOperLogs() API 获取日志记录设定的优化 filter，可以加快速度
+        // 脚本在 OnInitial() 或 OnBegin() 阶段设置好它，后面宿主会用它来请求 GetOperLogs() API
+        public string OperLogFilter { get; set; }
+
         /// <summary>
         /// 获得表示日期范围的字符串
         /// </summary>

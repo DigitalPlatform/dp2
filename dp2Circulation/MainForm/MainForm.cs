@@ -6729,6 +6729,15 @@ out strError);
             return null;    // not found
         }
 
+        // 获得一个特定类型的实用库的库名，可能是多个数据库名
+        public List<string> GetUtilDbNames(string strType)
+        {
+            if (this.UtilDbProperties == null)
+                return null;    // not found
+
+            return this.UtilDbProperties.Where(p => p.Type == strType).Select(p => p.DbName).ToList();
+        }
+
 
         // 从ISBN号中取得出版社号部分
         // 本函数可以自动适应有978前缀的新型ISBN号

@@ -46,7 +46,6 @@ namespace DigitalPlatform.CommonControl
                     SystemInformation.WorkingArea.Width - this.Size.Width,
                     this.Location.Y);
             }
-
         }
 
         private void GetDateDlg_FormClosed(object sender, FormClosedEventArgs e)

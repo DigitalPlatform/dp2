@@ -1,8 +1,4 @@
-﻿using DigitalPlatform.IO;
-using DigitalPlatform.LibraryServer.Common;
-using DigitalPlatform.Xml;
-using Jint.Parser.Ast;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {

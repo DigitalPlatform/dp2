@@ -5960,9 +5960,12 @@ out strError);
                 var ret = this._getAllLibraryCodes(
     out List<string> library_codes,
     out string strError);
-                return new GetCodesResult { Value = ret,
+                return new GetCodesResult
+                {
+                    Value = ret,
                     LibraryCodes = library_codes,
-                    ErrorInfo = strError };
+                    ErrorInfo = strError
+                };
             });
         }
 
@@ -6075,6 +6078,29 @@ out strError);
         }
 
         #endregion
+
+        // 同类书区分号窗 自动取种次号时自动忽略的状态值
+        public string CallNumberIgnoreItemState
+        {
+            get
+            {
+                return this.AppInfo?.GetString(
+"callNumber",
+"ignore_item_state",
+"");
+            }
+        }
+
+        public bool CallNumberUseEmptyNumber
+        {
+            get
+            {
+                return this.AppInfo?.GetBoolean(
+"callNumber",
+"use_empty_number",
+false) ?? false;
+            }
+        }
     }
 
     public delegate void TagChangedEventHandler(object sender,

@@ -1,0 +1,110 @@
+BODY {
+    FONT-FAMILY: Microsoft YaHei, Verdana, ËÎÌו;
+    FONT-SIZE: 10pt;
+}
+
+DIV.pageheader {
+    text-align: right;
+    border-bottom-width: 1pt;
+    border-bottom-color: #000000;
+    border-bottom-style: solid;
+    margin-bottom: 16pt;
+}
+
+DIV.tabletitle {
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+    margin: 16pt;
+}
+
+TABLE.table {
+    font-size: 10pt;
+    width: 100%;
+    border-color: #000000;
+    border-width: 1px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+    TABLE.table TR.column TD {
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    TABLE.table TD {
+        padding: 4pt;
+        text-align: left;
+        border-color: #999999;
+        border-width: 0px;
+        border-bottom-width: 1px;
+        border-style: solid;
+    }
+
+    TABLE.table TR.borrow {
+        background-color: #ffffcc;
+    }
+
+    TABLE.table TD.reader {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    TABLE.table TD.item {
+        font-size: 8pt;
+        width: 50%;
+    }
+
+    TABLE.table TD.operator {
+        width: 10%;
+    }
+
+
+    TABLE.table TD.index {
+        width: 1%;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    TABLE.table TD.opertime {
+        font-size: 8pt;
+        width: 1%;
+        white-space: nowrap;
+    }
+
+DIV.pagefooter {
+    text-align: right;
+    border-top-width: 1pt;
+    border-top-color: #000000;
+    border-top-style: solid;
+    margin-top: 16pt;
+}
+
+TABLE.overdueinfo {
+    font-size: 8pt;
+    width: 100%;
+    border-color: lightgrey;
+    border-width: 0px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+    TABLE.overdueinfo TD {
+        border-width: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+        TABLE.overdueinfo TD.name {
+            text-align: right;
+            background-color: #ffffff;
+            color: #777777;
+            width: 10%;
+            border: 0px;
+            border-right: 1px;
+            border-color: #999999;
+            border-style: solid;
+            text-align: right;
+            vertical-align: top;
+            white-space: nowrap;
+        }

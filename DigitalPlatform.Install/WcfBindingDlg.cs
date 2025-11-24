@@ -27,7 +27,7 @@ namespace DigitalPlatform.Install
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                this.MessageBoxShow(ex.Message);
             }
         }
 

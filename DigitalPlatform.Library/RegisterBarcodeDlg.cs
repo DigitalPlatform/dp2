@@ -276,7 +276,7 @@ namespace DigitalPlatform.Library
             return;
 
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         }
 

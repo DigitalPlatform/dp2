@@ -77,6 +77,14 @@ namespace DigitalPlatform.LibraryClient
             set;
         }
 
+        const int DEFAULT_BATCH_SIZE = 100;
+
+        public int BatchSize
+        {
+            get;
+            set;
+        } = DEFAULT_BATCH_SIZE;
+
         public IEnumerator GetEnumerator()
         {
             List<string> format_list = new List<string>();
@@ -147,11 +155,13 @@ namespace DigitalPlatform.LibraryClient
                 }
 
                 // 每100个一批，或者最后一次
-                if (batch.Count >= 100 ||
+                if (batch.Count >= this.BatchSize ||
                     (bEOF == true && batch.Count > 0))
                 {
+                    // 2025/10/27
+                    int delta = batch.Count;
                 REDO:
-                    string strCommand = "@path-list:" + StringUtil.MakePathList(batch);
+                    string strCommand = "@path-list:" + StringUtil.MakePathList(batch.GetRange(0, delta));
 
                     // Channel.Timeout = new TimeSpan(0, 0, 5); 应该让调主设置这个值
                     long lRet = Channel.GetBiblioInfos(
@@ -164,6 +174,16 @@ namespace DigitalPlatform.LibraryClient
                         out string strError);
                     if (lRet == -1)
                     {
+                        // 2025/10/27
+                        // 可能是响应包超出配额
+                        // 减小一半请求再试
+                        if (Channel.ErrorCode == ErrorCode.RequestError
+                            && delta > 1)
+                        {
+                            delta = Math.Max(delta / 2, 1);
+                            goto REDO;
+                        }
+
                         if (this.Prompt != null)
                         {
                             MessagePromptEventArgs e = new MessagePromptEventArgs

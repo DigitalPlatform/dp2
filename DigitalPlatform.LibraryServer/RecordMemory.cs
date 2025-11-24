@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
-using MongoDB.Driver.Core.Misc;
 
 namespace DigitalPlatform.LibraryServer
 {

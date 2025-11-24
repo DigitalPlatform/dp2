@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.Text;
-using Amazon.Runtime.EventStreams;
 
 namespace DigitalPlatform.LibraryServer
 {

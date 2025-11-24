@@ -10,6 +10,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections;
+using System.Linq;
 
 using DigitalPlatform;
 using DigitalPlatform.Script;
@@ -24,7 +25,6 @@ using DigitalPlatform.Core;
 using dp2Circulation.Charging;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.rms;
-using System.Linq;
 
 namespace dp2Circulation
 {
@@ -2218,9 +2218,9 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
 
                 line.Tag = task;
                 this.dpTable_tasks.Rows.Add(line);
-                if (this._bScrollBarTouched == false)
+                // if (this._bScrollBarTouched == false)
+                if (this._auto_scroll == true)
                 {
-                    // TODO: 应该分为两种情况  希望看到最末事项的，和看中间的。信号是触动卷滚条到底部；拖动卷滚条到中部
                     this.dpTable_tasks.FocusedItem = line;
                     line.EnsureVisible();
                 }
@@ -2258,7 +2258,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     if (task.Action == "load_reader_info" && string.IsNullOrEmpty(task.ReaderXml) == false)
                         task.RefreshPatronCardDisplay(line);
 
-                    if (this._bScrollBarTouched == false)
+                    // if (this._bScrollBarTouched == false)
+                    if (this._auto_scroll == true)
                     {
                         // 如果刷新的对象是 Focus 对象，则确保显示在视野范围内
                         // TODO: 当发现中途人触动了控件时，这个功能要禁用，以免对人的操作发生干扰
@@ -2903,6 +2904,7 @@ out string type_of_usage);
                 task.ItemBarcode = GetContent(strText);
                 task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "inventory";
+                // TODO: task.Parameters
             }
             else if (func == dp2Circulation.FuncState.VerifyReturn)
             {
@@ -3446,7 +3448,8 @@ false);
                 this._funcstate = value;
                 this.pictureBox_action.Invalidate();
                 WillLoadReaderInfo = true;
-                this._bScrollBarTouched = false;
+                // this._bScrollBarTouched = false;
+                this._auto_scroll = true;
 
                 Program.MainForm.ClearQrLastText();
 
@@ -3682,7 +3685,8 @@ false);
                 }
             }
 
-            this._bScrollBarTouched = false;
+            // this._bScrollBarTouched = false;
+            this._auto_scroll = true;
         }
 
         // 2023/12/12
@@ -4615,12 +4619,21 @@ MessageBoxDefaultButton.Button2);
 
         private void dpTable_tasks_ScrollBarTouched(object sender, ScrollBarTouchedArgs e)
         {
-            this._bScrollBarTouched = true;
+            // this._bScrollBarTouched = true;
+
+            // TODO: 应该分为两种情况  希望看到最末事项的，和看中间的。信号是触动卷滚条到底部；拖动卷滚条到中部
+            var is_down_end = this.dpTable_tasks.IsDownEnd();
+            if (is_down_end)
+                this._auto_scroll = true;
+            else
+                this._auto_scroll = false;
         }
 
+        bool _auto_scroll = true;
         private void dpTable_tasks_Click(object sender, EventArgs e)
         {
-            this._bScrollBarTouched = true;
+            // this._bScrollBarTouched = true;
+            this._auto_scroll = false;  // 当用户点了一下 task 的内容行，则表示不再自动卷滚
         }
 
         private void dpTable_tasks_PaintRegion(object sender, PaintRegionArgs e)

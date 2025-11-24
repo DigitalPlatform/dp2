@@ -4114,14 +4114,14 @@
       </wsp:All>
     </wsp:ExactlyOne>
   </wsp:Policy>
-  <wsdl:import namespace="http://dp2003.com/dp2library/rest" location="http://localhost:8001/dp2library/xe/metadata?wsdl=wsdl0" />
+  <wsdl:import namespace="http://dp2003.com/dp2library/rest" location="http://localhost/dp2library/xe/$metadata?wsdl=wsdl0" />
   <wsdl:types>
     <xsd:schema targetNamespace="http://dp2003.com/dp2library/Imports">
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd0" namespace="http://dp2003.com/dp2library/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd3" namespace="http://dp2003.com/dp2kernel/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd0" namespace="http://dp2003.com/dp2library/" />
+      <xsd:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
+      <xsd:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd3" namespace="http://dp2003.com/dp2kernel/" />
+      <xsd:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="dp2library_GetComments_InputMessage">
@@ -7305,9 +7305,9 @@
   </wsdl:binding>
   <wsdl:service name="LibraryService">
     <wsdl:port name="WSHttpBinding_dp2library" binding="tns:WSHttpBinding_dp2library">
-      <soap12:address location="http://localhost:8001/dp2library/xe" />
+      <soap12:address location="http://localhost/dp2library/xe" />
       <wsa10:EndpointReference>
-        <wsa10:Address>http://localhost:8001/dp2library/xe</wsa10:Address>
+        <wsa10:Address>http://localhost/dp2library/xe</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
           <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
             <X509Data>

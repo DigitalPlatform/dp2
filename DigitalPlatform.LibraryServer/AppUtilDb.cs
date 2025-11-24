@@ -9,7 +9,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.LibraryServer.Common;
-using System.Data;
 
 // using DigitalPlatform.rms.Client.rmsws_localhost;   // Record
 
@@ -53,7 +52,18 @@ out byte[] baOutputTimestamp)
 
             // 2023/2/21
             // 补充判断 get???info 权限
-            if (StringUtil.IsInList($"{GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false)
+            if (
+#if ITEM_ACCESS_RIGHTS
+                CheckAccess(sessioninfo,
+                    $"修改{db_type}记录",
+                    strDbName,
+                    LibraryApplication.GetInfoRight($"get{db_type}info"),
+                    "",
+                    out _) != null
+#else
+                StringUtil.IsInList($"{GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false
+#endif
+                )
             {
                 result.Value = -1;
                 result.ErrorInfo = $"修改{db_type}信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入{db_type}记录的权限，但不具备 get{db_type}info 权限。请修改账户权限";
@@ -177,7 +187,7 @@ out byte[] baOutputTimestamp)
             nRet = ItemDatabase.MergeOldNewRec(
                 db_type,
 #if ITEM_ACCESS_RIGHTS
-                (r) =>
+                (r, d) =>
                 {
                     return CheckAccess(sessioninfo,
                         $"{db_type}记录下级对象({r})",
@@ -1259,11 +1269,24 @@ out error);
 
             }
 #endif
+#if ITEM_ACCESS_RIGHTS
+            strError = CheckAccess(
+            sessioninfo,
+            "读违约金信息",
+            ResPath.GetDbName(strArrivedRecPath),
+            GetInfoRight("getarrivedinfo"),
+            "",
+            out _);
+            if (strError != null)
+                return 0;
+#else
             if (StringUtil.IsInList($"{GetInfoRight("getarrivedinfo")}", sessioninfo.RightsOrigin) == false)
             {
                 strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getarrivedinfo 权限";
                 return 0;
             }
+#endif
+
 
             // 读者只能看自己的预约到书记录
             if (sessioninfo.UserType == "reader")
@@ -1353,11 +1376,23 @@ out error);
         {
             strError = "";
 
+#if ITEM_ACCESS_RIGHTS
+            strError = CheckAccess(
+                sessioninfo,
+                "读违约金信息",
+                ResPath.GetDbName(strAmerceRecPath),
+                GetInfoRight("getamerceinfo"),
+                "",
+                out _);
+            if (strError != null)
+                return 0;
+#else
             if (StringUtil.IsInList($"{GetInfoRight("getamerceinfo")}", sessioninfo.RightsOrigin) == false)
             {
                 strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getamerceinfo 权限";
                 return 0;
             }
+#endif
 
             // 2023/2/9
             // 读者身份只能获得自己的违约金记录

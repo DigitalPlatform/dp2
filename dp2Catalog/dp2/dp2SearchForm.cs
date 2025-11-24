@@ -6325,6 +6325,7 @@ MessageBoxDefaultButton.Button2);
                                     "system.windows.forms.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
+                                    "System.Core.dll",  // Linq 需要
                                     // "D:\\Program Files\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0\\WindowsBase.dll",
                                     ExcelUtil.GetWindowsBaseDllPath(),
 

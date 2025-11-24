@@ -152,5 +152,12 @@ namespace DigitalPlatform
                 this.checkBox1.Visible = value;
             }
         }
+
+        // 2025/11/20
+        // 增加双击直接选择、关闭功能
+        private void listBox1_DoubleClick(object sender, EventArgs e)
+        {
+            button_OK_Click(sender, e);
+        }
     }
 }

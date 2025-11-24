@@ -1,0 +1,229 @@
+﻿
+
+
+#if OLD
+            {
+                result = TestCreate(
+                    "权限不足",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+
+                result = TestCreate(
+                    "普通权限 只有 setbiblioinfo",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+
+                result = TestCreate(
+                    "普通权限 setbiblioinfo getbiblioinfo",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+
+                //              
+                result = TestCreate(
+    "存取定义 只有 setbiblioinfo",
+    "",
+    token);
+                if (result.Value == -1) return result;
+
+                //              
+                result = TestCreate(
+    "存取定义 setbiblioinfo getbiblioinfo",
+    "",
+    token);
+                if (result.Value == -1) return result;
+
+                // 
+                result = TestCreate(
+                    "存取定义 setbiblioinfo getbiblioinfo 字段限制",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+                // 
+                result = TestCreate(
+                    "存取定义 order",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+
+                // 
+                result = TestCreate(
+    "存取定义 order 数据库 orderWork 角色",
+    "",
+    token);
+                if (result.Value == -1) return result;
+            }
+#endif
+
+
+#if OLD
+            {
+                result = TestChange(
+"权限不足",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestChange(
+    "普通权限 只有 setbiblioinfo",
+    "",
+    token);
+                if (result.Value == -1) return result;
+
+                result = TestChange(
+                    "普通权限 setbiblioinfo getbiblioinfo",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+
+                //              
+                result = TestChange(
+    "存取定义 只有 setbiblioinfo",
+    "",
+    token);
+                if (result.Value == -1) return result;
+
+                //              
+                result = TestChange(
+    "存取定义 setbiblioinfo getbiblioinfo",
+    "",
+    token);
+                if (result.Value == -1) return result;
+
+                result = TestChange(
+    "存取定义 setbiblioinfo getbiblioinfo 字段限制(指向未修改字段)",
+    "",
+    token);
+                if (result.Value == -1) return result;
+
+                // 
+                result = TestChange(
+                    "存取定义 setbiblioinfo getbiblioinfo 字段限制(指向修改字段)",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+
+                result = TestChange(
+                    "存取定义 order",
+                    "",
+                    token);
+                if (result.Value == -1) return result;
+
+                // 
+                result = TestChange(
+    "存取定义 order 数据库 orderWork 角色",
+    "",
+    token);
+                if (result.Value == -1) return result;
+
+                result = TestChange(
+"存取定义 setbiblioinfo=ownerchange",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestChange(
+"存取定义 setbiblioinfo=ownerchange 998$z相同",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestChange(
+"存取定义 setbiblioinfo=ownerchange 998$z不相同",
+"",
+token);
+                if (result.Value == -1) return result;
+            }
+#endif
+
+
+
+#if OLD
+            {
+                result = TestDelete(
+"权限不足",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"普通权限 只有 setbiblioinfo",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"普通权限 setbiblioinfo getbiblioinfo",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 只有 setbiblioinfo",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 setbiblioinfo getbiblioinfo",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 setbiblioinfo=change getbiblioinfo",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                // 
+                result = TestDelete(
+"存取定义 setbiblioinfo=(否定) getbiblioinfo",
+"",
+token);
+                if (result.Value == -1) return result;
+                result = TestDelete(
+"存取定义 setbiblioinfo getbiblioinfo 字段限制",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 order",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 order 数据库 orderWork 角色",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 setbiblioinfo=ownerdelete",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 setbiblioinfo=ownerdelete 998$z相同",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 setbiblioinfo=ownerdelete 998$z不相同",
+"",
+token);
+                if (result.Value == -1) return result;
+
+                result = TestDelete(
+"存取定义 order|setbiblioinfo 后者优先",
+"",
+token);
+                if (result.Value == -1) return result;
+            }
+#endif

@@ -106,7 +106,7 @@ namespace DigitalPlatform.DTLP
                     this.m_nodeProject = this.dom.DocumentElement.SelectSingleNode("//project[@name='" + this.ProjectName + "']");
                     if (this.m_nodeProject == null)
                     {
-                        MessageBox.Show(this, "DOM中并不存在name属性值为 '" + this.ProjectName + "' 的<project>元素");
+                        this.MessageBoxShow("DOM中并不存在name属性值为 '" + this.ProjectName + "' 的<project>元素");
                     }
                 }
 

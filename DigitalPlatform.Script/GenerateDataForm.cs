@@ -12,6 +12,7 @@ using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using System.Xml;
 using Newtonsoft.Json;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.Script
 {
@@ -407,16 +408,36 @@ namespace DigitalPlatform.Script
             return this.m_actions.Where(o => o.Active == true).ToList();
         }
 
+        // 因为本 Form 有时候是隐藏状态，无法正确 MessageBox.Show()，
+        // 导致 MessageBox 对话框打开后，切换到其它 Application，然后切换回来，MessageBox 就处在看不见的位置，无法点击确认，当前 Application 从此冻结无法操作和关闭(虽然用 Alt+Tab 可以切换过去看到这个对话框，但用户一般不知道这种操作)
+        // 所以要调用可靠的版本
+        public DialogResult MessageBoxShow(Form form, string text)
+        {
+            return ControlExtension.MessageBoxShow(form, text);
+        }
+
+        // 因为当前 Form 可能 Visible 为 false，所以需要确保利用一个 Visible 为 true 的 Form 当作 OwnerWindow
+        public DialogResult MessageDlgShow(Form form,
+            string text, 
+            string title)
+        {
+            // return MessageBoxShow(form, text);
+            return MessageDlg.Show(
+                form != null && form.Visible ? form : ControlExtension.GetVisibleForm(),
+                text,
+                title);
+        }
+
         private void ActionTable_DoubleClick(object sender, EventArgs e)
         {
             if (this._processing > 0)
             {
-                MessageBox.Show(this, "正在处理中，请稍后再重新启动执行");
+                MessageBoxShow(this, "正在处理中，请稍后再重新启动执行");
                 return;
             }
             if (this.ActionTable.SelectedRows.Count == 0)
             {
-                MessageBox.Show(this, "尚未选择事项...");
+                MessageBoxShow(this, "尚未选择事项...");
                 return;
             }
 
@@ -442,6 +463,12 @@ namespace DigitalPlatform.Script
                     e1.sender = this.sender;
                     e1.e = this.e;
                     this.TriggerAction(this, e1);
+                }
+                catch(Exception ex)
+                {
+                    MessageDlgShow(this, 
+                        $"执行脚本函数 {this.SelectedAction.ScriptEntry} 出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}",
+                        "执行脚本出现异常");
                 }
                 finally
                 {
@@ -618,7 +645,7 @@ Keys keyData)
                         {
                             if (this._processing > 0)
                             {
-                                MessageBox.Show(this, "正在处理中，请稍后再重新启动执行");
+                                MessageBoxShow(this, "正在处理中，请稍后再重新启动执行");
                                 return;
                             }
 
@@ -689,13 +716,13 @@ Keys keyData)
 
             if (this._processing > 0)
             {
-                MessageBox.Show(this, "正在处理中，请稍后再重新启动执行");
+                MessageBoxShow(this, "正在处理中，请稍后再重新启动执行");
                 return;
             }
 
             if (this.ActionTable.SelectedRows.Count == 0)
             {
-                MessageBox.Show(this, "尚未选择要执行的事项...");
+                MessageBoxShow(this, "尚未选择要执行的事项...");
                 return;
             }
 

@@ -6987,11 +6987,14 @@ out QueryResult[] results)
         // 复制或者移动书目信息(目前只能xml一种格式)
         // 权限:   需要具有setbiblioinfo权限
         // parameters:
-        //      strAction   动作。为"onlycopybiblio" "onlymovebiblio" "copy" "move" 之一
+        //      strAction   动作。为 "copy" "move" "onlycopybiblio" "onlymovebiblio"  之一
+        //      strBiblioRecPath    源书目记录路径。
         //      strBiblioType   目前只允许xml一种
-        //      strBiblio   源书目记录。目前需要用null调用
+        //      strBiblio   源书目记录内容。目前需要用null调用
         //      baTimestamp 源记录的时间戳
+        //      strNewBiblioRecPath 目标书目记录路径。一般为追加方式
         //      strNewBiblio    需要在目标记录中更新的内容。如果 == null，表示不特意更新
+        //      strMergeStyle   合并风格。
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
         //      baOutputTimestamp   操作完成后，新的时间戳
         // result.Value:
@@ -8192,7 +8195,7 @@ out QueryResult[] results)
                 var error = LibraryApplication.CheckAccess(
                     sessioninfo,
                     $"获取{typeCaption}信息",
-                    app.GetTwoDbName(strItemRecPath),
+                    strItemRecPath == "?" ? "" : app.GetTwoDbName(strItemRecPath),  // 注：当前端通过 strBarcode 传递一个 XML 记录内容时，得到的 strItemRecPath 为 "?"
                     $"{InfoRight($"get{strItemDbType}info")}",
                     "",
                     out _);
@@ -8871,13 +8874,13 @@ out QueryResult[] results)
 
         // 还书
         // paramters:
-        //      strAction   动作。有 return/lost/inventory/read/transfer
+        //      strAction   动作。有 return/lost/inventory/read/boxing/transfer
         //      strReaderBarcode   读者证条码号
         //      strItemBarcode  册条码号
         //      bForce  是否强制执行还书操作。用于某些配置参数和数据结构不正确的特殊情况
         //      strStyle   风格。"reader" 表示希望返回处理完后的读者记录
-        //      strReaderFormat 指明strReaderRecord参数中所返回的读者记录格式。为"xml"或"html"
-        //      strReaderFormat 读者记录
+        //      strReaderFormatList 指明 reader_records 参数中所返回的读者记录格式。为"xml"或"html"
+        //      reader_records      [out] 返回读者记录信息
         // return:
         //      Result.Value    -1  出错 0 操作成功 1 操作成功，并且有值得留意的情况：如有超期情况；发现条码号重复；需要放入预约架
         // 日志：
@@ -13544,8 +13547,8 @@ true);
                         //      2   具备部分权限(2022/5/20)
                         nRet = app.CheckGetResRights(
                             sessioninfo,
-                            sessioninfo.LibraryCodeList,
-                            sessioninfo.RightsOrigin,
+                            //sessioninfo.LibraryCodeList,
+                            //sessioninfo.RightsOrigin,
                             strCategory,
                             out strLibraryCode,
                             out strTemp,
@@ -16294,8 +16297,8 @@ Stack:
                     //      2   具备部分权限(2022/5/20)
                     int nRet = app.CheckGetResRights(
                         sessioninfo,
-                        sessioninfo.LibraryCodeList,
-                        sessioninfo.RightsOrigin,
+                        //sessioninfo.LibraryCodeList,
+                        //sessioninfo.RightsOrigin,
                         strResPath,
                         out string strLibraryCode,
                         out string strFilePath,
@@ -16429,8 +16432,8 @@ Stack:
                     //      2   具备部分权限(2022/5/20)
                     int nRet = app.CheckGetResRights(
                         sessioninfo,
-                        sessioninfo.LibraryCodeList,
-                        sessioninfo.RightsOrigin,
+                        //sessioninfo.LibraryCodeList,
+                        //sessioninfo.RightsOrigin,
                         strResPath,
                         out strLibraryCode,
                         out strFilePath,

@@ -91,7 +91,7 @@ namespace DigitalPlatform.Library
                 int nRet = this.GetGlobalCfgFile(out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                     return;
                 }
 

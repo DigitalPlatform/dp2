@@ -1606,7 +1606,7 @@ namespace DigitalPlatform.LibraryServer
 
             // TODO: 只要获得记录路径即可，因为后面利用了CopyRecord复制
             // return:
-            //      -2  not exist entity dbname
+            //      -2  权限不足
             //      -1  error
             //      >=0 含有流通信息的实体记录个数
             nRet = this.App.SearchChildEntities(
@@ -1619,7 +1619,7 @@ namespace DigitalPlatform.LibraryServer
                 out lHitCount,
                 out entityinfos,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == -2)
                 return -1;
 
             if (nRet == -2)
@@ -1641,7 +1641,7 @@ namespace DigitalPlatform.LibraryServer
                 channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
-                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                (LibraryApplication.Delegate_checkRecord)null,
                 null,
                 out lHitCount,
                 out orderinfos,
@@ -1667,7 +1667,7 @@ namespace DigitalPlatform.LibraryServer
                 channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
-                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                (LibraryApplication.Delegate_checkRecord)null,
                 null,
                 out lHitCount,
                 out issueinfos,
@@ -1692,7 +1692,7 @@ namespace DigitalPlatform.LibraryServer
                 channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
-                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                (LibraryApplication.Delegate_checkRecord)null,
                 null,
                 out lHitCount,
                 out commentinfos,

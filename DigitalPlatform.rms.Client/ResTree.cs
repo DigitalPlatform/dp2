@@ -133,8 +133,7 @@ namespace DigitalPlatform.rms.Client
             {
                 try
                 {
-                    MessageBox.Show(this,
-                        strError);
+                    this.MessageBoxShow(strError);
                 }
                 catch
                 {

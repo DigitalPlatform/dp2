@@ -9,8 +9,6 @@ using System.IO;
 using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
-using System.Threading.Tasks;
-
 
 using DigitalPlatform;
 using DigitalPlatform.Script;
@@ -18,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
+using dp2Circulation.defaultHosts;
 
 namespace dp2Circulation
 {
@@ -333,13 +332,34 @@ namespace dp2Circulation
                 AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
                 */
 
-                nRet = PrepareScript(strProjectName,
-                    strProjectLocate,
-                    // out assemblyMain,
-                    out _objStatis,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                if (strProjectName.StartsWith("#"))
+                {
+                    if (strProjectName == "#出纳流水")
+                        _objStatis = new ChargingDetailStatis
+                        {
+                            OperLogStatisForm = this,
+                            ProjectDir = Path.Combine(Program.MainForm.DataDir, "default\\OperLogStatis\\ChargingDetail"),
+                            InstanceDir = this.InstanceDir,
+                            OperLogFilter = "borrow,return"
+                        };
+                    else
+                    {
+                        strError = $"无法识别的内置统计方案名 '{strProjectName}'";
+                        goto ERROR1;
+                    }
+                }
+                else
+                {
+                    nRet = PrepareScript(strProjectName,
+                        strProjectLocate,
+                        // out assemblyMain,
+                        out _objStatis,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    _objStatis.ProjectDir = strProjectLocate;
+                }
 
                 if (strInitialParamString == "test_compile")
                     return new RunScriptResult
@@ -349,33 +369,6 @@ namespace dp2Circulation
                         Warning = strWarning
                     };
 
-                /*
-                 * 
-                 * 
-                string strDllName = "";
-                nRet = PrepareScript(strProjectName,
-                    strProjectLocate,
-                    out strDllName,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                System.AppDomain NewAppDomain = System.AppDomain.CreateDomain("NewApplicationDomain");
-
-                ObjectHandle h = NewAppDomain.CreateInstanceFrom(strDllName,
-                    "scriptcode.MyStatis");
-                objStatis = (Statis)h.Unwrap();
-
-                m_strMainCsDllName = strDllName;
-
-                // 为Statis派生类设置参数
-                objStatis.OperLogStatisForm = this;
-                objStatis.ProjectDir = strProjectLocate;
-                 * */
-
-                // this.AssemblyMain = assemblyMain;
-
-                _objStatis.ProjectDir = strProjectLocate;
                 _objStatis.Console = this.Console;
                 _objStatis.StartDate = this.dateControl_start.Value;
                 _objStatis.EndDate = this.dateControl_end.Value;
@@ -414,6 +407,7 @@ namespace dp2Circulation
                 nRet = DoLoop(
                     looping.Progress,
                     DoRecord,
+                    _objStatis.OperLogFilter,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -585,6 +579,7 @@ namespace dp2Circulation
         int DoLoop(
             Stop stop,
             OperLogForm.Delegate_doRecord procDoRecord,
+            string filter,
             out string strError)
         {
             strError = "";
@@ -657,7 +652,7 @@ namespace dp2Circulation
                 loader.AutoCache = StringUtil.IsInList("autocache", strStyle);    // false;
                 loader.CacheDir = Program.MainForm.OperLogCacheDir;
                 loader.LogType = bAccessLog ? LogType.AccessLog : LogType.OperLog;
-                // loader.Filter = "borrow,return";
+                loader.Filter = filter; //  "borrow,return";
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -726,6 +721,7 @@ namespace dp2Circulation
                                     "system.windows.forms.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
+                                    "System.Core.dll",  // Linq 需要
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
@@ -847,6 +843,7 @@ namespace dp2Circulation
                                     "system.windows.forms.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
+                                    "System.Core.dll",  // Linq 需要
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
@@ -968,29 +965,35 @@ namespace dp2Circulation
                             strError = $"TransferList() 出错: {result.ErrorInfo}";
                             goto ERROR1;
                         }
+                        goto END1;
                     }
+
+                    // 注: 如果这里没有识别出 #xxx 内置方案名字，还会继续向后直到 RunScriptAsync()，那里还有一次识别机会
                 }
-                else
+
                 {
-                    // 获得方案参数
-                    // strProjectNamePath	方案名，或者路径
-                    // return:
-                    //		-1	error
-                    //		0	not found project
-                    //		1	found
-                    nRet = this.ScriptManager.GetProjectData(
-                        strProjectName,
-                        out strProjectLocate);
-                    if (nRet == 0)
+                    if (strProjectName.StartsWith("#") == false)
                     {
-                        strError = "方案 " + strProjectName + " 没有找到...";
-                        this.tabControl_main.SelectedTab = this.tabPage_selectProject;
-                        goto ERROR1;
-                    }
-                    if (nRet == -1)
-                    {
-                        strError = "scriptManager.GetProjectData() error ...";
-                        goto ERROR1;
+                        // 获得方案参数
+                        // strProjectNamePath	方案名，或者路径
+                        // return:
+                        //		-1	error
+                        //		0	not found project
+                        //		1	found
+                        nRet = this.ScriptManager.GetProjectData(
+                            strProjectName,
+                            out strProjectLocate);
+                        if (nRet == 0)
+                        {
+                            strError = "方案 " + strProjectName + " 没有找到...";
+                            this.tabControl_main.SelectedTab = this.tabPage_selectProject;
+                            goto ERROR1;
+                        }
+                        if (nRet == -1)
+                        {
+                            strError = "scriptManager.GetProjectData() error ...";
+                            goto ERROR1;
+                        }
                     }
 
                     // 切换到执行page
@@ -1019,6 +1022,7 @@ namespace dp2Circulation
                     }
                 }
 
+            END1:
                 this.tabControl_main.SelectedTab = this.tabPage_runStatis;
                 MessageBox.Show(this, "统计完成。");
                 return;

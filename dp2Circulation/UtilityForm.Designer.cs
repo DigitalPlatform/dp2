@@ -140,13 +140,35 @@
             this.label20 = new System.Windows.Forms.Label();
             this.textBox_accessNo_lines = new System.Windows.Forms.TextBox();
             this.tabPage_publisher = new System.Windows.Forms.TabPage();
+            this.button_publisher_append_to_database = new System.Windows.Forms.Button();
+            this.button_publisher_convert1 = new System.Windows.Forms.Button();
+            this.button_publisher_deleteCityAndPublisher = new System.Windows.Forms.Button();
+            this.button_publisher_setCityAndPublisher = new System.Windows.Forms.Button();
+            this.button_publisher_getCityAndPublisher = new System.Windows.Forms.Button();
+            this.textBox_publisher_cityAndPublisher = new System.Windows.Forms.TextBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.textBox_publisher_isbnPrefix = new System.Windows.Forms.TextBox();
+            this.label28 = new System.Windows.Forms.Label();
+            this.button_publisher_deleteCity = new System.Windows.Forms.Button();
             this.button_publisher_setCityCode = new System.Windows.Forms.Button();
             this.button_publisher_searchCityCode = new System.Windows.Forms.Button();
             this.textBox_publisher_cityCode = new System.Windows.Forms.TextBox();
             this.label22 = new System.Windows.Forms.Label();
             this.textBox_publisher_city = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
-            this.button_publisher_deleteCity = new System.Windows.Forms.Button();
+            this.tabPage_zhongcihao = new System.Windows.Forms.TabPage();
+            this.label26 = new System.Windows.Forms.Label();
+            this.button_zhongcihao_conditionalPush = new System.Windows.Forms.Button();
+            this.textBox_zhongcihao_dbname = new System.Windows.Forms.TextBox();
+            this.label25 = new System.Windows.Forms.Label();
+            this.button_zhongcihao_delete = new System.Windows.Forms.Button();
+            this.button_zhongcihao_set = new System.Windows.Forms.Button();
+            this.button_zhongcihao_get = new System.Windows.Forms.Button();
+            this.textBox_zhongcihao_tailNumber = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.textBox_zhongcihao_class = new System.Windows.Forms.TextBox();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -182,6 +204,7 @@
             this.tabPage_addCrLf.SuspendLayout();
             this.tabPage_accessNo.SuspendLayout();
             this.tabPage_publisher.SuspendLayout();
+            this.tabPage_zhongcihao.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -200,6 +223,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_addCrLf);
             this.tabControl_main.Controls.Add(this.tabPage_accessNo);
             this.tabControl_main.Controls.Add(this.tabPage_publisher);
+            this.tabControl_main.Controls.Add(this.tabPage_zhongcihao);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
@@ -1538,6 +1562,16 @@
             // 
             // tabPage_publisher
             // 
+            this.tabPage_publisher.Controls.Add(this.label29);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_append_to_database);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_convert1);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_deleteCityAndPublisher);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_setCityAndPublisher);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_getCityAndPublisher);
+            this.tabPage_publisher.Controls.Add(this.textBox_publisher_cityAndPublisher);
+            this.tabPage_publisher.Controls.Add(this.label27);
+            this.tabPage_publisher.Controls.Add(this.textBox_publisher_isbnPrefix);
+            this.tabPage_publisher.Controls.Add(this.label28);
             this.tabPage_publisher.Controls.Add(this.button_publisher_deleteCity);
             this.tabPage_publisher.Controls.Add(this.button_publisher_setCityCode);
             this.tabPage_publisher.Controls.Add(this.button_publisher_searchCityCode);
@@ -1552,9 +1586,113 @@
             this.tabPage_publisher.Text = "出版者工具";
             this.tabPage_publisher.UseVisualStyleBackColor = true;
             // 
+            // button_publisher_append_to_database
+            // 
+            this.button_publisher_append_to_database.Location = new System.Drawing.Point(170, 457);
+            this.button_publisher_append_to_database.Name = "button_publisher_append_to_database";
+            this.button_publisher_append_to_database.Size = new System.Drawing.Size(116, 35);
+            this.button_publisher_append_to_database.TabIndex = 15;
+            this.button_publisher_append_to_database.Text = "append to dabase";
+            this.button_publisher_append_to_database.UseVisualStyleBackColor = true;
+            this.button_publisher_append_to_database.Click += new System.EventHandler(this.button_publisher_append_to_database_Click);
+            // 
+            // button_publisher_convert1
+            // 
+            this.button_publisher_convert1.Location = new System.Drawing.Point(170, 404);
+            this.button_publisher_convert1.Name = "button_publisher_convert1";
+            this.button_publisher_convert1.Size = new System.Drawing.Size(116, 35);
+            this.button_publisher_convert1.TabIndex = 14;
+            this.button_publisher_convert1.Text = "convert1";
+            this.button_publisher_convert1.UseVisualStyleBackColor = true;
+            this.button_publisher_convert1.Click += new System.EventHandler(this.button_publisher_convert1_Click);
+            // 
+            // button_publisher_deleteCityAndPublisher
+            // 
+            this.button_publisher_deleteCityAndPublisher.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_publisher_deleteCityAndPublisher.Location = new System.Drawing.Point(771, 211);
+            this.button_publisher_deleteCityAndPublisher.Name = "button_publisher_deleteCityAndPublisher";
+            this.button_publisher_deleteCityAndPublisher.Size = new System.Drawing.Size(156, 31);
+            this.button_publisher_deleteCityAndPublisher.TabIndex = 13;
+            this.button_publisher_deleteCityAndPublisher.Text = "删除";
+            this.button_publisher_deleteCityAndPublisher.UseVisualStyleBackColor = true;
+            this.button_publisher_deleteCityAndPublisher.Click += new System.EventHandler(this.button_publisher_deleteCityAndPublisher_Click);
+            // 
+            // button_publisher_setCityAndPublisher
+            // 
+            this.button_publisher_setCityAndPublisher.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_publisher_setCityAndPublisher.Location = new System.Drawing.Point(609, 211);
+            this.button_publisher_setCityAndPublisher.Name = "button_publisher_setCityAndPublisher";
+            this.button_publisher_setCityAndPublisher.Size = new System.Drawing.Size(156, 31);
+            this.button_publisher_setCityAndPublisher.TabIndex = 12;
+            this.button_publisher_setCityAndPublisher.Text = "设置";
+            this.button_publisher_setCityAndPublisher.UseVisualStyleBackColor = true;
+            this.button_publisher_setCityAndPublisher.Click += new System.EventHandler(this.button_publisher_setCityAndPublisher_Click);
+            // 
+            // button_publisher_getCityAndPublisher
+            // 
+            this.button_publisher_getCityAndPublisher.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_publisher_getCityAndPublisher.Location = new System.Drawing.Point(609, 173);
+            this.button_publisher_getCityAndPublisher.Name = "button_publisher_getCityAndPublisher";
+            this.button_publisher_getCityAndPublisher.Size = new System.Drawing.Size(156, 31);
+            this.button_publisher_getCityAndPublisher.TabIndex = 9;
+            this.button_publisher_getCityAndPublisher.Text = "获取";
+            this.button_publisher_getCityAndPublisher.UseVisualStyleBackColor = true;
+            this.button_publisher_getCityAndPublisher.Click += new System.EventHandler(this.button_publisher_getCityAndPublisher_Click);
+            // 
+            // textBox_publisher_cityAndPublisher
+            // 
+            this.textBox_publisher_cityAndPublisher.AcceptsReturn = true;
+            this.textBox_publisher_cityAndPublisher.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_publisher_cityAndPublisher.Location = new System.Drawing.Point(170, 213);
+            this.textBox_publisher_cityAndPublisher.Multiline = true;
+            this.textBox_publisher_cityAndPublisher.Name = "textBox_publisher_cityAndPublisher";
+            this.textBox_publisher_cityAndPublisher.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_publisher_cityAndPublisher.Size = new System.Drawing.Size(433, 142);
+            this.textBox_publisher_cityAndPublisher.TabIndex = 11;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(17, 216);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(147, 21);
+            this.label27.TabIndex = 10;
+            this.label27.Text = "出版地:出版社";
+            // 
+            // textBox_publisher_isbnPrefix
+            // 
+            this.textBox_publisher_isbnPrefix.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_publisher_isbnPrefix.Location = new System.Drawing.Point(170, 173);
+            this.textBox_publisher_isbnPrefix.Name = "textBox_publisher_isbnPrefix";
+            this.textBox_publisher_isbnPrefix.Size = new System.Drawing.Size(433, 31);
+            this.textBox_publisher_isbnPrefix.TabIndex = 8;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(17, 176);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(107, 21);
+            this.label28.TabIndex = 7;
+            this.label28.Text = "ISBN前段:";
+            // 
+            // button_publisher_deleteCity
+            // 
+            this.button_publisher_deleteCity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_publisher_deleteCity.Location = new System.Drawing.Point(771, 56);
+            this.button_publisher_deleteCity.Name = "button_publisher_deleteCity";
+            this.button_publisher_deleteCity.Size = new System.Drawing.Size(156, 31);
+            this.button_publisher_deleteCity.TabIndex = 6;
+            this.button_publisher_deleteCity.Text = "删除";
+            this.button_publisher_deleteCity.UseVisualStyleBackColor = true;
+            this.button_publisher_deleteCity.Click += new System.EventHandler(this.button_publisher_deleteCity_Click);
+            // 
             // button_publisher_setCityCode
             // 
-            this.button_publisher_setCityCode.Location = new System.Drawing.Point(508, 56);
+            this.button_publisher_setCityCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_publisher_setCityCode.Location = new System.Drawing.Point(609, 56);
             this.button_publisher_setCityCode.Name = "button_publisher_setCityCode";
             this.button_publisher_setCityCode.Size = new System.Drawing.Size(156, 31);
             this.button_publisher_setCityCode.TabIndex = 5;
@@ -1564,7 +1702,8 @@
             // 
             // button_publisher_searchCityCode
             // 
-            this.button_publisher_searchCityCode.Location = new System.Drawing.Point(508, 18);
+            this.button_publisher_searchCityCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_publisher_searchCityCode.Location = new System.Drawing.Point(609, 18);
             this.button_publisher_searchCityCode.Name = "button_publisher_searchCityCode";
             this.button_publisher_searchCityCode.Size = new System.Drawing.Size(156, 31);
             this.button_publisher_searchCityCode.TabIndex = 2;
@@ -1574,9 +1713,11 @@
             // 
             // textBox_publisher_cityCode
             // 
-            this.textBox_publisher_cityCode.Location = new System.Drawing.Point(137, 58);
+            this.textBox_publisher_cityCode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_publisher_cityCode.Location = new System.Drawing.Point(170, 58);
             this.textBox_publisher_cityCode.Name = "textBox_publisher_cityCode";
-            this.textBox_publisher_cityCode.Size = new System.Drawing.Size(364, 31);
+            this.textBox_publisher_cityCode.Size = new System.Drawing.Size(433, 31);
             this.textBox_publisher_cityCode.TabIndex = 4;
             // 
             // label22
@@ -1590,9 +1731,11 @@
             // 
             // textBox_publisher_city
             // 
-            this.textBox_publisher_city.Location = new System.Drawing.Point(137, 18);
+            this.textBox_publisher_city.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_publisher_city.Location = new System.Drawing.Point(170, 18);
             this.textBox_publisher_city.Name = "textBox_publisher_city";
-            this.textBox_publisher_city.Size = new System.Drawing.Size(364, 31);
+            this.textBox_publisher_city.Size = new System.Drawing.Size(433, 31);
             this.textBox_publisher_city.TabIndex = 1;
             // 
             // label21
@@ -1604,15 +1747,131 @@
             this.label21.TabIndex = 0;
             this.label21.Text = "出版地:";
             // 
-            // button_publisher_deleteCity
+            // tabPage_zhongcihao
             // 
-            this.button_publisher_deleteCity.Location = new System.Drawing.Point(670, 56);
-            this.button_publisher_deleteCity.Name = "button_publisher_deleteCity";
-            this.button_publisher_deleteCity.Size = new System.Drawing.Size(156, 31);
-            this.button_publisher_deleteCity.TabIndex = 6;
-            this.button_publisher_deleteCity.Text = "删除";
-            this.button_publisher_deleteCity.UseVisualStyleBackColor = true;
-            this.button_publisher_deleteCity.Click += new System.EventHandler(this.button_publisher_deleteCity_Click);
+            this.tabPage_zhongcihao.Controls.Add(this.label26);
+            this.tabPage_zhongcihao.Controls.Add(this.button_zhongcihao_conditionalPush);
+            this.tabPage_zhongcihao.Controls.Add(this.textBox_zhongcihao_dbname);
+            this.tabPage_zhongcihao.Controls.Add(this.label25);
+            this.tabPage_zhongcihao.Controls.Add(this.button_zhongcihao_delete);
+            this.tabPage_zhongcihao.Controls.Add(this.button_zhongcihao_set);
+            this.tabPage_zhongcihao.Controls.Add(this.button_zhongcihao_get);
+            this.tabPage_zhongcihao.Controls.Add(this.textBox_zhongcihao_tailNumber);
+            this.tabPage_zhongcihao.Controls.Add(this.label23);
+            this.tabPage_zhongcihao.Controls.Add(this.textBox_zhongcihao_class);
+            this.tabPage_zhongcihao.Controls.Add(this.label24);
+            this.tabPage_zhongcihao.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_zhongcihao.Name = "tabPage_zhongcihao";
+            this.tabPage_zhongcihao.Size = new System.Drawing.Size(943, 592);
+            this.tabPage_zhongcihao.TabIndex = 14;
+            this.tabPage_zhongcihao.Text = "种次号工具";
+            this.tabPage_zhongcihao.UseVisualStyleBackColor = true;
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(522, 29);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(379, 21);
+            this.label26.TabIndex = 10;
+            this.label26.Text = "注:组名或库名。库名要前导一个字符 @";
+            // 
+            // button_zhongcihao_conditionalPush
+            // 
+            this.button_zhongcihao_conditionalPush.Location = new System.Drawing.Point(523, 138);
+            this.button_zhongcihao_conditionalPush.Name = "button_zhongcihao_conditionalPush";
+            this.button_zhongcihao_conditionalPush.Size = new System.Drawing.Size(156, 31);
+            this.button_zhongcihao_conditionalPush.TabIndex = 9;
+            this.button_zhongcihao_conditionalPush.Text = "推动至";
+            this.button_zhongcihao_conditionalPush.UseVisualStyleBackColor = true;
+            this.button_zhongcihao_conditionalPush.Click += new System.EventHandler(this.button_zhongcihao_conditionalPush_Click);
+            // 
+            // textBox_zhongcihao_dbname
+            // 
+            this.textBox_zhongcihao_dbname.Location = new System.Drawing.Point(152, 26);
+            this.textBox_zhongcihao_dbname.Name = "textBox_zhongcihao_dbname";
+            this.textBox_zhongcihao_dbname.Size = new System.Drawing.Size(289, 31);
+            this.textBox_zhongcihao_dbname.TabIndex = 1;
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(18, 29);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(126, 21);
+            this.label25.TabIndex = 0;
+            this.label25.Text = "组名或库名:";
+            // 
+            // button_zhongcihao_delete
+            // 
+            this.button_zhongcihao_delete.Location = new System.Drawing.Point(685, 101);
+            this.button_zhongcihao_delete.Name = "button_zhongcihao_delete";
+            this.button_zhongcihao_delete.Size = new System.Drawing.Size(156, 31);
+            this.button_zhongcihao_delete.TabIndex = 8;
+            this.button_zhongcihao_delete.Text = "删除";
+            this.button_zhongcihao_delete.UseVisualStyleBackColor = true;
+            this.button_zhongcihao_delete.Click += new System.EventHandler(this.button_zhongcihao_delete_Click);
+            // 
+            // button_zhongcihao_set
+            // 
+            this.button_zhongcihao_set.Location = new System.Drawing.Point(523, 101);
+            this.button_zhongcihao_set.Name = "button_zhongcihao_set";
+            this.button_zhongcihao_set.Size = new System.Drawing.Size(156, 31);
+            this.button_zhongcihao_set.TabIndex = 7;
+            this.button_zhongcihao_set.Text = "设置";
+            this.button_zhongcihao_set.UseVisualStyleBackColor = true;
+            this.button_zhongcihao_set.Click += new System.EventHandler(this.button_zhongcihao_set_Click);
+            // 
+            // button_zhongcihao_get
+            // 
+            this.button_zhongcihao_get.Location = new System.Drawing.Point(523, 63);
+            this.button_zhongcihao_get.Name = "button_zhongcihao_get";
+            this.button_zhongcihao_get.Size = new System.Drawing.Size(156, 31);
+            this.button_zhongcihao_get.TabIndex = 4;
+            this.button_zhongcihao_get.Text = "获取";
+            this.button_zhongcihao_get.UseVisualStyleBackColor = true;
+            this.button_zhongcihao_get.Click += new System.EventHandler(this.button_zhongcihao_get_Click);
+            // 
+            // textBox_zhongcihao_tailNumber
+            // 
+            this.textBox_zhongcihao_tailNumber.Location = new System.Drawing.Point(152, 103);
+            this.textBox_zhongcihao_tailNumber.Name = "textBox_zhongcihao_tailNumber";
+            this.textBox_zhongcihao_tailNumber.Size = new System.Drawing.Size(364, 31);
+            this.textBox_zhongcihao_tailNumber.TabIndex = 6;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(18, 106);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(63, 21);
+            this.label23.TabIndex = 5;
+            this.label23.Text = "尾号:";
+            // 
+            // textBox_zhongcihao_class
+            // 
+            this.textBox_zhongcihao_class.Location = new System.Drawing.Point(152, 63);
+            this.textBox_zhongcihao_class.Name = "textBox_zhongcihao_class";
+            this.textBox_zhongcihao_class.Size = new System.Drawing.Size(364, 31);
+            this.textBox_zhongcihao_class.TabIndex = 3;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(18, 66);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(63, 21);
+            this.label24.TabIndex = 2;
+            this.label24.Text = "类名:";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(170, 362);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(579, 21);
+            this.label29.TabIndex = 16;
+            this.label29.Text = "注: 格式为 出版地:出版社名。可以有多个，每个占据一行。";
             // 
             // UtilityForm
             // 
@@ -1681,6 +1940,8 @@
             this.tabPage_accessNo.PerformLayout();
             this.tabPage_publisher.ResumeLayout(false);
             this.tabPage_publisher.PerformLayout();
+            this.tabPage_zhongcihao.ResumeLayout(false);
+            this.tabPage_zhongcihao.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1805,5 +2066,27 @@
         private System.Windows.Forms.Button button_publisher_setCityCode;
         private System.Windows.Forms.Button button_publisher_searchCityCode;
         private System.Windows.Forms.Button button_publisher_deleteCity;
+        private System.Windows.Forms.TabPage tabPage_zhongcihao;
+        private System.Windows.Forms.Button button_zhongcihao_delete;
+        private System.Windows.Forms.Button button_zhongcihao_set;
+        private System.Windows.Forms.Button button_zhongcihao_get;
+        private System.Windows.Forms.TextBox textBox_zhongcihao_tailNumber;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox textBox_zhongcihao_class;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.TextBox textBox_zhongcihao_dbname;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Button button_zhongcihao_conditionalPush;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Button button_publisher_setCityAndPublisher;
+        private System.Windows.Forms.Button button_publisher_getCityAndPublisher;
+        private System.Windows.Forms.TextBox textBox_publisher_cityAndPublisher;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.TextBox textBox_publisher_isbnPrefix;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Button button_publisher_deleteCityAndPublisher;
+        private System.Windows.Forms.Button button_publisher_convert1;
+        private System.Windows.Forms.Button button_publisher_append_to_database;
+        private System.Windows.Forms.Label label29;
     }
 }

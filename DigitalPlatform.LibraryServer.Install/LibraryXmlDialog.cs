@@ -146,7 +146,7 @@ namespace DigitalPlatform.LibraryServer
             RefreshMasterServerSummary();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         const string EncryptKey = "dp2circulationpassword";

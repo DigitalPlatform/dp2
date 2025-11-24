@@ -1,5 +1,18 @@
 ﻿#define SHITOUTANG  // 石头汤分类法和著者号的支持
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.ServiceModel;
+using System.Web;
+using System.Windows.Forms;
+using System.Xml;
+using static dp2Circulation.CallNumberForm;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -10,16 +23,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Web;
-using System.Windows.Forms;
-using System.Xml;
-using static dp2Circulation.CallNumberForm;
 
 namespace dp2Circulation
 {
@@ -5132,6 +5135,974 @@ chi	中文	如果是中文，则为空。
             return 1;
         }
 
+
+        #region 种次号库 API
+
+        // 2025/10/26
+        public static int SetZhongcihao(string strDbName,
+            string strClass,
+            string action,
+            string tailnumber,
+            out string output_number,
+            out string strError)
+        {
+            output_number = "";
+            strError = "";
+
+            if (action != "save"
+                && action != "delete"
+                && action != "conditionalpush")
+            {
+                strError = $"暂不支持 action='{action}'";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "strDbName 参数值(种次号库名) 不应为空";
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strClass))
+            {
+                strError = "strClass 参数值(类名) 不应为空";
+                return -1;
+            }
+
+            if (action != "delete")
+            {
+                if (string.IsNullOrEmpty(tailnumber))
+                {
+                    strError = $"tailnumber 参数值(尾号) 不应为空";
+                    return -1;
+                }
+            }
+
+            var channel = Program.MainForm.GetChannel();
+            try
+            {
+                var ret = channel.SetZhongcihaoTailNumber(
+                null,
+                action,
+                strDbName,
+                strClass,
+                tailnumber,
+                out output_number,
+                out strError);
+                return (int)ret;
+            }
+            finally
+            {
+                Program.MainForm.ReturnChannel(channel);
+            }
+        }
+
+        // 2025/10/26
+        public static int GetZhongcihao(string strDbName,
+            string strClass,
+            out string tailnumber,
+            out string strError)
+        {
+            tailnumber = "";
+            strError = "";
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "strDbName 参数值(种次号库名) 不应为空";
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strClass))
+            {
+                strError = "strClass 参数值(类名) 不应为空";
+                return -1;
+            }
+
+            var channel = Program.MainForm.GetChannel();
+            try
+            {
+                var ret = channel.GetZhongcihaoTailNumber(
+                null,
+                strDbName,
+                strClass,
+                out tailnumber,
+                out strError);
+                return (int)ret;
+            }
+            finally
+            {
+                Program.MainForm.ReturnChannel(channel);
+            }
+        }
+
+        #endregion
+
+        #region 出版地 出版者 地区代码 相关实用功能
+
+        // 2025/11/20
+        // 为 210 字段 加入出版地、出版者
+        public void UnimarcAddPublisher()
+        {
+            string strError = "";
+            string strISBN = "";
+
+            int nRet = 0;
+
+            strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
+
+            if (strISBN.Trim() == "")
+            {
+                strError = "记录中不存在010$a子字段,因此无法加出版社子字段";
+                goto ERROR1;
+            }
+
+            // 切割出 出版社 代码部分
+            string strPublisherNumber = "";
+            nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
+                out strPublisherNumber,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            string strValue = "";
+
+            // TODO: style 参数中增加子参数允许直接指定选择对话框的标题文字
+            nRet = this.DetailForm.GetPublisherInfo(strPublisherNumber,
+                "select_one",
+                out strValue,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (nRet == 0 || string.IsNullOrEmpty(strValue))
+            {
+            REDO_INPUT:
+                // 创建新条目
+                strValue = InputDlg.GetInput(
+                    this.DetailForm,
+                    null,
+                    "请输入ISBN出版社号 '" + strPublisherNumber + "' 对应的出版社名称(格式 出版地:出版社名):",
+                    "出版地:出版社名",
+                    this.DetailForm.MainForm.DefaultFont);
+                if (strValue == null)
+                    return; // 放弃整个操作
+
+                // 把全角冒号替换为半角的形态
+                strValue = strValue.Replace("：", ":");
+
+                var errors = VerifyBase.VerifyCityPublisher(strValue);
+                if (errors.Count > 0)
+                {
+                    MessageBox.Show(this.DetailForm, $"输入的内容 '{strValue}' 不合法:\r\n{StringUtil.MakePathList(errors, "; ")}\r\n\r\n请重新输入。");
+                    goto REDO_INPUT;
+                }
+
+                nRet = this.DetailForm.SetPublisherInfo(strPublisherNumber,
+                    strValue,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            // MessageBox.Show(this.DetailForm, strValue);
+
+            string strName = "";
+            string strCity = "";
+            nRet = strValue.IndexOf(":");
+            if (nRet == -1)
+            {
+                strName = strValue;
+            }
+            else
+            {
+                strCity = strValue.Substring(0, nRet);
+                strName = strValue.Substring(nRet + 1);
+            }
+
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
+            if (control == false)
+            {
+                this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("210", "a", strCity);
+                this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("210", "c", strName);
+            }
+            else
+            {
+                var ret = GetMarcRecord(
+        "show_dialog",
+        out MarcRecord record,
+        out string rule,
+        out string locationString,
+        out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                MarcNode caret_node = null;
+                if (string.IsNullOrEmpty(locationString) == false)
+                {
+                    caret_node = MarcRecordUtility.LocateMarcNode(record,
+                    locationString);
+                }
+
+                MarcField field = null;
+                if (caret_node != null)
+                {
+                    // 如果插入符所在的位置正好是 210 字段
+                    if (caret_node is MarcField && caret_node.Name == "210")
+                        field = caret_node as MarcField;
+                    else if (caret_node is MarcSubfield && caret_node.Parent.Name == "210")
+                        field = caret_node.Parent as MarcField;
+                }
+
+                // 否则从 MARC 中找到第一个 210 字段
+                if (field == null)
+                    field = record.select("field[@name='210']").FirstOrDefault() as MarcField;
+
+                // 追加到 210 字段末尾
+                if (field == null)
+                {
+                    record.setFirstSubfield("210", "a", strCity);
+                    record.setFirstSubfield("210", "c", strName);
+                }
+                else
+                {
+                    // 尝试找到 $d 子字段
+                    var subfields = field.select("subfield[@name='d']");
+                    if (subfields.count == 0)
+                    {
+                        field.ChildNodes.add(new MarcSubfield("a", strCity));
+                        field.ChildNodes.add(new MarcSubfield("c", strName));
+                    }
+                    else
+                    {
+                        int index = field.ChildNodes.indexOf(subfields[0]);
+                        field.ChildNodes.insert(index, new MarcSubfield("c", strName));
+                        field.ChildNodes.insert(index, new MarcSubfield("a", strCity));
+                    }
+                }
+                this.DetailForm.MarcEditor.Marc = record.Text;
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+        }
+
+
+        // 2025/11/20
+        // 维护 ISBN 前缀-出版者对照表
+        public void UnimarcManagePublisher()
+        {
+            string strError = "";
+            string strISBN = "";
+            int nRet = 0;
+
+            strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a").Trim();
+
+            string isbn_prefix = "";
+
+            if (String.IsNullOrEmpty(strISBN) == false)
+            {
+                // 切割出 出版社 代码部分
+                nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
+                    out isbn_prefix,
+                    out strError);
+                if (nRet == -1)
+                {
+                    goto ERROR1;
+                }
+            }
+
+            if (String.IsNullOrEmpty(isbn_prefix) == true)
+                isbn_prefix = "7-?";
+
+            REDO_INPUT:
+            isbn_prefix = InputDlg.GetInput(
+                    this.DetailForm,
+                    "维护 ISBN前缀-出版者 对照表 -- 第1步",
+                    "请输入ISBN前缀(出版社号码)部分:",
+                    isbn_prefix,
+                    this.DetailForm.MainForm.DefaultFont);
+            if (isbn_prefix == null)
+                return; // 放弃整个操作
+
+            // 检查 strPublisherNumber 中可能出现的非法字符。
+            // 数字和横杠以外的字符不允许出现
+            if (isbn_prefix.Where(c => !(char.IsDigit(c) || c == '-')).Any())
+            {
+                MessageBox.Show(this.DetailForm, $"输入的内容 '{isbn_prefix}' 不合法。不允许出现数字和横杠以外的字符");
+                goto REDO_INPUT;
+            }
+
+            nRet = this.DetailForm.GetPublisherInfo(isbn_prefix,
+                "", // 空表示直接获取出版者库中 value，不要对含有分号的 value 弹出对话框选择单个
+                out string city_publisher,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (nRet == 0 || string.IsNullOrEmpty(city_publisher))
+            {
+                // TODO: 把现有的 $a$c$a$c 拼接起来当作初始值
+                // 获得现有的210字段 $a$c
+                Field field_210 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("210", 0);
+                if (field_210 != null)
+                {
+                    Subfield subfield_a = field_210.Subfields["a"];
+                    Subfield subfield_c = field_210.Subfields["c"];
+                    if (subfield_a != null && subfield_c != null
+                        && string.IsNullOrEmpty(subfield_a.Value) == false
+                        && string.IsNullOrEmpty(subfield_c.Value) == false)
+                        city_publisher = subfield_a.Value + ":" + subfield_c.Value;
+                }
+
+                if (string.IsNullOrEmpty(city_publisher) == true)
+                    city_publisher = "出版地:出版社名";
+            }
+
+        REDO_INPUT_2:
+            // TODO: 用一个专用对话框，用多行 textbox 来显示和编辑可能出现的多个(分号分隔的)出版者信息
+            // 创建新条目
+            city_publisher = InputDlg.GetInput(
+                this.DetailForm,
+                "维护 ISBN前缀-出版者 对照表 -- 第2步",
+                "请输入ISBN前缀 '" + isbn_prefix + "' 对应的 出版地:出版社名:",
+                city_publisher,
+                this.DetailForm.MainForm.DefaultFont);
+            if (city_publisher == null)
+                return; // 放弃整个操作
+
+            if (city_publisher == "")
+                goto DOSAVE;
+
+            // MessageBox.Show(this.DetailForm, strValue);
+
+            // 把全角冒号替换为半角的形态
+            city_publisher = city_publisher.Replace("：", ":");
+
+            var errors = VerifyBase.VerifyCityPublisher(city_publisher);
+            if (errors.Count > 0)
+            {
+                MessageBox.Show(this.DetailForm, $"输入的内容 '{city_publisher}' 不合法:\r\n{StringUtil.MakePathList(errors, "; ")}\r\n\r\n请重新输入。");
+                goto REDO_INPUT_2;
+            }
+
+#if REMOVED
+            string strName = "";
+            string strCity = "";
+            nRet = strValue.IndexOf(":");
+            if (nRet == -1)
+            {
+                strError = "输入的内容中缺少冒号";
+                goto ERROR1;
+                // strName = strValue;
+            }
+            else
+            {
+                strCity = strValue.Substring(0, nRet);
+                strName = strValue.Substring(nRet + 1);
+            }
+
+            strValue = strCity + ":" + strName;
+#endif
+
+        DOSAVE:
+            // TODO: 注意检查 strValue 为 "" 是什么功能
+            nRet = this.DetailForm.SetPublisherInfo(isbn_prefix,
+                city_publisher,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+        }
+
+        // 根据 010$a (中的 ISBN 前缀)自动添加 102$a$b
+        // 最新版已经改进为根据出版地名自动添加 102$a$b (UnimarcAdd102() 函数)，出版地名可以从 210$a 寻找，或者从 ISBN 前缀先查找 publisher 库，命中 “出版地:出版者” 之后，再根据出版地寻找
+        public void UnimarcAdd102Legacy()
+        {
+            string strError = "";
+            string strISBN = "";
+            int nRet = 0;
+
+            strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
+
+            if (strISBN.Trim() == "")
+            {
+                strError = "记录中不存在010$a子字段,因此无法加102$a$b";
+                goto ERROR1;
+            }
+
+            // 切割出 出版社 代码部分
+            string strPublisherNumber = "";
+            nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
+                out strPublisherNumber,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            string strValue = "";
+
+            nRet = this.DetailForm.Get102Info(strPublisherNumber,
+                out strValue,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (nRet == 0 || strValue == "")
+            {
+                // 创建新条目
+                strValue = InputDlg.GetInput(
+                    this.DetailForm,
+                    null,
+                    "请输入ISBN出版社号码 '" + strISBN + "' 对应的UNIMARC 102$a$b参数(格式 国家代码[2位]:城市代码[6位]):",
+                    "国家代码[2位]:城市代码[6位]",
+                    this.DetailForm.MainForm.DefaultFont);
+                if (strValue == null)
+                    return; // 放弃整个操作
+
+                nRet = this.DetailForm.Set102Info(strPublisherNumber,
+                    strValue,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            // MessageBox.Show(this.DetailForm, strValue);
+
+            // 把全角冒号替换为半角的形态
+            strValue = strValue.Replace("：", ":");
+
+            string strCountryCode = "";
+            string strCityCode = "";
+            nRet = strValue.IndexOf(":");
+            if (nRet == -1)
+            {
+                strCountryCode = strValue;
+
+                if (strCountryCode.Length != 2)
+                {
+                    strError = "国家代码 '" + strCountryCode + "' 应当为2字符";
+                    goto ERROR1;
+                }
+            }
+            else
+            {
+                strCountryCode = strValue.Substring(0, nRet);
+                strCityCode = strValue.Substring(nRet + 1);
+                if (strCountryCode.Length != 2)
+                {
+                    strError = "冒号前面的国家代码部分 '" + strCountryCode + "' 应当为2字符";
+                    goto ERROR1;
+                }
+                if (strCityCode.Length != 6)
+                {
+                    strError = "冒号后面的城市代码部分 '" + strCityCode + "' 应当为6字符";
+                    goto ERROR1;
+                }
+            }
+
+            this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("102", "a", strCountryCode);
+            this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("102", "b", strCityCode);
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+        }
+
+        // 维护102对照关系
+        // 也就是根据 ISBN 前缀对应 102$a$b 的关系。
+        // 最新版已经改进为 城市名 对应 102$a$b 的关系，为 UnimarcManage102() 函数
+        public void UnimarcManage102Legacy()
+        {
+            string strError = "";
+            string strISBN = "";
+            int nRet = 0;
+
+            strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a").Trim();
+
+            string strPublisherNumber = "";
+
+            if (String.IsNullOrEmpty(strISBN) == false)
+            {
+                // 切割出 出版社 代码部分
+                nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
+                    out strPublisherNumber,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            if (String.IsNullOrEmpty(strPublisherNumber) == true)
+                strPublisherNumber = "978-7-?";
+
+            strPublisherNumber = InputDlg.GetInput(
+                    this.DetailForm,
+                    "维护102对照表 -- 第1步",
+                    "请输入ISBN中出版社号码部分:",
+                    strPublisherNumber,
+                    this.DetailForm.MainForm.DefaultFont);
+            if (strPublisherNumber == null)
+                return; // 放弃整个操作
+
+            string strValue = "";
+
+            nRet = this.DetailForm.Get102Info(strPublisherNumber,
+                out strValue,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (nRet == 0 || strValue == "")
+            {
+                strValue = "国家代码[2位]:城市代码[6位]";
+            }
+
+            // 创建新条目
+            strValue = InputDlg.GetInput(
+                this.DetailForm,
+                "维护102对照表 -- 第2步",
+                "请输入ISBN出版社号码 '" + strPublisherNumber + "' 对应的UNIMARC 102$a$b参数(格式国家代码[2位]:城市代码[6位]):",
+                strValue,
+                    this.DetailForm.MainForm.DefaultFont);
+            if (strValue == null)
+                return; // 放弃整个操作
+
+            if (strValue == "")
+                goto DOSAVE;
+
+            // MessageBox.Show(this.DetailForm, strValue);
+
+            // 把全角冒号替换为半角的形态
+            strValue = strValue.Replace("：", ":");
+
+            string strCountryCode = "";
+            string strCityCode = "";
+            nRet = strValue.IndexOf(":");
+            if (nRet == -1)
+            {
+                strCountryCode = strValue;
+
+                if (strCountryCode.Length != 2)
+                {
+                    strError = "国家代码 '" + strCountryCode + "' 应当为2字符";
+                    goto ERROR1;
+                }
+            }
+            else
+            {
+                strCountryCode = strValue.Substring(0, nRet);
+                strCityCode = strValue.Substring(nRet + 1);
+                if (strCountryCode.Length != 2)
+                {
+                    strError = "冒号前面的国家代码部分 '" + strCountryCode + "' 应当为2字符";
+                    goto ERROR1;
+                }
+                if (strCityCode.Length != 6)
+                {
+                    strError = "冒号后面的城市代码部分 '" + strCityCode + "' 应当为6字符";
+                    goto ERROR1;
+                }
+            }
+
+            strValue = strCountryCode + ":" + strCityCode;
+
+        DOSAVE:
+            nRet = this.DetailForm.Set102Info(strPublisherNumber,
+                strValue,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+        }
+
+        // (新版功能)
+        // 自动添加 102$a$b。算法是查找 210$a 或者 010$a，检索出版者库
+        public void UnimarcAddCityCode()
+        {
+            string strError = "";
+
+            var ret = GetMarcRecord(
+"show_dialog",
+out MarcRecord record,
+out string rule,
+out string locationString,
+out strError);
+            if (ret == -1)
+            {
+                goto ERROR1;
+            }
+
+            var old_marc = record.Text;
+
+            bool first_append = true;
+
+            // 先尝试寻找 210$a
+            var subfields_210a = record.select("field[@name='210']/subfield[@name='a']");
+            if (subfields_210a.count > 0)
+            {
+                foreach (MarcSubfield subfield in subfields_210a)
+                {
+                    var city = subfield.Content;
+                    if (string.IsNullOrEmpty(city))
+                        continue;
+                    // result.Value
+                    //      -1  出错
+                    //      0   没有找到(没有找到，但输入并保存了，也是返回 0)
+                    //      1   找到
+                    var result = VerifyBase.GetCityCode(city,
+                "askInput",
+                "",
+                out string code);
+                    if (string.IsNullOrEmpty(code))
+                    {
+                        strError = result.ErrorInfo;
+                        goto ERROR1;
+                    }
+                    Append102ab(code);
+                }
+            }
+
+            if (record.Text != old_marc)
+                goto END1;
+
+            // 再尝试寻找 010$a
+            var subfields_010a = record.select("field[@name='010']/subfield[@name='a']");
+            if (subfields_010a.count > 0)
+            {
+                foreach (MarcSubfield subfield in subfields_010a)
+                {
+                    var isbn = subfield.Content;
+                    if (string.IsNullOrEmpty(isbn))
+                        continue;
+                    ret = this.DetailForm.MainForm.GetPublisherNumber(isbn,
+    out string prefix,
+    out strError);
+                    if (ret == -1)
+                        goto ERROR1;
+                    // TODO: style 参数中增加子参数允许直接指定选择对话框的标题文字
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    ret = this.DetailForm.GetPublisherInfo(prefix,
+                        "select_one,askInput,create",
+                        out string city_publisher,
+                        out strError);
+                    if (ret == -1)
+                        goto ERROR1;
+                    if (ret == 0 || string.IsNullOrEmpty(city_publisher))
+                        continue;
+                    var cities = VerifyBase.GetCities(city_publisher).Distinct();
+                    foreach (var city in cities)
+                    {
+                        // result.Value
+                        //      -1  出错
+                        //      0   没有找到(没有找到，但输入并保存了，也是返回 0)
+                        //      1   找到
+                        var result = VerifyBase.GetCityCode(city,
+                    "askInput",
+                    "",
+                    out string code);
+                        if (string.IsNullOrEmpty(code))
+                        {
+                            strError = result.ErrorInfo;
+                            goto ERROR1;
+                        }
+                        Append102ab(code);
+                    }
+                }
+            }
+
+        END1:
+            if (record.Text != old_marc)
+            {
+                this.DetailForm.MarcEditor.Marc = record.Text;
+                if (string.IsNullOrEmpty(locationString) == false)
+                {
+                    this.DetailForm.MarcEditor.SetActiveField(locationString, false);
+                }
+            }
+            else
+            {
+                // strError = $"当前内容中既不存在 210$a，也不存在 010$a，无法添加 102$a$b";
+                Console.Beep();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+
+            // TODO: 如果首次调用时发现 102 字段中已经存在 $a$b 内容，弹出对话框询问是否覆盖
+            void Append102ab(string city_and_code)
+            {
+                // 首次追加前先检查
+                if (first_append)
+                {
+                    if (IsEmpty102() == false)
+                    {
+                        var lines = record.select("field[@name='102']")
+                            .Cast<MarcField>()
+                            .Select(o => o.Text.Replace(" ", "_").Replace(MarcQuery.SUBFLD, "$"))
+                            .ToList();
+                        DialogResult result = MessageBox.Show(this.DetailForm,
+    $"当前 MARC 内容中已经存在 102 字段\r\n{StringUtil.MakePathList(lines, "\r\n")}\r\n是否要覆盖原有内容?\r\n\r\n(是: 覆盖字段原有内容; 否: 追加到原有内容后面; 取消: 取消操作",
+    "UnimarcAddCityCode()",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.Cancel)
+                            return;
+                        if (result == DialogResult.Yes)
+                            record.select("field[@name='102'][1]/subfield").detach();
+                    }
+                    first_append = false;
+                }
+
+                var parts = StringUtil.ParseTwoPart(city_and_code, ":");
+                var a = parts[0];
+                var b = parts[1];
+                // 先检查 102 字段是否已经存在
+                MarcField field = record.select("field[@name='102']").FirstOrDefault() as MarcField;
+                if (field == null)
+                {
+                    field = new MarcField("102", "  ", "");
+                    record.ChildNodes.insertSequence(field);
+                }
+                field.ChildNodes.add(new MarcSubfield("a", a));
+                field.ChildNodes.add(new MarcSubfield("b", b));
+            }
+
+            bool IsEmpty102()
+            {
+                var field = record.select("field[@name='102'][1]").FirstOrDefault() as MarcField;
+                if (field != null)
+                {
+                    if (string.IsNullOrEmpty(field.Content))
+                        return true;
+                    var contents = field.select("subfield").Contents;
+                    if (contents.Where(o => string.IsNullOrEmpty(o) == false).Any())
+                        return false;
+                    field.select("subfield").detach();  // 把这些所有内容为空的子字段删除
+                    return true;
+                }
+
+                return true;
+            }
+        }
+
+        // (新版功能)
+        // 维护 出版地 --> CN:xxxxxx 对照关系
+        // 从 210$a 找出版地。只找第一个。如果出现多个，警告一下?
+        public void UnimarcManageCityCode()
+        {
+            string strError = "";
+
+            var ret = GetMarcRecord(
+"show_dialog",
+out MarcRecord record,
+out string rule,
+out string locationString,
+out strError);
+            if (ret == -1)
+            {
+                goto ERROR1;
+            }
+
+            string current_city = "";
+
+            // 尝试寻找 210$a
+            var subfields_210a = record.select("field[@name='210']/subfield[@name='a']");
+            if (subfields_210a.count > 0)
+            {
+                foreach (MarcSubfield subfield in subfields_210a)
+                {
+                    var city = subfield.Content;
+                    if (string.IsNullOrEmpty(city))
+                        continue;
+                    current_city = city;
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(current_city) == true)
+            {
+                current_city = InputDlg.GetInput(this.DetailForm,
+                    "请输入要维护的出版地名称",
+                    "出版地(城市名)",
+                    current_city,
+                    this.DetailForm.Font);
+                if (current_city == null)
+                    return;
+            }
+
+            // result.Value
+            //      -1  出错
+            //      0   没有找到(没有找到，但输入并保存了，也是返回 0)
+            //      1   找到
+            var result = VerifyBase.GetCityCode(current_city,
+        "maintain",
+        "",
+        out string code);
+            if (string.IsNullOrEmpty(code))
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+        }
+
+        #endregion
+
+        // 提供一些只在 Ctrl+A 中显示的菜单?
+
+        #region 默认的菜单函数
+
+        public void _HyphenISBN_setMenu(object sender, SetMenuEventArgs e)
+        {
+            Field curfield = this.DetailForm.MarcEditor.FocusedField;
+            if (curfield == null || curfield.Name != "010")
+            {
+                e.Action.Active = false;
+                return;
+            }
+            Subfield a = curfield.Subfields["a"];
+            if (a == null)
+            {
+                e.Action.Active = false;
+                return;
+            }
+
+            string strISBN = a.Value;
+            if (string.IsNullOrEmpty(strISBN) == true
+                || strISBN.Contains("-"))
+            {
+                e.Action.Active = false;
+                return;
+            }
+
+            e.Action.Active = true;
+        }
+
+        public void _HyphenISBN()
+        {
+            _hyphen("auto");
+        }
+
+        // 设置菜单加亮状态 -- 规整ISBN为13
+        void _HyphenISBN_13_setMenu(object sender, SetMenuEventArgs e)
+        {
+            Field curfield = this.DetailForm.MarcEditor.FocusedField;
+            if (curfield == null || curfield.Name != "010")
+            {
+                e.Action.Active = false;
+                return;
+            }
+            Subfield a = curfield.Subfields["a"];
+            if (a == null)
+            {
+                e.Action.Active = false;
+                return;
+            }
+
+            string strISBN = a.Value;
+            if (string.IsNullOrEmpty(strISBN) == true)
+            {
+                e.Action.Active = false;
+                return;
+            }
+
+            if (IsbnSplitter.IsIsbn13(strISBN) == true)
+            {
+                e.Action.Active = false;
+                return;
+            }
+
+            e.Action.Active = true;
+        }
+
+
+        public void _HyphenISBN_13()
+        {
+            _hyphen("force13");
+        }
+
+        // parameters:
+        //      style   force13 force10 auto 之一
+        public void _hyphen(string style)
+        {
+            // HyphenISBN(true);
+            var ret = GetMarcRecord(
+    "show_dialog",
+    out MarcRecord record,
+    out string rule,
+    out string locationString,
+    out string strError);
+            if (ret == -1)
+            {
+                MessageBox.Show(this.DetailForm, strError);
+                return;
+            }
+
+            var changed = MarcRecordUtility.HyphenISBN(record,
+                rule,
+                style,
+                ref locationString);
+            if (changed)
+            {
+                this.DetailForm.MarcEditor.Marc = record.Text;
+                if (string.IsNullOrEmpty(locationString) == false)
+                {
+                    this.DetailForm.MarcEditor.SetActiveField(locationString, false);
+                }
+            }
+            else
+                Console.Beep();
+        }
+
+
+        // 设置菜单加亮状态 -- 规整ISBN为10
+        void _HyphenISBN_10_setMenu(object sender, SetMenuEventArgs e)
+        {
+            Field curfield = this.DetailForm.MarcEditor.FocusedField;
+            if (curfield == null || curfield.Name != "010")
+            {
+                e.Action.Active = false;
+                return;
+            }
+            Subfield a = curfield.Subfields["a"];
+            if (a == null)
+            {
+                e.Action.Active = false;
+                return;
+            }
+
+            string strISBN = a.Value;
+            if (string.IsNullOrEmpty(strISBN) == true)
+            {
+                e.Action.Active = false;
+                return;
+            }
+
+            if (IsbnSplitter.IsIsbn13(strISBN) == true)
+            {
+                e.Action.Active = true;
+                return;
+            }
+
+            e.Action.Active = false;
+        }
+
+        public void _HyphenISBN_10()
+        {
+            _hyphen("force10");
+        }
+
+
+        #endregion
     }
 
 

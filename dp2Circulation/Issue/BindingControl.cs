@@ -3366,7 +3366,8 @@ namespace dp2Circulation
                 item.CallNumber = cur_item.AccessNo;
                 item.Location = cur_item.LocationString;
                 item.Barcode = cur_item.Barcode;
-
+                // 2025/11/17
+                item.State = cur_item.State;
                 results.Add(item);
             }
 

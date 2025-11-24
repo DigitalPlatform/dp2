@@ -8,6 +8,7 @@ using System.Web;
 
 using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
+using System.Windows.Forms;
 
 namespace dp2Circulation
 {
@@ -114,6 +115,8 @@ namespace dp2Circulation
         /// 一般是一个特定的 Form 派生类对象，代表当前正在处理的 MDI 窗口
         /// </summary>
         public object UiForm = null;
+
+        public HistoryMode HistoryMode = HistoryMode.RecPath;
 
         /// <summary>
         /// 构造函数
@@ -341,5 +344,28 @@ namespace dp2Circulation
                 strClass = "error";
             Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
+
+        // 2025/10/24
+        public void ChangeUiItemBackColor(string color)
+        {
+            if (this.UiItem == null)
+                return;
+            ListViewItem item = this.UiItem as ListViewItem;
+            if (item == null)
+                return;
+            try
+            {
+                item.BackColor = System.Drawing.Color.FromName(color);
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    public enum HistoryMode
+    {
+        None = 0,   // 不输出
+        RecPath = 1,    // 输出记录路径
     }
 }

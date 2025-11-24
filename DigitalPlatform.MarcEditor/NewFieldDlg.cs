@@ -36,7 +36,7 @@ namespace DigitalPlatform.Marc
 
             int nRet = FillFieldNameList(out string strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             // 2024/6/14
             SelectListLine(this.textBox_fieldName.Text, true);

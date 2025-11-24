@@ -33,7 +33,7 @@ namespace DigitalPlatform.EasyMarc
             string strError = "";
             int nRet = LoadNameList(out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             if (string.IsNullOrEmpty(this.textBox_name.Text) == false)
                 HilightListItems(this.textBox_name.Text);

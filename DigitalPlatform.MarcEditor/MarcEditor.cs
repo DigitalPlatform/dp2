@@ -1,4 +1,11 @@
-﻿using System;
+﻿using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
+using DigitalPlatform.MarcEditor;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,14 +19,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-
-using Newtonsoft.Json;
-
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.GUI;
-using DigitalPlatform.MarcEditor;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.Marc
 {
@@ -825,34 +824,44 @@ TaskScheduler.Default);
                     return;
                 }
 #endif
-                if (value == null)
-                {
-                    this.m_fixedSizeFont = value;
-                    this.m_captionFont = value;
-                    base.Font = value;  // 2019/5/18 从 this.Font 改过来
-                    return;
-                }
-
-                // 初始化内部等宽字体
-                if (this.m_fixedSizeFont == null)
-                    this.m_fixedSizeFont = value;
-                else
-                    this.m_fixedSizeFont = new Font(this.m_fixedSizeFont.FontFamily,
-                        value.SizeInPoints,
-                        FontStyle.Bold,
-                        GraphicsUnit.Point);
-
-                // 初始化标签字体
-                if (this.m_captionFont == null)
-                    this.m_captionFont = value;
-                else
-                {
-                    // TODO: 测试一下是否会导致内存泄漏
-                    this.m_captionFont = new Font(this.m_captionFont.FontFamily, value.SizeInPoints, GraphicsUnit.Point);
-                }
+                // ChangeRelativeFonts(value);
 
                 // 最后触发
                 base.Font = value;
+
+                // 2025/11/20
+                // 确保触发
+                OnFontChanged(new EventArgs());
+            }
+        }
+
+        // 因为主要字体改变，需要连带改变其它相关字体的尺寸
+        void ChangeRelativeFonts(Font value)
+        {
+            if (value == null)
+            {
+                this.m_fixedSizeFont = value;
+                this.m_captionFont = value;
+                base.Font = value;  // 2019/5/18 从 this.Font 改过来
+                return;
+            }
+
+            // 初始化内部等宽字体
+            if (this.m_fixedSizeFont == null)
+                this.m_fixedSizeFont = value;
+            else
+                this.m_fixedSizeFont = new Font(this.m_fixedSizeFont.FontFamily,
+                    value.SizeInPoints,
+                    FontStyle.Bold,
+                    GraphicsUnit.Point);
+
+            // 初始化标签字体
+            if (this.m_captionFont == null)
+                this.m_captionFont = value;
+            else
+            {
+                // TODO: 测试一下是否会导致内存泄漏
+                this.m_captionFont = new Font(this.m_captionFont.FontFamily, value.SizeInPoints, GraphicsUnit.Point);
             }
         }
 
@@ -921,7 +930,7 @@ TaskScheduler.Default);
                     if (this.Font != null)
                         this.m_captionFont = NewFont(this.Font); // this.Font;
                     else
-                        this.m_fixedSizeFont = new Font(new FontFamily("宋体"),
+                        /*this.m_fixedSizeFont bug*/m_captionFont = new Font(new FontFamily("宋体"),
                             9,
                             GraphicsUnit.Point);
                 }
@@ -3839,6 +3848,7 @@ API.MakeLParam(x, y));
             this.m_fixedSizeFont = null;
             this.m_captionFont = null;
              * */
+            ChangeRelativeFonts(this.Font);
 
             if (this.record != null)
                 this.record.InitializeWidth();

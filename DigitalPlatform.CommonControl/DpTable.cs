@@ -2154,6 +2154,11 @@ Color.FromArgb(100, this.m_hoverBackColor)
             base.OnSizeChanged(e);
         }
 
+        public bool IsDownEnd()
+        {
+            return this.DocumentOrgY - this.ClientSize.Height <= -this.DocumentHeight;
+        }
+
         /// <summary>
         /// 缺省窗口过程
         /// </summary>

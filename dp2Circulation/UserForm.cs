@@ -1,16 +1,16 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
+using Microsoft.CodeAnalysis.Operations;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Text;
-
-using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.LibraryClient;
+using System.Windows.Forms;
 
 namespace dp2Circulation
 {
@@ -365,7 +365,7 @@ password);
             }
         }
 
-        public override LibraryChannel GetChannel(string strServerUrl = ".", 
+        public override LibraryChannel GetChannel(string strServerUrl = ".",
             string strUserName = ".",
             GetChannelStyle style = GetChannelStyle.None,
             string strClientIP = "")
@@ -1404,9 +1404,65 @@ password);
 
         private void toolStripButton_freeAllChannels_Click(object sender, EventArgs e)
         {
-            // TODO: 警告
-            Program.MainForm._channelPool.Clear();
-            Program.MainForm._channelPoolExt.Clear();
+            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.193") < 0)
+                {
+                    MessageBox.Show(this, $"dp2library 服务器版本低于 3.193 (为 {Program.MainForm.ServerVersion})，无法使用强制关闭 dp2library 全部通道功能");
+                    return;
+                }
+
+                DialogResult result = MessageBox.Show(this,
+"确实要强制关闭 dp2library 服务器的所有通道？\r\n\r\n警告: 这可能会导致您自己，和其它前端机器的用户请求 dp2library 的操作被中断或破坏。请谨慎使用本功能",
+"UserForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
+                // 强制关闭所有通道
+                var count = CloseAllChannel();
+                if (count >= 0)
+                    MessageBox.Show(this, $"dp2library 服务器上的所有 {count} 个通道已被强制关闭");
+            }
+            else
+            {
+                // TODO: 警告
+                Program.MainForm._channelPool.Clear();
+                Program.MainForm._channelPoolExt.Clear();
+            }
+        }
+
+        int CloseAllChannel()
+        {
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.193") < 0)
+                return -1;
+
+            var looping = Looping(out LibraryChannel channel,
+    "正在获得全部用户信息 ...",
+    "disableControl");
+            try
+            {
+                long lRet = channel.ManageChannel(
+    looping.Progress,
+    "close",
+    "",
+    new ChannelInfo[] {
+    new ChannelInfo{ UserName = "*"}
+    },
+    out ChannelInfo[] results,
+    out string strError);
+                if (lRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return -1;
+                }
+                return (int)lRet;
+            }
+            finally
+            {
+                looping.Dispose();
+            }
         }
 
         private void textBox_location_TextChanged(object sender, EventArgs e)

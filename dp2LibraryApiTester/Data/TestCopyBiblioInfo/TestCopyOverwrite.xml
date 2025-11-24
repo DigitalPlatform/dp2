@@ -1,0 +1,355 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<collection>
+	<env comment="*** 普通权限不足 ***">
+		<![CDATA[
+		普通权限不足
+			全缺
+			缺读
+			缺写
+		]]>
+		<env
+			rights=""
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*不具备*">
+				没有任何权限
+			</trigger>
+		</env>
+		<env
+			rights="setbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*不具备*">
+				缺读权限
+			</trigger>
+		</env>
+		<env
+			rights="getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*不具备*">
+				缺写权限
+			</trigger>
+		</env>
+	</env>
+
+	<env comment="*** 存取定义权限不足 ***">
+		<![CDATA[
+		存取定义权限不足
+			全缺
+			缺读
+			缺写
+		]]>
+		<env
+			access="*:getsystemparameter"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*不具备*">
+				没有任何权限
+			</trigger>
+		</env>
+		<env
+			access="{target}:setbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*不具备*">
+				缺读权限
+			</trigger>
+		</env>
+		<env
+			access="{source}:getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*不具备*">
+				缺写权限
+			</trigger>
+		</env>
+	</env>
+
+	<env comment="*** 字段限制 ***">
+		<![CDATA[
+		字段限制
+			(普通权限无法限制)
+			存取定义限制
+				源字段限制
+				目标字段限制
+					字段限制又分为限制到了有效字段，和无效限制两类
+					(覆盖功能整体另行组织测试)字段限制还和追加和覆盖有关。覆盖时有原有记录的字段
+		]]>
+		{
+		<env
+			access="{source}:getbiblioinfo=*(300);{target}:setbiblioinfo=*(300)|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*权限不足以完整读取源记录*">
+				限制源。所允许的字段 300 在内容中不存在
+			</trigger>
+		</env>
+		<env
+			access="{source}:getbiblioinfo=*(200);{target}:setbiblioinfo|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*权限不足以完整读取源记录*">
+				限制源。所允许的字段 200 在内容中存在
+			</trigger>
+		</env>
+		}
+		{
+		<env
+			access="{source}:getbiblioinfo;{target}:setbiblioinfo=*(300)|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="SystemError" ErrorInfo="*拟保存的书目记录中已不存在任何字段*">
+				限制目标。所允许的字段 300 在内容中不存在
+				(只有 300 能写入。实际上数据中没有 300 字段。这样就等于任何字段都不允许写入。造成了即将写入的是一条空内容记录。为了避免出现误解，系统干脆就禁止了这种操作)
+			</trigger>
+		</env>
+		<env
+			access="{source}:getbiblioinfo;{target}:setbiblioinfo=*(200)|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*权限不足以将 XML 记录完整写入目标记录*">
+				限制目标。所允许的字段 200 在内容中存在
+				(只有 200 能写入，这样就是一条不完整的记录。所以不允许这样写入)
+			</trigger>
+		</env>
+		}
+		{
+		<env
+			access="{source}:getbiblioinfo=*(300);{target}:setbiblioinfo=*(300)|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*权限不足以完整读取源记录*">
+				同时限制两端。所允许的字段 300 在内容中不存在
+			</trigger>
+		</env>
+		<env
+			access="{source}:getbiblioinfo=*(200);{target}:setbiblioinfo=*(200)|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*权限不足以完整读取源记录*">
+				同时限制两端。所允许的字段 200 在内容中存在
+			</trigger>
+		</env>
+		}
+		{
+		<env
+			access="{source}:getbiblioinfo=*(200);{target}:setbiblioinfo=*(300)|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*权限不足以完整读取源记录*">
+				同时限制两端并且字段名交叉。所允许的目标字段 300 在内容中不存在
+			</trigger>
+		</env>
+		<env
+			access="{source}:getbiblioinfo=*(300);{target}:setbiblioinfo=*(200)|getbiblioinfo"
+			overwrite="1">
+			<trigger ret="-1" code="AccessDenied" info="*权限不足以完整读取源记录*">
+				同时限制两端并且字段名交叉。所允许的源字段 300 在内容中不存在
+			</trigger>
+		</env>
+		}
+	</env>
+
+	<env comment="*** order 权限特殊性 ***"
+			overwrite="1">
+		<![CDATA[
+		order 权限特殊性
+			普通权限
+			存取权限(分为源为 order，目标为 order，源和目标都是 order)
+			追加写入是无所谓的，主要是测试覆盖式写入
+			源和目标分别是 orderWork 角色，或者不是。涉及到如何在操作前改变书目库角色，完成后改回原来角色
+		]]>
+		<env comment="order 普通权限"
+			 rights="order">
+			<trigger ret="0" code="NoError">
+				因为是追加写入，所以 order 权限并不会有问题
+			</trigger>
+			<trigger overwrite="2"
+					 ret="-1" code="AccessDenied" info="*只有*">
+				因为是覆盖写入，所以 order 权限无法成功
+			</trigger>
+			<trigger overwrite="2" add_target_db_role="orderWork"
+					 ret="0" code="NoError">
+				若要覆盖写入成功，必须先把目标书目库的角色改为 orderWork
+			</trigger>
+		</env>
+
+		<env comment="order 存取定义"
+			access="{source}:order;{target}:order">
+			<trigger ret="0" code="NoError">
+				因为是追加写入，所以 order 权限并不会有问题
+			</trigger>
+			<trigger overwrite="true"
+					 ret="-1" code="AccessDenied" info="*只有*">
+				因为是覆盖写入，所以 order 权限无法成功
+			</trigger>
+			<trigger overwrite="true" add_target_db_role="orderWork"
+					 ret="0" code="NoError">
+				若要覆盖写入成功，必须先把目标书目库的角色改为 orderWork
+			</trigger>
+		</env>
+	</env>
+
+	<env comment='权限不足'
+			overwrite="1">
+		<env biblio='' subrecord=''>
+			<trigger ret='-1' code='AccessDenied' info='*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				包含下级记录
+				账户没有任何权限
+			</trigger>
+		</env>
+		<env subrecord=''
+			 rights='getbiblioobject,getitemobject'
+			 access=''>
+			<trigger ret='-1' code='AccessDenied' info='*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				包含下级记录
+				普通权限。账户没有主要权限，有其它的也没用
+			</trigger>
+		</env>
+		<env subrecord=''
+	 rights=''
+	 access='{source}:getbiblioobject|getitemobject;{target}:setbiblioobject|setitemobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*存取定义权限*' >
+				存取定义。账户没有主要权限，有其它的也没用
+			</trigger>
+		</env>
+		<env subrecord=''
+			 rights='getiteminfo,setiteminfo,getbiblioobject,getitemobject'
+			>
+			<trigger ret='-1' code='AccessDenied' info='*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				包含下级记录。
+				普通权限。账户没有主要权限，有其它的也没用
+			</trigger>
+		</env>
+		<env >
+			<trigger ret='-1' code='AccessDenied' info='*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户没有任何权限
+			</trigger>
+		</env>
+		<env change_while_copy='true'>
+			<trigger ret='-1' code='AccessDenied' info='*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				拷贝时即修改
+				账户没有任何权限
+			</trigger>
+		</env>
+		<env biblio='file' subrecord='file' >
+			<trigger ret='-1' code='AccessDenied' info='*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				源书目记录包含 dprms:file 元素
+				下级记录包含 dprms:file 元素
+				账户没有任何权限
+			</trigger>
+		</env>
+	</env>
+
+
+	<env comment='普通权限 只有 setbiblioinfo'
+			overwrite="1">
+		<env style='subrecord'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+		<env style='subrecord,s_o:getbiblioobject|getitemobject,t_o:setbiblioobject|setitemobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+		<env style='subrecord,s_item:getiteminfo,s_o:getbiblioobject|getitemobject,t_item:setiteminfo,t_o:setbiblioobject|setitemobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+		<env style=''>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+		<env style='change_while_copy'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+		<env style='file'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+		<env style='file,s_o:getobject,t_o:getobject|setobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+		<env style='file,s_o:getbiblioobject,t_o:getbiblioobject|setbiblioobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查源之读*不具备 getbiblioinfo 或 getrecord 或 order 普通权限*' >
+				账户只有 set 没有 getbiblioinfo，复制中无法读
+			</trigger>
+		</env>
+	</env>
+
+
+	<env comment='普通权限 setbiblioinfo getbiblioinfo'
+			overwrite="1">
+		<env style='subrecord'>
+			<trigger ret='-1' code='AccessDenied' info='*书目记录带有下属的实体记录*' >
+				有下级记录，但没有 setxxxinfo 和 getxxxinfo 权限
+			</trigger>
+		</env>
+		<env style='subrecord,s_o:getbiblioobject|getitemobject,t_o:setbiblioobject|setitemobject'>
+			<trigger ret='-1' code='AccessDenied' info='*书目记录带有下属的实体记录*'>
+				有下级记录，但没有 setxxxinfo 和 getxxxinfo 权限。
+				虽然有 setxxxobject 和 getxxxobject 权限，但没有 xxxinfo 权限
+			</trigger>
+		</env>
+		<env style='subrecord,s_item:getiteminfo,s_o:getbiblioobject|getitemobject,t_item:setiteminfo,t_o:setbiblioobject|setitemobject'>
+			<trigger ret='0' code='NoError'></trigger>
+		</env>
+		<env style=''>
+			<trigger ret='0' code='NoError'></trigger>
+		</env>
+		<env style='change_while_copy'>
+			<trigger ret='0' code='NoError'></trigger>
+		</env>
+		<env style='file'>
+			<trigger ret='-1' code='AccessDenied' info='*不足以完整读取源记录*'></trigger>
+		</env>
+		<env style='file,s_o:getobject,t_o:getobject|setobject'>
+			<trigger></trigger>
+		</env>
+		<env style='file,s_o:getbiblioobject,t_o:getbiblioobject|setbiblioobject'>
+			<trigger ret='0' code='NoError'></trigger>
+		</env>
+	</env>
+
+	<env comment='存取定义 源:getbiblioinfo'
+			overwrite="1">
+		<env style='subrecord'>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+		<env style='subrecord,s_o:getbiblioobject|getitemobject,t_o:setbiblioobject|setitemobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+		<env style='subrecord,s_item:getiteminfo,s_o:getbiblioobject|getitemobject,t_item:setiteminfo,t_o:setbiblioobject|setitemobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+		<env style=''>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+		<env style='change_while_copy'>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+		<env style='file'>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+		<env style='file,s_o:getobject,t_o:getobject|setobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+		<env style='file,s_o:getbiblioobject,t_o:getbiblioobject|setbiblioobject'>
+			<trigger ret='-1' code='AccessDenied' info='*检查目标之写*setbiblioinfo,writerecord,order*动作为*new*' >
+				账户只有 getbiblioinfo 没有 set，复制中无法写入
+			</trigger>
+		</env>
+	</env>
+
+</collection>

@@ -490,7 +490,7 @@ namespace DigitalPlatform.rms.Client
 
             if (lRet == -1)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
                 goto FINISH;
             }
 
@@ -508,7 +508,7 @@ namespace DigitalPlatform.rms.Client
                 out strError);
             if (values == null)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
                 goto FINISH;
             }
             strMime = (string)values["mimetype"];

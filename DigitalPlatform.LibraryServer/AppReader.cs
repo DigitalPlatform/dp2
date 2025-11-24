@@ -2443,7 +2443,7 @@ out strError);
                             domNewRec,
                                 CanonicalizeElementNames(important_fields),
 #if ITEM_ACCESS_RIGHTS
-                                (r) =>
+                                (r, d) =>
                                 {
                                     return CheckAccess(sessioninfo,
                                         $"读者记录下级对象({r})",
@@ -3981,7 +3981,7 @@ root, strLibraryCode);
                     domNewRec,
                     CanonicalizeElementNames(importantFields),
 #if ITEM_ACCESS_RIGHTS
-                    (r) =>
+                    (r, d) =>
                     {
                         return CheckAccess(sessioninfo,
                             $"读者记录下级对象({r})",
@@ -7649,14 +7649,26 @@ out strError);
     out _);
         }
 
+        // 判断参数是否匹配指定名称
+        // 例: strResultType 内容 "iso2709:utf-8|backup" 匹配 strName "iso2709" 返回 [out] parameters 内容为 "utf-8|backup"。注意语义上来说，utf-8 和 backup 之间是平行的关系，不分先后，调主随后一般用 StringUtil.IsInList() 判断是否包含
+        // 例: strResultType 内容 "marc" 匹配 strName "marc"，返回 [out] parameters ""
+        // parameters:
+        //      strResultType   参数内容。例如 "iso2709:utf-8|backup"。可以用冒号携带后面若干子参数。
+        //      strName         匹配的名字。例如 "iso2709"
+        //      parameters      [out] 返回参数内容中匹配的名字之后的附加的子参数内容。例如 "utf-8|backup"
+        // return:
+        //      false   不匹配
+        //      true    匹配。[out] parameters 参数中返回了子参数内容。
         public static bool IsResultType(string strResultType,
             string strName,
             out string parameters)
         {
             parameters = "";
+            if (strResultType == null)
+                strResultType = "";
             if (String.Compare(strResultType, strName, true) == 0)
                 return true;
-            if (StringUtil.HasHead(strResultType, strName + ":") == true)
+            if (strResultType.StartsWith(strName + ":") == true)
             {
                 parameters = strResultType.Substring((strName + ":").Length);
                 return true;

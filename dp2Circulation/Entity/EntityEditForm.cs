@@ -156,7 +156,8 @@ namespace dp2Circulation
 
             item.Location = entityEditControl_editing.LocationString;
             item.Barcode = entityEditControl_editing.Barcode;
-
+            // 2025/11/17
+            item.State = entityEditControl_editing.State;
             return callnumber_items;
         }
 

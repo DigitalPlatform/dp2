@@ -109,7 +109,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="API Document\CopyBiblioInfo.md" />
+    <None Include="API Document\GetBiblioInfo.md" />
     <None Include="API Document\GetBiblioSummary.md" />
+    <None Include="API Document\Login.md" />
+    <None Include="API Document\Return.md" />
+    <None Include="API Document\SetBiblioInfo.md" />
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup />

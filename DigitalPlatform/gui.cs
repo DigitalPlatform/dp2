@@ -5,9 +5,9 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using Microsoft.Win32;
-using System.Threading.Tasks;
 
 namespace DigitalPlatform.GUI
 {

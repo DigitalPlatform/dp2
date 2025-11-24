@@ -617,30 +617,34 @@ namespace dp2Circulation
         void SendMessage(string strGroupName, string strText)
         {
             this.EnableControls(false);
-
-            List<MessageRecord> messages = new List<MessageRecord>();
-            MessageRecord record = new MessageRecord();
-            record.groups = new string[1] { strGroupName };
-            record.data = strText;
-            messages.Add(record);
-
-            SetMessageRequest param = new SetMessageRequest("create",
-                "",
-               messages);
-
-            SetMessageResult result = Program.MainForm.MessageHub.SetMessageAsync(param).Result;
-            if (result.Value == -1)
+            try
             {
-                this.Invoke((Action)(() => MessageBox.Show(this, result.ErrorInfo)));
-            }
-            else
-            {
-                // 调用成功后才把输入的文字清除
-                this.Invoke((Action)(() => this.textBox_input.Text = ""
-                    ));
-            }
+                List<MessageRecord> messages = new List<MessageRecord>();
+                MessageRecord record = new MessageRecord();
+                record.groups = new string[1] { strGroupName };
+                record.data = strText;
+                messages.Add(record);
 
-            this.EnableControls(true);
+                SetMessageRequest param = new SetMessageRequest("create",
+                    "",
+                   messages);
+
+                SetMessageResult result = Program.MainForm.MessageHub.SetMessageAsync(param).Result;
+                if (result.Value == -1)
+                {
+                    this.Invoke((Action)(() => MessageBox.Show(this, result.ErrorInfo)));
+                }
+                else
+                {
+                    // 调用成功后才把输入的文字清除
+                    this.Invoke((Action)(() => this.textBox_input.Text = ""
+                        ));
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+            }
         }
 
         int _redoLoadMesssageCount = 0;

@@ -1013,7 +1013,7 @@ namespace dp2Circulation
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void KeyboardForm_Activated(object sender, EventArgs e)

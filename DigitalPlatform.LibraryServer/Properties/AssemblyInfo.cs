@@ -33,8 +33,8 @@ using System.Xml;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.192.*")]
-[assembly: AssemblyFileVersion("3.192.0.0")]
+[assembly: AssemblyVersion("3.196.*")]
+[assembly: AssemblyFileVersion("3.196.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -497,15 +497,21 @@ public bool ItemCanReturn(Account account,
 //                              login -- ?patronPasswordStyle
 //                          注: (为便于理解) library.xml 中 login 元素的 patronPasswordExpireLength 属性，当为空的时候，即便读者 XML 记录中 password 元素的 expire 属性有值，也不启用此读者账户的密码失效。
 //                              login 元素的 patronPasswordExpireLength 属性值不为空的时候，其值会影响到新设置的读者密码的失效期计算设置，但不会影响到已经设置的密码的失效期。也就是说，对于已经设置的密码的失效期而言，这个属性的值不为空只相当于一个“启用失效期作用”的开关。
-//      3.187 (2025/9/15) library.xml 保存时丢失根元素的 localIP 属性定义和 arrived 元素的 prepareOnshelf 属性定义的 bug 已经修正。
+//      3.187 (2025/9/15)   library.xml 保存时丢失根元素的 localIP 属性定义和 arrived 元素的 prepareOnshelf 属性定义的 bug 已经修正。
 //                          预约时写入读者 XML 记录 reservations/request 元素 requestItemBarcode 属性值，从写入 @refID:xxx 改进为尽量写入册条码号形态，便于兼容 dp2mini 备书功能的原有用法
-//              (2025/9/17) Reservation() API 写入的操作日志记录，先前版本写入的 itemBarcodeList 元素内容是册参考 ID，最新版改为尽量写入册条码号
-//      3.188 (2025/9/18) 为 WSDL metadata 修改了绑定的 URL 为: http://localhost/dp2library/$metadata。在 "metadata" 前增加了一个 "$"
-//      3.189 (2025/9/25) SetEntities() GetItemInfo() 等 API 增加了存取定义中的 setiteminfo 和 getiteminfo 权限。原有账户，当存取定义不为空时，其普通权限中的 setiteminfo 和 getiteminfo 需要手动处理
+//            (2025/9/17)   Reservation() API 写入的操作日志记录，先前版本写入的 itemBarcodeList 元素内容是册参考 ID，最新版改为尽量写入册条码号
+//      3.188 (2025/9/18)   为 WSDL metadata 修改了绑定的 URL 为: http://localhost/dp2library/$metadata。在 "metadata" 前增加了一个 "$"
+//      3.189 (2025/9/25)   SetEntities() GetItemInfo() 等 API 增加了存取定义中的 setiteminfo 和 getiteminfo 权限。原有账户，当存取定义不为空时，其普通权限中的 setiteminfo 和 getiteminfo 需要手动处理
 //                          CopyBiblio() API 中 move 和 onlymovebiblio 在三条以上书目记录发生重复的情况下，会报错说有重复记录无法移动成功。这是因为自动进行了查重，并且只从命中结果中排除了源记录路径，没有排除掉第三条记录的路径造成的。最新版在 *move* 操作都不自动查重了，目的是让试图缩减重复的操作得以进行。
-//      3.190 (2025/10/14) GetReaderInfo() API 利用 strBarcode 进行检索的时候，如果 strBarcode 内容中出现了点，此前版本会当作机构代码和证条码号看待。最新版做了改进，当 library.xml 中存在 rfid 元素时，依然是原有效果，而当 library.xml 中没有定义 rfid 元素的时候，strBarcode 中的内容会被当作证条码号对待。也就是说，假设一条读者 XML 记录中 barcode 元素内容为 ABC.1234，则利用 GetReaderInfo() API 可以成功获得这条记录。
-//		3.191 (2025/10/18) dp2Kernel 中的 browse 配置文件先前允许使用 <root filter='marc'> 方式，以对应 col/use 元素用法。最新版取消了 root 元素的 filter 属性，当使用 col/use 时，系统会自动做好相应的内部处理。现存的 browse 配置文件中若残留 root/@filter 属性，对功能不会有任何影响
+//      3.190 (2025/10/14)  GetReaderInfo() API 利用 strBarcode 进行检索的时候，如果 strBarcode 内容中出现了点，此前版本会当作机构代码和证条码号看待。最新版做了改进，当 library.xml 中存在 rfid 元素时，依然是原有效果，而当 library.xml 中没有定义 rfid 元素的时候，strBarcode 中的内容会被当作证条码号对待。也就是说，假设一条读者 XML 记录中 barcode 元素内容为 ABC.1234，则利用 GetReaderInfo() API 可以成功获得这条记录。
+//		3.191 (2025/10/18)  dp2Kernel 中的 browse 配置文件先前允许使用 <root filter='marc'> 方式，以对应 col/use 元素用法。最新版取消了 root 元素的 filter 属性，当使用 col/use 时，系统会自动做好相应的内部处理。现存的 browse 配置文件中若残留 root/@filter 属性，对功能不会有任何影响
 //                          对 dp2library 账户权限 setiteminfo setobject setitemobject 等，增加对应的存取定义能力
-//      3.192 (2025/10/23) ManageDatabase() API 的 refresh 动作，给 refreshStyle 元素增加了一个 templateDir 属性，可以指定特殊的模板根目录进行刷新数据库定义的操作。如果这个属性为空，则依然使用 dp2library 数据目录下原有的 templates 子目录
+//      3.192 (2025/10/23)  ManageDatabase() API 的 refresh 动作，给 refreshStyle 元素增加了一个 templateDir 属性，可以指定特殊的模板根目录进行刷新数据库定义的操作。如果这个属性为空，则依然使用 dp2library 数据目录下原有的 templates 子目录
+//      3.193 (2025/10/24)  ManageChannel() API 的 "close" 功能增加了根据 info.UserName 中用户名来删除通道的功能。可以是星号通配符，表示关闭所有通道
+//      3.194 (2025/11/6)   GetSystemParameter() API 增加了 category=utility name=null_marc_header 获得 MARC 记录合并算法规定的 头标区 NULL 内容功能
+//      3.195 (2025/11/11)  Return() API 中的 inventory(盘点功能)，当检索到已经存在的盘点记录时，以前版本是报错返回，最新版改为修改覆盖这条已有的记录。但已有记录的 refID 元素内容不变。
+//                          最新版对盘点记录增加了三个元素 newLocation newShelfNo newCurrentLocation。不过，只有当 strStyle 参数中具备 location:xxx,shelfNo:xxx,currentLocation=xxx 子参数时才会写入这几个相关的 XML 元素。
+//      3.196 (2025/11/17)  GetCallNumberSearchResult() API 返回的 CallNumberSearchResult 结构中增加了 State 成员和 Reserve 成员。
+//                          GetCallNumberSearchResult() API strBrowseInfoStyle 中增加了 "format:xxx" 子参数用法，由请求者指定需要返回哪些列。这种用法时，列信息会返回在 CallNumberSearchResult::Reserve 成员中，为 XML 格式内容。
 
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到

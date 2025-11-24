@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
 using System.Xml;
 using System.IO;
 using System.Collections;
@@ -9,6 +8,7 @@ using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Web;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
@@ -16,8 +16,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Web;
-using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -570,10 +568,15 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 如果返回值不是0，就中断循环并返回
+        // return:
+        //      -2  权限不足
+        //      -1  出错
+        //      0   正常
         public delegate int Delegate_checkRecord(
             SessionInfo sessioninfo,
             int index,
             string strRecPath,
+            string set_or_get,
             XmlDocument dom,
             byte[] baTimestamp,
             object param,
@@ -587,8 +590,9 @@ namespace DigitalPlatform.LibraryServer
         //                  当包含 count_borrow_info 时，函数要统计全部流通信息的个数
         //                  当包含 libraryCodes: 时，表示仅获得所列分馆代码的册记录。注意多个馆代码之间用竖线分隔
         //                  当包含 limit: 时，定义最多取得记录的个数。例如希望最多取得 10 条，可以定义 limit:10
+        //                  set_or_get:set  表示触发 procCheckRecord 时，要带上的 set_or_get 参数值
         // return:
-        //      -2  not exist entity dbname
+        //      -2  权限不足
         //      -1  error
         //      >=0 含有流通信息的实体记录个数, 当strStyle包含count_borrow_info时。
         public int SearchChildEntities(
@@ -825,10 +829,12 @@ namespace DigitalPlatform.LibraryServer
 
                         if (procCheckRecord != null)
                         {
+                            var set_or_get = StringUtil.GetParameterByPrefix(strStyle, "set_or_get")?.Replace("|", ",");
                             nRet = procCheckRecord(
                                 sessioninfo,
                                 nStart + i,
                                 strOutputPath,
+                                set_or_get, // "set",
                                 domExist,
                                 timestamp,
                                 param,
@@ -1822,7 +1828,7 @@ strOldRefID);
             List<DeleteEntityInfo> entityinfos = null;
             long lHitCount = 0;
             // return:
-            //      -2  not exist entity dbname
+            //      -2  权限不足
             //      -1  error
             //      >=0 含有流通信息的实体记录个数
             int nRet = SearchChildEntities(
@@ -1835,7 +1841,7 @@ strOldRefID);
                 out lHitCount,
                 out entityinfos,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == -2)
                 goto ERROR1;
             if (nRet == -2)
             {
@@ -4240,19 +4246,19 @@ out strError);
                 }
                 else
                 {
-                        var error = this.CheckSetItemAccessEx(
-                            sessioninfo,
-                            "item",
-                            strBiblioRecPath,
-                            info,
-                            out strAccessParameters);
-                        if (error != null)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = error;
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
+                    var error = this.CheckSetItemAccessEx(
+                        sessioninfo,
+                        "item",
+                        strBiblioRecPath,
+                        info,
+                        out strAccessParameters);
+                    if (error != null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = error;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
                 }
 #if REMOVED
 
@@ -5113,7 +5119,7 @@ out strError);
                                 strBiblioRecId,
                                 existing_xml,
                                 info.NewRecord,
-                                (r) =>
+                                (r, d) =>
                                 {
                                     return CheckAccess(sessioninfo,
                                         $"册记录下级对象({r})",
@@ -6527,15 +6533,15 @@ out strError);
                     domExist,
                     domNew,
 #if ITEM_ACCESS_RIGHTS
-                    (r) =>
-                     {
-                         return CheckAccess(sessioninfo,
-                             $"册记录下级对象({r})",
-                             ResPath.GetDbName(info.NewRecPath),
-                             r,
-                             "",
-                             out _);
-                     },
+                    (r, d) =>
+                    {
+                        return CheckAccess(sessioninfo,
+                            $"册记录下级对象({r})",
+                            ResPath.GetDbName(info.NewRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
 #endif
                     out string _,
                     out strError);
@@ -7340,7 +7346,7 @@ out strError);
                     elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                     StringUtil.IsInList("outofrangeAsError", strStyle),
 #if ITEM_ACCESS_RIGHTS
-                    (r) =>
+                    (r, d) =>
                     {
                         return CheckAccess(sessioninfo,
                             $"册记录下级对象({r})",
@@ -8196,7 +8202,7 @@ strSourceLibraryCode);
                 null,
                 StringUtil.IsInList("outofrangeAsError", strStyle),
 #if ITEM_ACCESS_RIGHTS
-                    (r) =>
+                    (r, d) =>
                     {
                         return CheckAccess(sessioninfo,
                             $"册记录下级对象({r})",
@@ -9280,7 +9286,7 @@ strSourceLibraryCode);
                 var ret = LibraryApplication.CheckRights(
         sessioninfo,
         "getitemobject,getobject",
-        dbname,
+        GetTwoDbName(dbname),
         "");
                 if (ret != null && ret.ErrorCode == ErrorCode.AccessDenied)
                 {

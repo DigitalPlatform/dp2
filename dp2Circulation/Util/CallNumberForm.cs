@@ -9,6 +9,9 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
 using System.Xml;
+using System.Threading.Tasks;
+using System.Linq;
+
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -19,7 +22,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -92,25 +94,29 @@ namespace dp2Circulation
         /// </summary>
         public const int COLUMN_ITEMRECPATH = 0;
         /// <summary>
+        /// 状态
+        /// </summary>
+        public const int COLUMN_STATE = 1;
+        /// <summary>
         /// 浏览列号: 索取号
         /// </summary>
-        public const int COLUMN_CALLNUMBER = 1;
+        public const int COLUMN_CALLNUMBER = 2;
         /// <summary>
         /// 浏览列号: 摘要
         /// </summary>
-        public const int COLUMN_SUMMARY = 2;
+        public const int COLUMN_SUMMARY = 3;
         /// <summary>
         /// 浏览列号: 馆藏地
         /// </summary>
-        public const int COLUMN_LOCATION = 3;
+        public const int COLUMN_LOCATION = 4;
         /// <summary>
         /// 浏览列号: 册条码号
         /// </summary>
-        public const int COLUMN_BARCODE = 4;
+        public const int COLUMN_BARCODE = 5;
         /// <summary>
         /// 浏览列号: 书目记录路径
         /// </summary>
-        public const int COLUMN_BIBLIORECPATH = 5;
+        public const int COLUMN_BIBLIORECPATH = 6;
 
         #endregion
 
@@ -362,6 +368,22 @@ namespace dp2Circulation
             set
             {
                 this.textBox_classNumber.Text = value;
+            }
+        }
+
+        string _firstEmptyNumber = "";
+
+        // 第一个可用空号
+        public string FirstEmtpyNumber
+        {
+            get
+            {
+                return this._firstEmptyNumber;
+            }
+            set
+            {
+                this.textBox_firstEmptyNumber.Text = value;
+                this._firstEmptyNumber = value;
             }
         }
 
@@ -619,6 +641,10 @@ namespace dp2Circulation
                         item.ImageIndex = TYPE_NORMAL;
                         item.Text = result_item.ItemRecPath;
 
+                        ListViewUtil.ChangeItemText(item,
+                            COLUMN_STATE,
+                            result_item.State);
+
                         if (String.IsNullOrEmpty(result_item.ErrorInfo) == false)
                         {
                             ListViewUtil.ChangeItemText(item, COLUMN_CALLNUMBER, result_item.ErrorInfo);
@@ -627,8 +653,12 @@ namespace dp2Circulation
                         else
                             ListViewUtil.ChangeItemText(item, COLUMN_CALLNUMBER, result_item.CallNumber);
 
-                        ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, result_item.Location);
-                        ListViewUtil.ChangeItemText(item, COLUMN_BARCODE, result_item.Barcode);
+                        ListViewUtil.ChangeItemText(item,
+                            COLUMN_LOCATION,
+                            result_item.Location);
+                        ListViewUtil.ChangeItemText(item,
+                            COLUMN_BARCODE,
+                            result_item.Barcode);
 
                         string strItemDbName = Global.GetDbName(result_item.ItemRecPath);
 
@@ -706,6 +736,9 @@ namespace dp2Circulation
                 SetNumberBackcolor(
 this.listView_number,
 COLUMN_CALLNUMBER);
+
+                // 如果设置了“利用空号”
+                this.FirstEmtpyNumber = GetZhongcihaoPart(GetBlankNumber(this.listView_number));
 
                 this.MaxNumber = GetZhongcihaoPart(GetTopNumber(this.listView_number));
 
@@ -900,6 +933,9 @@ COLUMN_CALLNUMBER);
                 list_item.ImageIndex = TYPE_CURRENT;
                 list_item.Text = item.RecPath;
 
+                ListViewUtil.ChangeItemText(list_item, COLUMN_STATE, item.State);
+
+                // 2025/11/17
                 ListViewUtil.ChangeItemText(list_item, COLUMN_CALLNUMBER, strCallNumber);
 
                 ListViewUtil.ChangeItemText(list_item, COLUMN_LOCATION, item.Location);
@@ -939,6 +975,9 @@ COLUMN_CALLNUMBER);
         /// <returns>同类书区分号部分</returns>
         public static string GetZhongcihaoPart(string strCallNumber)
         {
+            // 2025/11/19
+            if (string.IsNullOrEmpty(strCallNumber))
+                return "";
             string[] lines = strCallNumber.Split(new char[] { '/' });
             if (lines.Length < 2)
                 return "";
@@ -1053,22 +1092,76 @@ COLUMN_CALLNUMBER);
 
         // 从已经排序的事项中，取出位置最高事项的种次号。
         // 本函数会自动排除MyselfItemRecPath这条记录
+        // 注: 要跳过空白行(也就是记录路径为空的行。这些行用于显示不连续的号段)
+        // 注: 根据系统参数设置，可能需要跳过状态包含类似“注销”的行
         string GetTopNumber(ListView list)
         {
+            var ignore_state = Program.MainForm.CallNumberIgnoreItemState;
+
             for (int i = 0; i < list.Items.Count; i++)
             {
                 ListViewItem item = list.Items[i];
                 string strRecPath = item.Text;
+
+                if (string.IsNullOrEmpty(strRecPath))
+                {
+                    continue;
+                }
+
+                // 2025/11/17
+                if (string.IsNullOrEmpty(ignore_state) == false)
+                {
+                    var state = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                    if (StringUtil.IsInList(ignore_state, state))
+                        continue;
+                }
+
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
 
                 if (strRecPath != this.MyselfItemRecPath
                     && strBiblioRecPath != this.MyselfParentRecPath)
+                {
+                    // 注: 空行中的索取号可能为 xxxx/1-10(空号) 这样，注意使用前要把后面的 -10(空号) 这个部分去除干净
                     return ListViewUtil.GetItemText(item, COLUMN_CALLNUMBER);
+                }
             }
 
             // TODO: 如果除了自己以外，并没有其他包含有效种次号的事项了，那也只好用自己的种次号-1来充当？
 
             return "";  // 没有找到
+        }
+
+#if OLD
+        // 从已经排序的事项中，取出最小的第一个空白的种次号。
+        string GetBlankNumber(ListView list)
+        {
+            var ignore_state = Program.MainForm.CallNumberIgnoreItemState;
+
+            for (int i = list.Items.Count - 1; i >= 0; i--)
+            {
+                ListViewItem item = list.Items[i];
+                string strRecPath = item.Text;
+
+                if (string.IsNullOrEmpty(strRecPath) == false)
+                    continue;
+
+                // 注: 空行中的索取号可能为 xxxx/1-10(空号) 这样，注意使用前要把后面的 -10(空号) 这个部分去除干净
+                return ListViewUtil.GetItemText(item, COLUMN_CALLNUMBER);
+            }
+            return "";  // 没有找到
+        }
+#endif
+        // 取出最小的第一个空白的种次号。事先不需要排序
+        string GetBlankNumber(ListView list)
+        {
+            var sorter = new ZhongcihaoComparer() { Descending = false};
+            var ignore_state = Program.MainForm.CallNumberIgnoreItemState;
+            return list.Items
+                .Cast<ListViewItem>()
+                .Where(item => string.IsNullOrEmpty(item.Text) == true)
+                .Select(item => ListViewUtil.GetItemText(item, COLUMN_CALLNUMBER))
+                .OrderBy(item => item, sorter)
+                .FirstOrDefault() ?? "";
         }
 
         // 获得若干号
@@ -1080,18 +1173,26 @@ COLUMN_CALLNUMBER);
             out string strOtherMaxNumber,
             out string strMyselfNumber,
             out string strSiblingNumber,
+            out string strFirstEmptyNumber,
             out string strError)
         {
             strError = "";
             strOtherMaxNumber = "";
             strMyselfNumber = "";
             strSiblingNumber = "";
+            strFirstEmptyNumber = "";
 
             int nRet = FillList(true,
                 strStyle,
                 out strError);
             if (nRet == -1)
                 return -1;
+
+            // 获得 第一个空号
+            strFirstEmptyNumber = GetZhongcihaoPart(GetBlankNumber(this.listView_number));
+
+            if (strFirstEmptyNumber != this.FirstEmtpyNumber)
+                throw new ArgumentException($"独立得到的空号 '{strFirstEmptyNumber}' 和 FillList() 得到的空号 '{this.FirstEmtpyNumber}' 不一致");
 
             // 2017/3/2
             // 由于 FillList() 里面用了 EndUpdate()，如果后来窗口很快关闭了，就会来不及显示 ListView 的更新情况，所以需要这里 Update()，才能看到瞬间 ListView 刷新显示的效果
@@ -1143,17 +1244,55 @@ COLUMN_CALLNUMBER);
             return false;
         }
 
-        static void SetNumberBackcolor(
+        // 不连续号码位置的显示风格
+        enum BreakingNumberStyle
+        {
+            BackColor = 0,  // 以黄色背景区分
+            Line = 1,  // 以一个空行区分
+        }
+
+        BreakingNumberStyle _breakingStyle = BreakingNumberStyle.Line;
+
+        // 设置不连续区域的背景色，或者填入空行
+        void SetNumberBackcolor(
     ListView list,
     int nNumberColumn)
         {
-            string strPrevText = "";
-            for (int i = 0; i < list.Items.Count; i++)
-            {
-                ListViewItem item = list.Items[i];
+            var ignore_item_state = Program.MainForm.CallNumberIgnoreItemState;
 
+            string strPrevText = "0";
+            var items = list.Items
+                .Cast<ListViewItem>()
+                .Reverse(); // 从小到大
+
+            ListViewItem prev_item = null;
+            foreach (var item in items)
+            {
                 if (item.ImageIndex == TYPE_ERROR)
                     continue;
+
+                // 设置不连续事项的背景色，或者插入空行
+                {
+                    string state = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                    if (string.IsNullOrEmpty(state) == false
+                        && StringUtil.IsInList(ignore_item_state, state))
+                    {
+                        item.ForeColor = SystemColors.GrayText;
+                        item.Font = GetItalicFont();
+                        var callnumber = ListViewUtil.GetItemText(item, COLUMN_CALLNUMBER);
+                        ListViewUtil.ChangeItemText(item, COLUMN_CALLNUMBER, callnumber + "(不参与分配)");
+                        // 如果要跳过这样的行，那么计算 breaking 号段的时候也不考虑这行的行
+                        continue;
+                    }
+                    else
+                    {
+                        /*
+                        item.ForeColor = SystemColors.WindowText;
+                        item.Font = this.Font;
+                        */
+                    }
+                }
+
 
                 string strThisText = "";
                 try
@@ -1170,16 +1309,110 @@ COLUMN_CALLNUMBER);
                     && IsContinueNumber(strPrevText, strThisText) == false)
                 {
                     // 突变处是特殊颜色
-                    item.BackColor = Color.Yellow;
+                    if (_breakingStyle == BreakingNumberStyle.BackColor)
+                        item.BackColor = Color.Yellow;
+                    else
+                    {
+                        // 插入一个空行
+                        InsertBlankLine(prev_item, item);
+                    }
                 }
                 else
                 {
                 }
 
+                prev_item = item;
                 strPrevText = strThisText;
+            }
+
+            void InsertBlankLine(ListViewItem previous,
+                ListViewItem current)
+            {
+                var index = list.Items.IndexOf(current);
+                var new_item = new ListViewItem();
+                ListViewUtil.ChangeItemText(new_item, COLUMN_CALLNUMBER, $"{GetBlankCallNumber(prev_item, current, out int direction)}(空号)");
+                if (direction < 0)
+                    list.Items.Insert(index + 1, new_item);
+                else
+                    list.Items.Insert(index, new_item);
+            }
+
+            // 获得表示空号段的文字
+            // parameters:
+            //      direction   [out] 方向。
+            //                  如果为 -1，表示 previous 比 current 要小
+            //                  0 表示相等
+            //                  1 表示 previous 比 current 要大
+            string GetBlankCallNumber(
+                ListViewItem previous,
+                ListViewItem current,
+                out int direction)
+            {
+                var ref_prev = previous == null ? "" : ListViewUtil.GetItemText(previous, COLUMN_CALLNUMBER);
+                var ref_current = ListViewUtil.GetItemText(current, COLUMN_CALLNUMBER);
+
+                var ret = CompareZhongcihao(ref_prev, ref_current);
+                if (ret == 0)
+                {
+                    throw new ArgumentException($"GetBlankCallNumber() 调用时 previous '{ref_prev}' 和 current '{ref_current}' 相等");
+                    direction = 0;
+                    return null;    // 两边相等，没法产生范围文字
+                }
+
+                var zhongcihao_prev = ref_prev == "" ? "0" : GetZhongcihaoPart(ref_prev);
+                var zhongcihao_current = GetZhongcihaoPart(ref_current);
+
+                var class_part = ref_prev == "" ? GetClassPart(ref_current) : GetClassPart(ref_prev);
+
+                if (ret < 0)
+                {
+                    direction = -1;
+                    return $"{class_part}/{Range(More(zhongcihao_prev), Less(zhongcihao_current))}";
+                }
+                direction = 1;
+                return $"{class_part}/{Range(More(zhongcihao_current), Less(zhongcihao_prev))}";
+            }
+
+            string Less(string t)
+            {
+                try
+                {
+                    return (Convert.ToInt32(t) - 1).ToString();
+                }
+                catch
+                {
+                    return t + "-1";
+                }
+            }
+
+            string More(string t)
+            {
+                try
+                {
+                    return (Convert.ToInt32(t) + 1).ToString();
+                }
+                catch
+                {
+                    return t + "+1";
+                }
+            }
+
+            string Range(string s1, string s2)
+            {
+                if (s1 == s2)
+                    return s1;
+                return $"{s1}-{s2}";
             }
         }
 
+        Font _italicFont = null;
+        Font GetItalicFont()
+        {
+            if (_italicFont != null)
+                return _italicFont;
+            _italicFont = new Font(this.Font, FontStyle.Italic);
+            return _italicFont;
+        }
 
         // 根据排序键值的变化分组设置颜色
         // 算法是将原本的背景颜色变深或者浅一点
@@ -1927,31 +2160,49 @@ COLUMN_CALLNUMBER);
             }
         }
 
-        // 复制比当前书目中统计出来的最大号还大1的号
+        // 复制第一个可用的空号(如果当前设置是利用空号)，或比当前书目中统计出来的最大号还大1的号
         private void button_copyMaxNumber_Click(object sender, EventArgs e)
         {
             string strResult = "";
             string strError = "";
+            string strMessage = "";
 
-            // 得到当前书目中统计出来的最大号的加1以后的号
-            // return:
-            //      -1  error
-            //      1   succeed
-            int nRet = GetMaxNumberPlusOne(out strResult,
-                out strError);
-            if (nRet == -1)
+            if (Program.MainForm.CallNumberUseEmptyNumber
+                && string.IsNullOrEmpty(this.FirstEmtpyNumber) == false)
             {
-                goto ERROR1;
+                strResult = this.FirstEmtpyNumber;
+                strMessage = $"第一个可用空号 '{strResult}' 已经复制到 Windows 剪贴板中";
             }
+            else
+            {
+                // 得到当前书目中统计出来的最大号的加1以后的号
+                // return:
+                //      -1  error
+                //      1   succeed
+                int nRet = GetMaxNumberPlusOne(out strResult,
+                    out strError);
+                if (nRet == -1)
+                {
+                    goto ERROR1;
+                }
 
-            if (nRet == 0)
-                strResult = "1";    // 如果当前从书目中无法统计出最大号，则视为得到"0"，而加1以后正好为"1"
+                if (nRet == 0)
+                {
+                    strResult = "1";    // 如果当前从书目中无法统计出最大号，则视为得到"0"，而加1以后正好为"1"
+                    strMessage = $"首次号码 '{strResult}' 已经复制到 Windows 剪贴板中";
+                }
+                else
+                {
+                    strMessage = $"最大号加一 '{strResult}' 已经复制到 Windows 剪贴板中";
+                }
+            }
 
             // Clipboard.SetDataObject(strResult);
             StringUtil.RunClipboard(() =>
             {
                 Clipboard.SetDataObject(strResult);
             });
+            MessageDlg.Show(this, strMessage, "复制到剪贴板成功");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1988,6 +2239,8 @@ COLUMN_CALLNUMBER);
                 strError = ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
+
+
 
             if (String.IsNullOrEmpty(strMaxNumber) == true)
                 return 0;
@@ -2177,6 +2430,7 @@ COLUMN_CALLNUMBER);
                     out strOtherMaxNumber,
                     out strMyselfNumber,
                     out strSiblingNumber,
+                    out string first_blank_number,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2191,6 +2445,14 @@ COLUMN_CALLNUMBER);
                 {
                     strNumber = strSiblingNumber;
                     return 1;   // 从相邻册得到的号码，不需要保护
+                }
+
+                // 2025/11/19
+                if (Program.MainForm.CallNumberUseEmptyNumber == true
+                    && string.IsNullOrEmpty(first_blank_number) == false)
+                {
+                    strNumber = first_blank_number;
+                    goto PROTECT_END;
                 }
 
                 if (String.IsNullOrEmpty(strOtherMaxNumber) == false)
@@ -2235,6 +2497,7 @@ COLUMN_CALLNUMBER);
             }
 
             // 每次都利用书目统计最大号来检验、校正尾号
+            // 注: 这种方式既然用到了尾号库，那么就无法使用空号了
             if (style == ZhongcihaoStyle.BiblioAndSeed
                 || style == ZhongcihaoStyle.SeedAndBiblio)
             {
@@ -2253,16 +2516,13 @@ COLUMN_CALLNUMBER);
                         return 1;
                     }
                      * */
-                    string strOtherMaxNumber = "";
-                    string strMyselfNumber = "";
-                    string strSiblingNumber = "";
-
                     // 获得若干号
                     nRet = GetMultiNumber(
                         "fast",
-                        out strOtherMaxNumber,
-                        out strMyselfNumber,
-                        out strSiblingNumber,
+                        out string strOtherMaxNumber,
+                        out string strMyselfNumber,
+                        out string strSiblingNumber,
+                        out _,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -2712,6 +2972,9 @@ COLUMN_CALLNUMBER);
         /// 册条码号
         /// </summary>
         public string Barcode = "";
+
+        // 2025/11/17
+        public string State = "";
     }
 
     // 排序
@@ -2739,5 +3002,25 @@ COLUMN_CALLNUMBER);
             return -1 * CallNumberForm.CompareZhongcihao(s1, s2);
         }
 
+    }
+
+    class ZhongcihaoComparer : IComparer<string>
+    {
+        public bool Descending { get; set; }
+
+        public int Compare(string x, string y)
+        {
+            // 允许 null 安全处理
+            if (ReferenceEquals(x, y)) return 0;
+
+            // 取得区分号行
+            var s1 = CallNumberForm.GetZhongcihaoPart(x);
+            var s2 = CallNumberForm.GetZhongcihaoPart(y);
+
+            if (Descending)
+                return -1 * CallNumberForm.CompareZhongcihao(s1, s2);
+            else
+                return CallNumberForm.CompareZhongcihao(s1, s2);
+        }
     }
 }

@@ -1,15 +1,17 @@
-﻿using DigitalPlatform.ResultSet;
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.Text;
-using Microsoft.VisualStudio.Threading;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Sql;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+
+using Microsoft.VisualStudio.Threading;
+
+using DigitalPlatform.ResultSet;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer
 {

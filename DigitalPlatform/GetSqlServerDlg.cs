@@ -29,47 +29,52 @@ namespace DigitalPlatform
         async Task FillList()
         {
             EnableControls(false);
-            this.listView_sqlServers.Items.Clear();
-            ListViewItem item = new ListViewItem("正在获取SQL服务器信息 ...");
-            this.listView_sqlServers.Items.Add(item);
-
-            Application.DoEvents();
-            this.Update();
-
-            System.Data.DataTable table = null;
-
-            await Task.Factory.StartNew(() =>
+            try
             {
-                SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
-                table = instance.GetDataSources();
-            },
-default,
-TaskCreationOptions.LongRunning,
-TaskScheduler.Default);
-
-            this.listView_sqlServers.Items.Clear();
-
-            foreach (System.Data.DataRow row in table.Rows)
-            {
-                string strServerName = row["ServerName"].ToString();
-                string strInstanceName = row["InstanceName"].ToString();
-                string strIsClustered = row["IsClustered"].ToString();
-                string strVersion = row["Version"].ToString();
-
-                item = new ListViewItem(strServerName);
-
-                item.SubItems.Add(strInstanceName);
-                item.SubItems.Add(strIsClustered);
-                item.SubItems.Add(strVersion);
+                this.listView_sqlServers.Items.Clear();
+                ListViewItem item = new ListViewItem("正在获取SQL服务器信息 ...");
                 this.listView_sqlServers.Items.Add(item);
 
-                // 如果和本地计算机名相同，并且没有instancename，则事项字体加粗
-                if (strServerName == SystemInformation.ComputerName
-                    && String.IsNullOrEmpty(strInstanceName) == true)
-                    item.Font = new Font(item.Font, FontStyle.Bold);
-            }
+                Application.DoEvents();
+                this.Update();
 
-            EnableControls(true);
+                System.Data.DataTable table = null;
+
+                await Task.Factory.StartNew(() =>
+                {
+                    SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
+                    table = instance.GetDataSources();
+                },
+    default,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+
+                this.listView_sqlServers.Items.Clear();
+
+                foreach (System.Data.DataRow row in table.Rows)
+                {
+                    string strServerName = row["ServerName"].ToString();
+                    string strInstanceName = row["InstanceName"].ToString();
+                    string strIsClustered = row["IsClustered"].ToString();
+                    string strVersion = row["Version"].ToString();
+
+                    item = new ListViewItem(strServerName);
+
+                    item.SubItems.Add(strInstanceName);
+                    item.SubItems.Add(strIsClustered);
+                    item.SubItems.Add(strVersion);
+                    this.listView_sqlServers.Items.Add(item);
+
+                    // 如果和本地计算机名相同，并且没有instancename，则事项字体加粗
+                    if (strServerName == SystemInformation.ComputerName
+                        && String.IsNullOrEmpty(strInstanceName) == true)
+                        item.Font = new Font(item.Font, FontStyle.Bold);
+                }
+            }
+            finally
+            {
+                EnableControls(true);
+            }
         }
 
         /// <summary>

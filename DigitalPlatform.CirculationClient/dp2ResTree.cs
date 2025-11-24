@@ -157,7 +157,8 @@ namespace DigitalPlatform.CirculationClient
                 {
                     try
                     {
-                        MessageBox.Show(this, strError);
+                        // 注意 Form_Load() 事件中显示 MessageBox 可能导致用户切换到其它 Application 再切换回来无法看到 MessageBox
+                        this.MessageBoxShow(strError);
                     }
                     catch
                     {
@@ -443,7 +444,7 @@ namespace DigitalPlatform.CirculationClient
         {
             string strError = "";
             if (ExpandPath(respath, out strError) == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
         }
 
         // 根据路径逐步展开

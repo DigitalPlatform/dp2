@@ -192,6 +192,7 @@
             this.checkBox_rfidTest_returnPreEAS = new System.Windows.Forms.CheckBox();
             this.checkBox_rfidTest_borrowEAS = new System.Windows.Forms.CheckBox();
             this.groupBox_rfidReader = new System.Windows.Forms.GroupBox();
+            this.checkBox_cardReader_autoStartRfidCenter = new System.Windows.Forms.CheckBox();
             this.comboBox_rfid_tagCachePolicy = new System.Windows.Forms.ComboBox();
             this.label_rfid_tagCachePolicy = new System.Windows.Forms.Label();
             this.groupBox_uhf = new System.Windows.Forms.GroupBox();
@@ -288,9 +289,13 @@
             this.textBox_ucs_apiUrl = new System.Windows.Forms.TextBox();
             this.label44 = new System.Windows.Forms.Label();
             this.button_z3950_servers = new System.Windows.Forms.Button();
+            this.tabPage_callNumber = new System.Windows.Forms.TabPage();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.label50 = new System.Windows.Forms.Label();
+            this.textBox_callNumber_ignore_item_state = new System.Windows.Forms.TextBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_cardReader_autoStartRfidCenter = new System.Windows.Forms.CheckBox();
+            this.checkBox_callNumber_useEmptyNumber = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -345,6 +350,8 @@
             this.groupBox_message_compactShelf.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
             this.groupBox7.SuspendLayout();
+            this.tabPage_callNumber.SuspendLayout();
+            this.groupBox8.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -372,6 +379,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_labelPrint);
             this.tabControl_main.Controls.Add(this.tabPage_message);
             this.tabControl_main.Controls.Add(this.tabPage_z3950);
+            this.tabControl_main.Controls.Add(this.tabPage_callNumber);
             this.tabControl_main.Location = new System.Drawing.Point(18, 17);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
             this.tabControl_main.Multiline = true;
@@ -2336,6 +2344,16 @@
             this.groupBox_rfidReader.TabStop = false;
             this.groupBox_rfidReader.Text = " RFID 读写器接口 URL ";
             // 
+            // checkBox_cardReader_autoStartRfidCenter
+            // 
+            this.checkBox_cardReader_autoStartRfidCenter.AutoSize = true;
+            this.checkBox_cardReader_autoStartRfidCenter.Location = new System.Drawing.Point(11, 74);
+            this.checkBox_cardReader_autoStartRfidCenter.Name = "checkBox_cardReader_autoStartRfidCenter";
+            this.checkBox_cardReader_autoStartRfidCenter.Size = new System.Drawing.Size(120, 25);
+            this.checkBox_cardReader_autoStartRfidCenter.TabIndex = 5;
+            this.checkBox_cardReader_autoStartRfidCenter.Text = "自动启动";
+            this.checkBox_cardReader_autoStartRfidCenter.UseVisualStyleBackColor = true;
+            // 
             // comboBox_rfid_tagCachePolicy
             // 
             this.comboBox_rfid_tagCachePolicy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -3427,6 +3445,48 @@
             this.button_z3950_servers.UseVisualStyleBackColor = true;
             this.button_z3950_servers.Click += new System.EventHandler(this.button_z3950_servers_Click);
             // 
+            // tabPage_callNumber
+            // 
+            this.tabPage_callNumber.Controls.Add(this.groupBox8);
+            this.tabPage_callNumber.Location = new System.Drawing.Point(4, 85);
+            this.tabPage_callNumber.Name = "tabPage_callNumber";
+            this.tabPage_callNumber.Size = new System.Drawing.Size(905, 459);
+            this.tabPage_callNumber.TabIndex = 21;
+            this.tabPage_callNumber.Text = "同类书区分号";
+            this.tabPage_callNumber.UseVisualStyleBackColor = true;
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox8.Controls.Add(this.checkBox_callNumber_useEmptyNumber);
+            this.groupBox8.Controls.Add(this.label50);
+            this.groupBox8.Controls.Add(this.textBox_callNumber_ignore_item_state);
+            this.groupBox8.Location = new System.Drawing.Point(21, 29);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(868, 185);
+            this.groupBox8.TabIndex = 2;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = " 种次号自动取号 ";
+            // 
+            // label50
+            // 
+            this.label50.AutoSize = true;
+            this.label50.Location = new System.Drawing.Point(24, 47);
+            this.label50.Name = "label50";
+            this.label50.Size = new System.Drawing.Size(358, 21);
+            this.label50.TabIndex = 1;
+            this.label50.Text = "忽略以下状态值(逗号分隔)的册记录:";
+            // 
+            // textBox_callNumber_ignore_item_state
+            // 
+            this.textBox_callNumber_ignore_item_state.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_callNumber_ignore_item_state.Location = new System.Drawing.Point(28, 71);
+            this.textBox_callNumber_ignore_item_state.Name = "textBox_callNumber_ignore_item_state";
+            this.textBox_callNumber_ignore_item_state.Size = new System.Drawing.Size(817, 31);
+            this.textBox_callNumber_ignore_item_state.TabIndex = 0;
+            // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -3452,15 +3512,15 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // checkBox_cardReader_autoStartRfidCenter
+            // checkBox_callNumber_useEmptyNumber
             // 
-            this.checkBox_cardReader_autoStartRfidCenter.AutoSize = true;
-            this.checkBox_cardReader_autoStartRfidCenter.Location = new System.Drawing.Point(11, 74);
-            this.checkBox_cardReader_autoStartRfidCenter.Name = "checkBox_cardReader_autoStartRfidCenter";
-            this.checkBox_cardReader_autoStartRfidCenter.Size = new System.Drawing.Size(120, 25);
-            this.checkBox_cardReader_autoStartRfidCenter.TabIndex = 5;
-            this.checkBox_cardReader_autoStartRfidCenter.Text = "自动启动";
-            this.checkBox_cardReader_autoStartRfidCenter.UseVisualStyleBackColor = true;
+            this.checkBox_callNumber_useEmptyNumber.AutoSize = true;
+            this.checkBox_callNumber_useEmptyNumber.Location = new System.Drawing.Point(28, 125);
+            this.checkBox_callNumber_useEmptyNumber.Name = "checkBox_callNumber_useEmptyNumber";
+            this.checkBox_callNumber_useEmptyNumber.Size = new System.Drawing.Size(153, 25);
+            this.checkBox_callNumber_useEmptyNumber.TabIndex = 2;
+            this.checkBox_callNumber_useEmptyNumber.Text = "利用空号(&E)";
+            this.checkBox_callNumber_useEmptyNumber.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -3572,6 +3632,9 @@
             this.tabPage_z3950.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
+            this.tabPage_callNumber.ResumeLayout(false);
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -3840,5 +3903,10 @@
         private System.Windows.Forms.TextBox textBox_ucs_filterScriptCode;
         private System.Windows.Forms.Label label49;
         private System.Windows.Forms.CheckBox checkBox_cardReader_autoStartRfidCenter;
+        private System.Windows.Forms.TabPage tabPage_callNumber;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.Label label50;
+        private System.Windows.Forms.TextBox textBox_callNumber_ignore_item_state;
+        private System.Windows.Forms.CheckBox checkBox_callNumber_useEmptyNumber;
     }
 }

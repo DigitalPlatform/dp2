@@ -2012,15 +2012,34 @@ out string strError)
             }
         }
 
-        // 
+        // 兼容以前的接口
+        public int GetPublisherInfo(string strPublisherNumber,
+    out string str210,
+    out string strError)
+        {
+            return GetPublisherInfo(strPublisherNumber,
+            "select_one",
+            out str210,
+            out strError);
+        }
+
+        // parameters:
+        //      style   select_one askInput create 之一或者组合。
+        //              askInput,create 表示如果没有找到，则立即输入并创建条目
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
         /// <summary>
         /// 获得出版社相关信息
         /// </summary>
         /// <param name="strPublisherNumber">出版社号码</param>
+        /// <param name="style">风格。如果包含 select_one，表示对返回的多个出版者信息，先弹出对话框让操作者选择一个以后，再返回所选择的这一个</param>
         /// <param name="str210">返回 210 字符串</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
         public int GetPublisherInfo(string strPublisherNumber,
+            string style,
             out string str210,
             out string strError)
         {
@@ -2035,13 +2054,8 @@ out string strError)
                 return -1;
             }
 
-            /*
-            LibraryChannel channel = this.GetChannel();
+            var select_one = StringUtil.IsInList("select_one", style);
 
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在获得出版社信息 ...");
-            Progress.BeginLoop();
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在获得出版社信息 ...");
             try
@@ -2059,22 +2073,78 @@ out string strError)
                     out strError);
                 if (lRet == -1)
                     return -1;
-
+                var askInput = StringUtil.IsInList("askInput", style);
+                var create = StringUtil.IsInList("create", style);
                 if (lRet == 0)
+                {
+                    if (askInput || create)
+                    {
+                        var dlg_title = "对照信息没有找到，请输入";
+                        if (create)
+                            dlg_title = "对照信息没有找到。现在创建";
+                    REDO_INPUT:
+                        // 创建新条目
+                        str210 = InputDlg.GetInput(
+                            this,
+                            dlg_title,
+                            "请输入ISBN出版社号 '" + strPublisherNumber + "' 对应的出版社名称(格式 出版地:出版社名):",
+                            "出版地:出版社名",
+                            Program.MainForm.DefaultFont);
+                        if (str210 == null)
+                            return 0; // 放弃重建
+
+                        // 把全角冒号替换为半角的形态
+                        str210 = str210.Replace("：", ":");
+
+                        var errors = VerifyBase.VerifyCityPublisher(str210);
+                        if (errors.Count > 0)
+                        {
+                            MessageBox.Show(this, $"输入的内容 '{str210}' 不合法:\r\n{StringUtil.MakePathList(errors, "; ")}\r\n\r\n请重新输入。");
+                            goto REDO_INPUT;
+                        }
+
+                        if (create)
+                        {
+                            var ret = this.SetPublisherInfo(strPublisherNumber,
+                                str210,
+                                out strError);
+                            if (ret == -1)
+                            {
+                                strError = $"创建ISBN 前缀与 出版地:出版社名 对照条目时出错: {strError}";
+                                return -1;
+                            }
+                        }
+                        return 1;
+                    }
+
                     return 0;
+                }
+
+                if (select_one && str210.Contains(";"))
+                {
+                    bool temp = false;
+                    var ret = SelectDlg.GetSelect(this,
+                        "发现多个相关出版社条目，请选择",
+                        $"{strPublisherNumber} 关联的 出版地:出版者:",
+                        str210.Split(';'),
+                        0,
+                        null,
+                        ref temp,
+                        this.Font);
+                    if (ret == null)
+                    {
+                        strError = "放弃从多个出版社信息中选择";
+                        return -1;
+                    }
+
+                    str210 = ret;
+                }
 
                 return 1;
             }
             finally
             {
                 looping.Dispose();
-                /*
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-
-                this.ReturnChannel(channel);
-                */
             }
         }
 
@@ -2100,13 +2170,6 @@ out string strError)
                 return -1;
             }
 
-            /*
-            LibraryChannel channel = this.GetChannel();
-
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在设置出版社信息 ...");
-            Progress.BeginLoop();
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在设置出版社信息 ...");
             try
@@ -2132,13 +2195,6 @@ out string strError)
             finally
             {
                 looping.Dispose();
-                /*
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-
-                this.ReturnChannel(channel);
-                */
             }
 
         }
@@ -3647,6 +3703,67 @@ out strError);
                     e.ResultAction = "yes";
             }
         }
+
+        public int SetZhongcihao(string strDbName,
+    string strClass,
+    string action,
+    string tailnumber,
+    out string output_number,
+    out string strError)
+        {
+            output_number = "";
+            strError = "";
+
+            if (action != "save"
+                && action != "delete"
+                && action != "conditionalpush")
+            {
+                strError = $"暂不支持 action='{action}'";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "strDbName 参数值(种次号库名) 不应为空";
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strClass))
+            {
+                strError = "strClass 参数值(类名) 不应为空";
+                return -1;
+            }
+
+            if (action != "delete")
+            {
+                if (string.IsNullOrEmpty(tailnumber))
+                {
+                    strError = $"tailnumber 参数值(尾号) 不应为空";
+                    return -1;
+                }
+            }
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在 {action} 类 '{strClass}' 的尾号 ...",
+                "disableControl");
+            try
+            {
+                var ret = channel.SetZhongcihaoTailNumber(
+                looping.Progress,
+                action,
+                strDbName,
+                strClass,
+                tailnumber,
+                out output_number,
+                out strError);
+                return (int)ret;
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+        }
+
 
         #endregion
 

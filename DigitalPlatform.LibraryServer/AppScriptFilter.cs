@@ -9,10 +9,6 @@ using System.Threading;
 using System.Diagnostics;
 
 using System.Reflection;
-using Microsoft.CSharp;
-// using Microsoft.VisualBasic;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.Xml;
@@ -172,6 +168,8 @@ namespace DigitalPlatform.LibraryServer
                                     "system.web.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
+                                    "System.Core.dll",  // Linq 需要
+
                                          strBinDir + "\\digitalplatform.core.dll",
                                          strBinDir + "\\digitalplatform.marcdom.dll",
 										 strBinDir + "\\digitalplatform.marckernel.dll",
@@ -511,6 +509,7 @@ namespace DigitalPlatform.LibraryServer
                                     "system.web.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
+                                    "System.Core.dll",  // Linq 需要
                                     this.BinDir + "\\digitalplatform.core.dll",
                                     this.BinDir + "\\digitalplatform.marcdom.dll",
 									this.BinDir + "\\digitalplatform.marckernel.dll",

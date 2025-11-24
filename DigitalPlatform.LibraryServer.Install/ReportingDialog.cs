@@ -234,7 +234,7 @@ namespace DigitalPlatform.LibraryServer
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         void SaveLibraryXml()

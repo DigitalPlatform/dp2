@@ -22,23 +22,66 @@ namespace DigitalPlatform
             */
         }
 
+        // 2025/11/22
+        // 如果 form .Visbile 为 false，确保从当前 Application 打开的 Form 中找到返回一个 .Visible 为 true 的 form
+        public static Form EnsureVisible(this Form form)
+        {
+            if (form.Visible == false)
+                return GetVisibleForm();
+            return form;
+        }
 
-        public static void MessageBoxShow(
-            this Control form, 
+        // 2025/11/22
+        public static Form GetVisibleForm()
+        {
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form != null && form.Visible)
+                    return form;
+            }
+            return null;
+        }
+
+        public static DialogResult MessageBoxShow(
+            this Control form,
             string strText)
         {
-            if (form.IsHandleCreated)
-                form.Invoke((Action)(() =>
+            if (form.IsHandleCreated == false
+                || form.Visible == false)
+            {
+                var caller = form;
+                if (caller.IsHandleCreated == false)
+                    caller = GetVisibleForm();
+                
+                return caller.TryGet(() =>
                 {
                     try
                     {
-                        MessageBox.Show(form, strText);
+                        // 2025/11/22
+                        return MessageBox.Show(GetVisibleForm(), strText);
                     }
                     catch (ObjectDisposedException)
                     {
-
+                        return DialogResult.Abort;
                     }
-                }));
+                });
+            }
+            else
+                return form.TryGet(() =>
+                {
+                    try
+                    {
+                        // 2025/11/22
+                        if (form.Visible == false)
+                            return MessageBox.Show(GetVisibleForm(), strText);
+                        else
+                            return MessageBox.Show(form, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        return DialogResult.Abort;
+                    }
+                });
         }
 
         public static T TryGet<T>(

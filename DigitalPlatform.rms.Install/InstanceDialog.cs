@@ -74,7 +74,7 @@ namespace DigitalPlatform.rms
             string strError = "";
             int nRet = FillInstanceList(out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             else
             {
                 // 安装状态

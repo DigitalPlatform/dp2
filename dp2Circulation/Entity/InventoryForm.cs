@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.Threading.Tasks;
 
 using ClosedXML.Excel;
 
@@ -18,8 +19,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Core;
-using System.Threading.Tasks;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -215,6 +214,20 @@ namespace dp2Circulation
                     this.inventoryBatchNoControl_start_batchNo.LibaryCodeEanbled = false;
                 }
             }
+
+            EnableRestTabpages(false);
+
+            // 填充盘点库名
+            {
+                this.comboBox_inventoryDbName.Items.Clear();
+                var dbnames = Program.MainForm.GetUtilDbNames("inventory");
+                foreach (var dbname in dbnames)
+                {
+                    this.comboBox_inventoryDbName.Items.Add(dbname);
+                    break;  // 2025/11/1 注: combobox.items 中只填入第一个。等以后 dp2library 升级后再删除这个 break
+                }
+            }
+
             this.UiState = Program.MainForm.AppInfo.GetString(
     "inventory_form",
     "ui_state",
@@ -226,13 +239,13 @@ namespace dp2Circulation
 #if SUPPORT_OLD_STOP
             this.Channel = null;    // testing
 #endif
-            this.BeginInvoke(new Action(Initial));
+            // this.BeginInvoke(new Action(InitialDefs));
         }
 
         ColumnDefs _defs = null;
 
         // 初始化
-        void Initial()
+        void InitialDefs()
         {
             string strError = "";
             ColumnDefs defs = null;
@@ -240,12 +253,24 @@ namespace dp2Circulation
             if (nRet == -1)
             {
                 this.ShowMessage(strError, "red", true);
-                this.tabControl_main.Enabled = false;
+                // this.tabControl_main.Enabled = false;
+                EnableRestTabpages(false);
                 this._defs = null;
                 return;
             }
 
             this._defs = defs;
+            EnableRestTabpages(true);
+        }
+
+        void EnableRestTabpages(bool enable)
+        {
+            foreach (TabPage page in this.tabControl_main.TabPages)
+            {
+                if (page == this.tabPage_start)
+                    continue;
+                page.Enabled = enable;
+            }
         }
 
         private void InventoryForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -336,6 +361,12 @@ namespace dp2Circulation
         {
             string strError = "";
 
+            if (this._defs == null)
+            {
+                strError = "尚未指定盘点库名";
+                goto ERROR1;
+            }
+
             string strInventoryDbName = this._defs.InventoryDbName;
             if (string.IsNullOrEmpty(strInventoryDbName) == true)
             {
@@ -343,9 +374,6 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            /*
-            LibraryChannel channel = this.GetChannel();
-            */
             var looping = Looping(out LibraryChannel channel,
                 null,
                 "disableControl");
@@ -353,12 +381,14 @@ namespace dp2Circulation
             {
                 SelectBatchNoDialog dlg = new SelectBatchNoDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.Channel = channel;
-                dlg.Stop = looping.Progress;
+                //dlg.Channel = channel;
+                //dlg.Stop = looping.Progress;
                 dlg.InventoryDbName = strInventoryDbName;
                 dlg.LibraryCodeList = GetOwnerLibraryCodes();
                 Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_state");
-                dlg.ShowDialog(this);
+
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return;
 
                 this.textBox_inventoryList_batchNo.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
                 return;
@@ -366,9 +396,6 @@ namespace dp2Circulation
             finally
             {
                 looping.Dispose();
-                /*
-                this.ReturnChannel(channel);
-                */
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -448,6 +475,11 @@ namespace dp2Circulation
 
             ClearInventoryListViewItems();
 
+            if (this._defs == null)
+            {
+                strError = "尚未指定盘点库名";
+                return -1;
+            }
             string strDbName = this._defs.InventoryDbName;
             if (string.IsNullOrEmpty(strDbName) == true)
             {
@@ -951,31 +983,17 @@ namespace dp2Circulation
         {
             // string strError = "";
 
-            /*
-            LibraryChannel channel = this.GetChannel();
-            */
-            var looping = Looping(out LibraryChannel channel,
-                null);
-            try
-            {
-                SelectBatchNoDialog dlg = new SelectBatchNoDialog();
-                MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.Channel = channel;
-                dlg.Stop = looping.Progress;
-                dlg.InventoryDbName = "";
-                Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
-                dlg.ShowDialog(this);
-
-                this.textBox_baseList_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
+            SelectBatchNoDialog dlg = new SelectBatchNoDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            //dlg.Channel = channel;
+            //dlg.Stop = looping.Progress;
+            dlg.InventoryDbName = "";
+            Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
+            if (dlg.ShowDialog(this) != DialogResult.OK)
                 return;
-            }
-            finally
-            {
-                looping.Dispose();
-                /*
-                this.ReturnChannel(channel);
-                */
-            }
+
+            this.textBox_baseList_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
+            return;
 #if NO
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1061,6 +1079,12 @@ namespace dp2Circulation
         {
             strError = "";
             int nRet = 0;
+
+            if (this._defs == null)
+            {
+                strError = "尚未指定盘点库名";
+                return -1;
+            }
 
             long lTotalCount = 0;   // 总共命中的记录数
 
@@ -1486,6 +1510,11 @@ null);
         {
             strError = "";
             int nRet = 0;
+            if (this._defs == null)
+            {
+                strError = "尚未指定盘点库名";
+                return -1;
+            }
 
             if (this.listView_inventoryList_records.Items.Count == 0)
             {
@@ -1942,12 +1971,52 @@ null);
 
             defs = new ColumnDefs();
 
+            var dbnames = Program.MainForm.GetUtilDbNames("inventory");
+            if (dbnames == null || dbnames.Count == 0)
+            {
+                strError = "dp2library 服务器中不存在任何盘点库";
+                return -1;
+            }
+
+            defs.InventoryDbName = this.comboBox_inventoryDbName.Text;
+            if (string.IsNullOrEmpty(defs.InventoryDbName))
+            {
+                strError = "尚未指定盘点库名";
+                return -1;
+            }
+
+            if (dbnames.IndexOf(defs.InventoryDbName) == -1)
+            {
+                strError = $"您指定的盘点库名 '{defs.InventoryDbName}' 不符合当前 dp2library 中的盘点库定义('{StringUtil.MakePathList(dbnames, ",")}')";
+                return -1;
+            }
+            /*
+            {
+                bool temp = false;
+                defs.InventoryDbName = SelectDlg.GetSelect(this,
+                    "请选择本次使用的盘点库",
+                    "盘点库",
+                    dbnames.ToArray(),
+                    0,
+                    null,
+                    ref temp,
+                    this.Font);
+                if (defs.InventoryDbName == null)
+                {
+                    strError = "取消准备定义";
+                    return -1;
+                }
+            }
+            */
+
+            /*
             defs.InventoryDbName = Program.MainForm.GetUtilDbName("inventory");
             if (string.IsNullOrEmpty(defs.InventoryDbName) == true)
             {
                 strError = "尚未定义盘点库";
                 return -1;
             }
+            */
 
             {
                 // 获得 册记录路径 的列号
@@ -2041,6 +2110,12 @@ null);
         {
             strError = "";
             int nRet = 0;
+
+            if (this._defs == null)
+            {
+                strError = "尚未指定盘点库名";
+                return -1;
+            }
 
             int nCount = 0;
 
@@ -2147,6 +2222,7 @@ null);
                 controls.Add(this.textBox_start_locations);
                 controls.Add(this.textBox_baseList_locations);
                 controls.Add(this.textBox_inventoryList_batchNo);
+                controls.Add(this.comboBox_inventoryDbName);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -2157,6 +2233,7 @@ null);
                 controls.Add(this.textBox_start_locations);
                 controls.Add(this.textBox_baseList_locations);
                 controls.Add(this.textBox_inventoryList_batchNo);
+                controls.Add(this.comboBox_inventoryDbName);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -2524,7 +2601,8 @@ null);
                 stop?.SetProgressRange(0, items.Count);
 
             List<int> indices = new List<int>();
-            if (output_columns == null && output_columns.Count == 0)
+            if (output_columns == null || output_columns.Count == 0
+                || output_columns[0] == "<all>")    // 2025/11/1
             {
                 int i = 0;
                 foreach (ColumnHeader header in list.Columns)
@@ -3056,6 +3134,12 @@ null);
         {
             int nRet = 0;
 
+            if (this._defs == null)
+            {
+                strError = "尚未指定盘点库名";
+                return -1;
+            }
+
             if (strAction != "remove" && strAction != "add")
             {
                 strError = "未知的 strAction 值 '" + strAction + "'";
@@ -3139,8 +3223,8 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            /*
             EnableControls(false);
+            /*
 
             LibraryChannel channel = this.GetChannel();
 
@@ -3262,7 +3346,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     // TODO: 要保护被刷新行原先的背景颜色
 
-                    string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+                    string strBrowseStyle = "id,cols,format:@coldef:" + this._defs?.BrowseColumnDef;
 
                     // 刷新浏览行
                     nRet = RefreshListViewLines(
@@ -3591,32 +3675,17 @@ MessageBoxDefaultButton.Button1);
 
         private void button_start_setLocations_Click(object sender, EventArgs e)
         {
-            /*
-            LibraryChannel channel = this.GetChannel();
-            */
-            var looping = Looping(out LibraryChannel channel,
-                null);
-            try
-            {
-                SelectBatchNoDialog dlg = new SelectBatchNoDialog();
-                MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.Channel = channel;
-                dlg.Stop = looping.Progress;
-                dlg.InventoryDbName = "";
-                dlg.LibraryCodeList = GetOwnerLibraryCodes();
-                Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
-                dlg.ShowDialog(this);
+            SelectBatchNoDialog dlg = new SelectBatchNoDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            //dlg.Channel = channel;
+            //dlg.Stop = looping.Progress;
+            dlg.InventoryDbName = "";
+            dlg.LibraryCodeList = GetOwnerLibraryCodes();
+            Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
+            dlg.ShowDialog(this);
 
-                this.textBox_start_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
-                return;
-            }
-            finally
-            {
-                looping.Dispose();
-                /*
-                this.ReturnChannel(channel);
-                */
-            }
+            this.textBox_start_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
+            return;
         }
 
         private void inventoryBatchNoControl_start_batchNo_TextChanged(object sender, EventArgs e)
@@ -3644,6 +3713,12 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
             int nRet = 0;
+
+            if (this._defs == null)
+            {
+                strError = "尚未指定盘点库名";
+                goto ERROR1;
+            }
 
             int nBorrowerColumnIndex = this._defs._base_colmun_defs.FindColumnByType("borrower");
             if (nBorrowerColumnIndex == -1)
@@ -3690,7 +3765,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             {
-                string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+                string strBrowseStyle = "id,cols,format:@coldef:" + this._defs?.BrowseColumnDef;
 
                 // 刷新浏览行
                 nRet = RefreshListViewLines(
@@ -4107,7 +4182,7 @@ MessageBoxDefaultButton.Button2);
             {
                 items.Add(item);
             }
-            string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+            string strBrowseStyle = "id,cols,format:@coldef:" + this._defs?.BrowseColumnDef;
 
             // 刷新浏览行
             int nRet = RefreshListViewLines(
@@ -4123,6 +4198,18 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void tabPage_start_Leave(object sender, EventArgs e)
+        {
+            if (this._defs == null && string.IsNullOrEmpty(this.comboBox_inventoryDbName.Text) == false)
+                InitialDefs();
+        }
+
+        private void comboBox_inventoryDbName_TextChanged(object sender, EventArgs e)
+        {
+            this._defs = null;
+            InitialDefs();
         }
     }
 }

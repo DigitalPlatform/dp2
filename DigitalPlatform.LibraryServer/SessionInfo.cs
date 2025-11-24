@@ -1,7 +1,4 @@
-﻿using DigitalPlatform.IO;
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +11,10 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+
+using DigitalPlatform.IO;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1622,13 +1623,15 @@ SetStartEventArgs e);
             });
         }
 
+        // parameters:
+        //      strUserID   用户名。特殊地 "*" 表示全部用户
         public int CloseSessionByUserID(string strUserID)
         {
             return CloseSessionBy((info) =>
             {
                 if (info == null)
                     return false;
-                return (info.UserID == strUserID);
+                return (strUserID == "*" || info.UserID == strUserID);
             });
         }
 

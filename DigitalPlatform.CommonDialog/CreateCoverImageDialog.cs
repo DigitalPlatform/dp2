@@ -60,7 +60,7 @@ namespace DigitalPlatform.CommonDialog
             if (string.IsNullOrEmpty(strMessage) == false)
             {
                 int nWidth = GetLargeWidth();
-                MessageBox.Show(this, strMessage + "\r\n\r\n建议改用宽度在 " + nWidth + " 像素以上的图像作为原始图像");
+                this.MessageBoxShow(strMessage + "\r\n\r\n建议改用宽度在 " + nWidth + " 像素以上的图像作为原始图像");
             }
         }
 

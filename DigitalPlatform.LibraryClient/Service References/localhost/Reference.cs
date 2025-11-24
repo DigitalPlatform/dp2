@@ -3786,6 +3786,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ParentIDField;
         
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ReserveField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string StateField;
+        
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -3870,6 +3876,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.ParentIDField, value) != true)) {
                     this.ParentIDField = value;
                     this.RaisePropertyChanged("ParentID");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Reserve {
+            get {
+                return this.ReserveField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ReserveField, value) != true)) {
+                    this.ReserveField = value;
+                    this.RaisePropertyChanged("Reserve");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string State {
+            get {
+                return this.StateField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.StateField, value) != true)) {
+                    this.StateField = value;
+                    this.RaisePropertyChanged("State");
                 }
             }
         }

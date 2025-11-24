@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<collection>
+	<env
+		access="{source}:getbiblioinfo;{target}:setbiblioinfo=*(300)|getbiblioinfo"
+		overwrite="1"
+		verify_target_biblio="=existing_origin,compare_ignore_fields:-refID"
+		>
+		<trigger ret="0" code="NoError"
+				 >
+			限制目标写入字段，只允许写入 300 字段，其它字段都不允许。
+			所允许的字段 300 在内容中不存在。
+			写入是按照原样写入的，任何字段都没有修改。
+			这样相对于目标位置的原记录，任何 MARC 字段都没有被修改，所以算作成功。
+			(TODO: 检查一下 refID 元素内容是否被修改? 如果有修改，还算至少兑现了一处修改(如果没有修改，那么这个“成功”就值得推敲一下了)。注意，operations 元素的修改不算，因为任何情况它都会修改)
+			<verify ref="目标位置覆盖前后 refID 元素发生了变化"/>
+		</trigger>
+	</env>
+	<env
+		access="{source}:getbiblioinfo;{target}:setbiblioinfo=*(300)|getbiblioinfo"
+		overwrite="1"
+		change_while_copy="true">
+		<trigger ret="-1" code="AccessDenied" ErrorInfo="*拟保存的书目记录中已不存在任何字段*"
+				 verify_ref="目标位置覆盖前后无改变">
+			限制目标写入字段，只允许写入 300 字段，其它字段都不允许。
+			所允许的字段 300 在内容中不存在。
+			写入是按照一边修改一边写入的，写入时修改了 200 字段。
+			但 200 又被目标限制了无法修改，所以报错 AccessDenied。
+
+		</trigger>
+	</env>
+
+
+	<verify name="目标位置覆盖前后 refID 元素发生了变化">
+		<compareBiblio name="去掉 refID 再比较，期待相同"
+				assert="equal"
+				xml_pair="target_starting,target_read"
+				ignore_elements="refID,operations,997"/>
+		<compareBiblio name="包含 refID 比较，期待不同"
+				assert="not_equal"
+				xml_pair="target_starting,target_read"
+				ignore_elements="operations,997"/>
+	</verify>
+	<verify name="目标位置覆盖前后无改变">
+		<compareBiblio name="去掉 refID 再比较，期待相同"
+				assert="equal"
+				xml_pair="target_starting,target_read"
+				ignore_elements="refID,operations,997"/>
+	</verify>
+</collection>

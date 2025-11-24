@@ -34,7 +34,7 @@ namespace DigitalPlatform.dp2.Statis
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void SortColumnDialog_FormClosed(object sender, FormClosedEventArgs e)

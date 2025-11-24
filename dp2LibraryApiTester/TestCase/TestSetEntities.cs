@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Diagnostics;
+using System.Threading;
 
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
@@ -13,7 +14,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Threading;
 
 namespace dp2LibraryApiTester
 {
@@ -1229,6 +1229,23 @@ access_string_template
             };
         }
 
+        static NormalResult PrepareWritingAccounts(LibraryChannel channel,
+    string userName,
+    string rights_template,
+    string access_template)
+        {
+            var rights = rights_template?.Replace("{dbtype}", _dbType);
+            var access = access_template?.Replace("{dbtype}", _dbType);
+            return Utility.PrepareAccount(channel,
+                new UserInfo
+                {
+                    UserName = userName,
+                    Rights = rights,
+                    Access = access
+                });
+        }
+
+#if REMOVED
         // 准备“写入用途”的账户
         static NormalResult PrepareWritingAccounts(LibraryChannel channel,
             string userName,
@@ -1270,6 +1287,7 @@ access_string_template
 
             return new NormalResult();
         }
+#endif
 
         static NormalResult WriteNew(LibraryChannel channel,
             string condition,
@@ -1740,6 +1758,94 @@ access_string_template
 
         #endregion
 
+#if TODO_
+        #region 尚未完成
+
+        public delegate void delegate_get_user_rights(
+            out string rights,
+            out string access);
+        // 验证新创建、修改、删除的结果
+        public delegate void delegate_verify_item_result(
+            NormalResult result,
+            EntityInfo entity);
+
+        // 针对两阶段弱点进行测试。所谓两阶段，就是 dp2library 在验证权限阶段，第一阶段针对所有数据库验证当前账户是否大致具备存取定义权限，第二阶段才针对具体的数据库精确验证村粗定义权限。测试方法是故意定义错位的权限，然后观察 dp2library 是否的实现过程是否有漏洞
+        // 验证回调函数式编程结构
+
+        public static NormalResult TestTwoStageWeak()
+        {
+            return _test(
+                (out string rights, out string access_string) =>
+                {
+                },
+                (ret, entity) =>
+                {
+                    //new
+                },
+                (ret, entity) =>
+                {
+                    // change
+                },
+                (ret, entity) =>
+                {
+                    // delete
+                }
+                );
+        }
+
+        static NormalResult _test(delegate_get_user_rights func_get_user_rights,
+            delegate_verify_item_result func_verify_new,
+            delegate_verify_item_result func_verify_change,
+            delegate_verify_item_result func_verify_delete)
+        {
+            // 用于构造账户的通道
+            var super_channel = DataModel.GetChannel();
+
+            TimeSpan old_timeout = super_channel.Timeout;
+            super_channel.Timeout = TimeSpan.FromMinutes(10);
+
+            try
+            {
+                // *** 获得一个账户的权限
+                func_get_user_rights(out string rights_template, out string access_string_template);
+
+                var result = PrepareWritingAccounts(super_channel,
+"test_normal_account",
+rights_template,
+access_string_template
+);
+                if (result.Value == -1)
+                    return result;
+
+                // 用于写入的通道。也就是被测试的通道
+                var test_channel = DataModel.NewChannel("test_normal_account", "");
+                try
+                {
+                    // new item record
+                    result = WriteNew(test_channel,
+                        "",
+                        out string item_recpath,
+                        out byte[] item_timestamp);
+                    if (result.Value == -1)
+                        return result;
+                }
+                finally
+                {
+                    DataModel.DeleteChannel(test_channel);
+                }
+
+                return new NormalResult();
+            }
+            finally
+            {
+                super_channel.Timeout = old_timeout;
+                DataModel.ReturnChannel(super_channel);
+            }
+        }
+
+        #endregion
+
+#endif
         public static NormalResult Finish()
         {
             string strError = "";

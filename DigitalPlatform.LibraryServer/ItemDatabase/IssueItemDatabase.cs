@@ -1,9 +1,4 @@
-﻿using DigitalPlatform;	// Stop类
-using DigitalPlatform.IO;
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,8 +7,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
-using static DigitalPlatform.LibraryServer.LibraryApplication;
 
+using static DigitalPlatform.LibraryServer.LibraryApplication;
+using DigitalPlatform;	// Stop类
+using DigitalPlatform.IO;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {

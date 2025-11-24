@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="content-type" content="text/html; charset=gb2312">
+</head>
+<body style="FONT-FAMILY: Microsoft YaHei, Verdana, 宋体;">
+
+    <INPUT type=button value="退出" onclick="form1.action='action://quit/';form1.submit();" style="FONT-FAMILY: Microsoft YaHei, Verdana, 宋体;" />
+
+    <form id="form1" action="action://ok/" method="post">
+
+        <hr />
+        如何输出报表:<br />
+
+        <input type="checkbox" name="OutputAllInOneTable" checked value="true">起止范围<br />
+        <input type="checkbox" name="OutputYearTable" checked value="true">每一年<br />
+        <input type="checkbox" name="OutputMonthTable" checked value="true">每一月<br />
+        <input type="checkbox" name="OutputDayTable" checked value="true">每一日<br />
+
+        <hr />
+
+        <input type="submit" value=" 继续 " style="FONT-FAMILY: Microsoft YaHei, Verdana, 宋体;" />
+    </form>
+</body>
+</html>

@@ -1096,6 +1096,7 @@ namespace dp2Circulation
                                     "system.windows.forms.dll",
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
+                                    "System.Core.dll",  // Linq 需要
 
                                     "netstandard.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",

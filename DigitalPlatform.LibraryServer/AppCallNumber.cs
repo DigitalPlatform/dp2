@@ -5,14 +5,13 @@ using System.Text;
 using System.Xml;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Threading;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -286,10 +285,31 @@ namespace DigitalPlatform.LibraryServer
                 strResultSetName = "default";
 
             bool bCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            string client_format = StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format");
+
 
             string strBrowseStyle = "keyid,id,key";
             if (bCols == true)
-                strBrowseStyle += ",cols,format:cfgs/browse_callnumber";
+            {
+                /* 最新一版实体库的 browse_callnumber 文件内容
+<root>
+  <col title="父记录ID">
+    <xpath>//parent</xpath>
+  </col>
+  <col title="馆藏地点">
+    <xpath>//location</xpath>
+  </col>
+  <col title="册条码号">
+    <xpath>//barcode</xpath>
+  </col>
+</root>
+                * */
+                // strBrowseStyle += ",cols,format:cfgs/browse_callnumber";
+                if (client_format != null)
+                    strBrowseStyle += $",cols,format:{client_format}";  // 使用前端直接要求的 format 格式
+                else
+                    strBrowseStyle += ",cols,format:@coldef:*/parent|*/location|*/barcode|*/state";
+            }
 
             Record[] origin_searchresults = null; //
 
@@ -322,12 +342,30 @@ namespace DigitalPlatform.LibraryServer
 
                 if (bCols == true && record.Cols != null)
                 {
-                    if (record.Cols.Length > 0)
-                        item.ParentID = record.Cols[0];
-                    if (record.Cols.Length > 1)
-                        item.Location = record.Cols[1];
-                    if (record.Cols.Length > 2)
-                        item.Barcode = record.Cols[2];
+                    if (client_format != null)
+                    {
+                        // 前端指定的格式。全部放入 .Reserve 返回。XML 格式
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml("<cols></cols>");
+                        foreach(var col in record.Cols)
+                        {
+                            var new_col = dom.CreateElement("col");
+                            dom.DocumentElement.AppendChild(new_col);
+                        }
+                        item.Reserve = dom.DocumentElement.OuterXml;
+                    }
+                    else
+                    {
+                        // 服务器默认格式
+                        if (record.Cols.Length > 0)
+                            item.ParentID = record.Cols[0];
+                        if (record.Cols.Length > 1)
+                            item.Location = record.Cols[1];
+                        if (record.Cols.Length > 2)
+                            item.Barcode = record.Cols[2];
+                        if (record.Cols.Length > 3)
+                            item.State = record.Cols[3];
+                    }
                 }
 
                 if (string.IsNullOrEmpty(item.Location) == true)
@@ -490,8 +528,8 @@ namespace DigitalPlatform.LibraryServer
             return strArrangeGroupName;
         }
 
+        // TODO： 需要加锁。增加写入操作日志类型
         // 设置种次号尾号
-        // TODO: 增强 strArrangeGroupName 语义，允许直接表达“种次号库名”
         // parameters:
         //      strAction   动作。memo, unmemo, skipmemo, protect, conditionalpush, increase, save
         //      strArrangeGroupName  排架体系名。如果是 '@' 打头，则表示种次号库名
@@ -986,6 +1024,12 @@ namespace DigitalPlatform.LibraryServer
     {
         [DataMember]
         public string ItemRecPath = "";    // 实体记录路径
+
+        // 2025/11/17
+        [DataMember]
+        public string State { get; set; }    // 状态
+
+
         [DataMember]
         public string CallNumber = "";  // 索取号全部
         [DataMember]
@@ -997,6 +1041,11 @@ namespace DigitalPlatform.LibraryServer
         public string ParentID = "";    // 父(书目)记录ID
         [DataMember]
         public string ErrorInfo = "";   // 出错信息
+
+        // 2025/11/17
+        [DataMember]
+        public string Reserve { get; set; } // 保留将来使用
+
     }
 
 }

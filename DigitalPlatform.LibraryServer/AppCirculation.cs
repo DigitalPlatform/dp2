@@ -29,8 +29,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using Amazon.Runtime.EventStreams;
-using Microsoft.SqlServer.Server;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1167,7 +1165,8 @@ namespace DigitalPlatform.LibraryServer
                         // 检查存取权限 circulation
                         if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                         {
-                            string dbname_list = GetItemBiblioDbNameList(strItemDbName);
+                            // string dbname_list = GetItemBiblioDbNameList(strItemDbName);
+                            string dbname_list = GetTwoDbName(strOutputItemRecPath);    // 2025/11/11
                             string strAccessActionList = "";
                             strAccessActionList = GetDbOperRights(sessioninfo.Access,
                                 dbname_list,
@@ -2752,6 +2751,7 @@ strMetaData,     // 记录的metadata
 timestamp,
 biblio_formats,
 out List<String> result_strings,
+out _,
 out strError);
             if (nRet == -1 || nRet == -2)
                 return -1;
@@ -4397,7 +4397,7 @@ out strError);
         //      0   允许继续访问
         //      1   权限限制，不允许继续访问。strError 中有说明原因的文字
         //      2   没有定义相关的存取定义参数
-        static int AccessReaderRange(
+        public static int AccessReaderRange(
             string strAccessString,
             XmlDocument reader_dom,
             string strReaderDbName,
@@ -4428,6 +4428,10 @@ out strError);
                 if (IsInAccessList(name, strAccessActionList, out strAccessParameters) == false)
                     continue;
 
+                // 2025/11/12
+                if (strAccessParameters.Contains("%"))
+                    strAccessParameters = StringUtil.UnescapeString(strAccessParameters);
+
                 // 匹配一个读者字段
                 // parameters:
                 //      strName     字段名
@@ -4442,6 +4446,7 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     return -1;
+                // 元素名中只要有一个匹配不上，整体来说就算匹配不上
                 if (nRet == 0)
                     return 1;
             }
@@ -6293,6 +6298,8 @@ out _);
             }
         }
 
+#if REMOVED
+        // (2025/11/11) 请改用 GetTwoDbName()
         // 根据实体库名字，找到书目库名字，并返回两者一起构成的列表字符串
         string GetItemBiblioDbNameList(string strItemDbName)
         {
@@ -6311,6 +6318,8 @@ out _);
                 return strItemDbName + "," + strBiblioDbName;
             return strItemDbName;
         }
+
+#endif
 
         // API: 还书
         // 权限：  工作人员需要return权限，如果是丢失处理需要lost权限；所有读者均不具备还书操作权限。盘点需要 inventory 权限
@@ -6993,19 +7002,19 @@ out _);
                         return result;
 
                     // 看看册记录所从属的数据库，是否在参与流通的实体库之列
+                    // 注意 inventory 操作并不限定数据库在参与流通的实体库之列。但注意 invenotory 操作也要用到 strItemDbName
                     // 2008/6/4
                     string strItemDbName = "";
+                    if (String.IsNullOrEmpty(strOutputItemRecPath) == false)
+                        strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
                     bool bItemDbInCirculation = true;
-                    if (strAction != "inventory" /*&& strAction != "transfer"*/)
+                    if (string.IsNullOrEmpty(strItemDbName) == false
+                        && strAction != "inventory" /*&& strAction != "transfer"*/)
                     {
-                        if (String.IsNullOrEmpty(strOutputItemRecPath) == false)
+                        if (this.IsItemDbName(strItemDbName, out bItemDbInCirculation) == false)
                         {
-                            strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
-                            if (this.IsItemDbName(strItemDbName, out bItemDbInCirculation) == false)
-                            {
-                                strError = "册记录路径 '" + strOutputItemRecPath + "' 中的数据库名 '" + strItemDbName + "' 居然不在定义的实体库之列。";
-                                goto ERROR1;
-                            }
+                            strError = "册记录路径 '" + strOutputItemRecPath + "' 中的数据库名 '" + strItemDbName + "' 居然不在定义的实体库之列。";
+                            goto ERROR1;
                         }
                     }
 
@@ -7017,7 +7026,8 @@ out _);
                         // 检查存取权限
                         if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                         {
-                            string dbname_list = GetItemBiblioDbNameList(strItemDbName);
+                            // string dbname_list = GetItemBiblioDbNameList(strItemDbName);
+                            string dbname_list = GetTwoDbName(strOutputItemRecPath);    // 2025/11/11
                             string strAccessActionList = "";
                             strAccessActionList = GetDbOperRights(sessioninfo.Access,
                                 dbname_list,
@@ -7467,6 +7477,7 @@ out _);
                             itemdom,
                             strOutputItemRecPath,
                             strBatchNo,
+                            strStyle,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -9291,12 +9302,13 @@ out string _);
 
         // 执行盘点记载
         int DoInventory(
-        SessionInfo sessioninfo,
-        string strAccessParameters,
-        XmlDocument itemdom,
-        string strItemRecPath,
-        string strBatchNo,
-        out string strError)
+            SessionInfo sessioninfo,
+            string strAccessParameters,
+            XmlDocument itemdom,
+            string strItemRecPath,
+            string strBatchNo,
+            string strStyle,
+            out string strError)
         {
             strError = "";
             int nRet = 0;
@@ -9325,8 +9337,7 @@ out string _);
             //      0   符合要求
             //      1   不符合要求
             nRet = CheckItemLibraryCode(itemdom,
-                // sessioninfo.LibraryCodeList,
-                sessioninfo,    // 这样可以处理当前账户为读者身份情况
+                sessioninfo,
                 out string strLibraryCode,
                 out strError);
             if (nRet == -1)
@@ -9420,10 +9431,12 @@ out string _);
                 strItemRefID,
                 2,
                 out List<string> aPath,
+                out string xml,
+                out byte[] timestamp,
                 out strError);
             if (nRet == -1)
                 return -1;
-            if (nRet >= 1)
+            if (nRet > 1)
             {
                 if (string.IsNullOrEmpty(strItemBarcode) == false)
                     strError = "馆代码 '" + strLibraryCode + "' 批次号 '" + strBatchNo + "' 册条码号 '" + strItemBarcode + "' 的盘点记录已经存在，无法重复创建 ...";
@@ -9432,9 +9445,23 @@ out string _);
                 return -1;
             }
 
-            // 在盘点库中创建一条新记录
             XmlDocument inventory_dom = new XmlDocument();
-            inventory_dom.LoadXml("<history_container />");
+
+            string path = "";
+            if (nRet == 1)
+            {
+                // 修改以前的盘点记录
+                path = aPath[0];
+                inventory_dom.LoadXml(xml);
+            }
+            else
+            {
+                // 在盘点库中创建一条新记录
+                path = strInventoryDbName + "/?";
+                timestamp = null;
+                inventory_dom.LoadXml("<history_container />");
+            }
+
 
             DomUtil.SetElementText(inventory_dom.DocumentElement, "itemBarcode", strItemBarcode);
             DomUtil.SetElementText(inventory_dom.DocumentElement, "itemRefID", strItemRefID);   // 册记录的参考 ID
@@ -9443,23 +9470,69 @@ out string _);
             DomUtil.SetElementText(inventory_dom.DocumentElement, "batchNo", strBatchNo);
             DomUtil.SetElementText(inventory_dom.DocumentElement, "location", strLocation);
             DomUtil.SetElementText(inventory_dom.DocumentElement, "libraryCode", strLibraryCode);
-            DomUtil.SetElementText(inventory_dom.DocumentElement, "refID", Guid.NewGuid().ToString());  // 盘点记录的参考 ID
-            string strOperTime = this.Clock.GetClock();
+
+            {
+                var old_refID = DomUtil.GetElementText(inventory_dom.DocumentElement, "refID");
+                if (string.IsNullOrEmpty(old_refID))
+                    DomUtil.SetElementText(inventory_dom.DocumentElement, "refID", Guid.NewGuid().ToString());  // 盘点记录的参考 ID
+            }
+
+            // 2025/11/11
+            // 记载盘点当时前端发来的 location shelfNo currentLocation。供以后统一设置用
+            if (string.IsNullOrEmpty(strStyle) == false)
+            {
+                bool newLocationChanged = false;
+                string strNewLocation = StringUtil.GetParameterByPrefix(strStyle, "location");
+                // 注意参数值里面的逗号和冒号在请求时候要处理为转义字符
+                if (strNewLocation != null)
+                {
+                    strNewLocation = StringUtil.UnescapeString(strNewLocation);
+
+                    if (string.IsNullOrEmpty(strNewLocation) == true && strNewLocation != null)
+                    {
+                        strError = "inventory 操作中，调拨去向的馆藏地不允许为空";
+                        return -1;
+                    }
+
+                    DomUtil.SetElementText(inventory_dom.DocumentElement, "newLocation", strNewLocation);
+                    newLocationChanged = true;
+                }
+
+                // 新的永久架位
+                string strNewShelfNo = StringUtil.GetParameterByPrefix(strStyle, "shelfNo");
+                // 注意参数值里面的逗号和冒号在请求时候要处理为转义字符
+                if (strNewShelfNo != null)
+                {
+                    strNewShelfNo = StringUtil.UnescapeString(strNewShelfNo);
+
+                    DomUtil.SetElementText(inventory_dom.DocumentElement, "newShelfNo", strNewShelfNo);
+                }
+                else if (newLocationChanged)
+                {
+                    DomUtil.SetElementText(inventory_dom.DocumentElement, "newShelfNo", "[clear]");
+                }
+
+                string strNewCurrentLocation = StringUtil.GetParameterByPrefix(strStyle, "currentLocation");
+                if (strNewCurrentLocation != null)
+                {
+                    strNewCurrentLocation = StringUtil.UnescapeString(strNewCurrentLocation);
+
+                    DomUtil.SetElementText(inventory_dom.DocumentElement, "newCurrentLocation", strNewCurrentLocation);
+                }
+            }
+
             DomUtil.SetElementText(inventory_dom.DocumentElement, "operator",
                 sessioninfo.UserID);   // 操作者
             DomUtil.SetElementText(inventory_dom.DocumentElement, "operTime",
-                strOperTime);   // 操作时间
+                this.Clock.GetClock());   // 操作时间
 
-            byte[] output_timestamp = null;
-            string strOutputPath = "";
-
-            long lRet = channel.DoSaveTextRes(strInventoryDbName + "/?",
+            long lRet = channel.DoSaveTextRes(path,
     inventory_dom.OuterXml,
     false,   // include preamble?
     "content",
-    null,   // info.OldTimestamp,
-    out output_timestamp,
-    out strOutputPath,
+    timestamp,   // info.OldTimestamp,
+    out byte[] output_timestamp,
+    out string strOutputPath,
     out strError);
             if (lRet == -1)
                 return -1;

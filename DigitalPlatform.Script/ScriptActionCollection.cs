@@ -14,6 +14,10 @@ namespace DigitalPlatform.Script
         public bool Active = false;
 
         public char ShortcutKey = (char)0;  // 快捷键 2011/8/3
+
+        // 风格
+        // 比如控制只在 MARC 编辑器 Ctrl+A 的 Popup 菜单中显示，在固定面板区不显示
+        public string Style { get; set; }
     }
 
     /// <summary>

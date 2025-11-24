@@ -14,6 +14,7 @@ using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.CirculationClient
 {
+    // TODO: 为每个图书馆提供面板颜色定制功能。在 library.xml 中设置面板颜色
     /// <summary>
     /// dp2library 前端登录的对话框
     /// </summary>
@@ -56,6 +57,7 @@ namespace DigitalPlatform.CirculationClient
         private Label label_tempCode; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
         private ToolStripButton toolStripButton_pasteFromJSONClipboard;
         private ToolStripButton toolStripButton_changePassword;
+        private Label label_serverCaption;
         public bool SupervisorMode = false; // 是否为 supervisor 模式。也就是管理员模式。在这个模式下， 无法修改 URL ，无法选择读者类型，不出现 红泥巴数字平台服务器按钮
 
         public CirculationLoginDlg()
@@ -111,12 +113,13 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_deleteFromList = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_pasteFromJSONClipboard = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_changePassword = new System.Windows.Forms.ToolStripButton();
             this.comboBox_serverAddr = new System.Windows.Forms.ComboBox();
             this.textBox_phoneNumber = new System.Windows.Forms.TextBox();
             this.label_phoneNumber = new System.Windows.Forms.Label();
             this.textBox_tempCode = new System.Windows.Forms.TextBox();
             this.label_tempCode = new System.Windows.Forms.Label();
-            this.toolStripButton_changePassword = new System.Windows.Forms.ToolStripButton();
+            this.label_serverCaption = new System.Windows.Forms.Label();
             this.toolStrip_server.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -125,7 +128,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordShort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_savePasswordShort.AutoSize = true;
             this.checkBox_savePasswordShort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_savePasswordShort.Location = new System.Drawing.Point(220, 427);
+            this.checkBox_savePasswordShort.Location = new System.Drawing.Point(220, 460);
             this.checkBox_savePasswordShort.Margin = new System.Windows.Forms.Padding(0);
             this.checkBox_savePasswordShort.Name = "checkBox_savePasswordShort";
             this.checkBox_savePasswordShort.Size = new System.Drawing.Size(193, 25);
@@ -137,11 +140,11 @@ namespace DigitalPlatform.CirculationClient
             // textBox_password
             // 
             this.textBox_password.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_password.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.textBox_password.BackColor = System.Drawing.SystemColors.Window;
             this.textBox_password.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_password.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.textBox_password.ForeColor = System.Drawing.SystemColors.WindowText;
             this.textBox_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_password.Location = new System.Drawing.Point(220, 387);
+            this.textBox_password.Location = new System.Drawing.Point(220, 420);
             this.textBox_password.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_password.Name = "textBox_password";
             this.textBox_password.PasswordChar = '*';
@@ -153,11 +156,11 @@ namespace DigitalPlatform.CirculationClient
             // textBox_userName
             // 
             this.textBox_userName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_userName.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.textBox_userName.BackColor = System.Drawing.SystemColors.Window;
             this.textBox_userName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_userName.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.textBox_userName.ForeColor = System.Drawing.SystemColors.WindowText;
             this.textBox_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_userName.Location = new System.Drawing.Point(220, 313);
+            this.textBox_userName.Location = new System.Drawing.Point(220, 346);
             this.textBox_userName.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_userName.Name = "textBox_userName";
             this.textBox_userName.Size = new System.Drawing.Size(284, 31);
@@ -169,7 +172,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_cancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_cancel.Location = new System.Drawing.Point(638, 595);
+            this.button_cancel.Location = new System.Drawing.Point(665, 628);
             this.button_cancel.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(143, 42);
@@ -181,7 +184,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(20, 390);
+            this.label3.Location = new System.Drawing.Point(20, 423);
             this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(96, 21);
@@ -192,7 +195,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label_userName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label_userName.AutoSize = true;
-            this.label_userName.Location = new System.Drawing.Point(18, 317);
+            this.label_userName.Location = new System.Drawing.Point(18, 350);
             this.label_userName.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_userName.Name = "label_userName";
             this.label_userName.Size = new System.Drawing.Size(117, 21);
@@ -203,7 +206,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(18, 187);
+            this.label1.Location = new System.Drawing.Point(18, 220);
             this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(264, 21);
@@ -214,7 +217,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_OK.Location = new System.Drawing.Point(638, 542);
+            this.button_OK.Location = new System.Drawing.Point(665, 575);
             this.button_OK.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(143, 42);
@@ -227,28 +230,28 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_comment.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.textBox_comment.BackColor = System.Drawing.SystemColors.ControlLight;
             this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_comment.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textBox_comment.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.textBox_comment.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_comment.Location = new System.Drawing.Point(22, 21);
             this.textBox_comment.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_comment.Multiline = true;
             this.textBox_comment.Name = "textBox_comment";
             this.textBox_comment.ReadOnly = true;
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(759, 161);
+            this.textBox_comment.Size = new System.Drawing.Size(786, 185);
             this.textBox_comment.TabIndex = 0;
             this.textBox_comment.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textBox_location
             // 
             this.textBox_location.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_location.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.textBox_location.BackColor = System.Drawing.SystemColors.Window;
             this.textBox_location.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_location.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.textBox_location.ForeColor = System.Drawing.SystemColors.WindowText;
             this.textBox_location.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_location.Location = new System.Drawing.Point(220, 464);
+            this.textBox_location.Location = new System.Drawing.Point(220, 497);
             this.textBox_location.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_location.Name = "textBox_location";
             this.textBox_location.Size = new System.Drawing.Size(284, 31);
@@ -259,7 +262,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(20, 467);
+            this.label4.Location = new System.Drawing.Point(20, 500);
             this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(138, 21);
@@ -271,7 +274,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_isReader.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_isReader.AutoSize = true;
             this.checkBox_isReader.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_isReader.Location = new System.Drawing.Point(220, 353);
+            this.checkBox_isReader.Location = new System.Drawing.Point(220, 386);
             this.checkBox_isReader.Margin = new System.Windows.Forms.Padding(0);
             this.checkBox_isReader.Name = "checkBox_isReader";
             this.checkBox_isReader.Size = new System.Drawing.Size(109, 25);
@@ -286,7 +289,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordLong.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_savePasswordLong.AutoSize = true;
             this.checkBox_savePasswordLong.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_savePasswordLong.Location = new System.Drawing.Point(24, 514);
+            this.checkBox_savePasswordLong.Location = new System.Drawing.Point(24, 547);
             this.checkBox_savePasswordLong.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.checkBox_savePasswordLong.Name = "checkBox_savePasswordLong";
             this.checkBox_savePasswordLong.Size = new System.Drawing.Size(193, 25);
@@ -311,11 +314,11 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_deleteFromList,
             this.toolStripButton_pasteFromJSONClipboard,
             this.toolStripButton_changePassword});
-            this.toolStrip_server.Location = new System.Drawing.Point(22, 248);
+            this.toolStrip_server.Location = new System.Drawing.Point(22, 281);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
             this.toolStrip_server.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_server.Size = new System.Drawing.Size(759, 44);
+            this.toolStrip_server.Size = new System.Drawing.Size(786, 44);
             this.toolStrip_server.TabIndex = 3;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -368,77 +371,6 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_pasteFromJSONClipboard.ToolTipText = "从 Windows 剪贴板中粘贴服务器参数";
             this.toolStripButton_pasteFromJSONClipboard.Click += new System.EventHandler(this.toolStripButton_pasteFromJSONClipboard_Click);
             // 
-            // comboBox_serverAddr
-            // 
-            this.comboBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_serverAddr.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.comboBox_serverAddr.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
-            this.comboBox_serverAddr.DropDownHeight = 260;
-            this.comboBox_serverAddr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.comboBox_serverAddr.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.comboBox_serverAddr.FormattingEnabled = true;
-            this.comboBox_serverAddr.IntegralHeight = false;
-            this.comboBox_serverAddr.Location = new System.Drawing.Point(22, 214);
-            this.comboBox_serverAddr.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.comboBox_serverAddr.Name = "comboBox_serverAddr";
-            this.comboBox_serverAddr.Size = new System.Drawing.Size(756, 32);
-            this.comboBox_serverAddr.TabIndex = 2;
-            this.comboBox_serverAddr.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBox_serverAddr_DrawItem);
-            this.comboBox_serverAddr.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.comboBox_serverAddr_MeasureItem);
-            this.comboBox_serverAddr.SelectedIndexChanged += new System.EventHandler(this.comboBox_serverAddr_SelectedIndexChanged);
-            this.comboBox_serverAddr.Click += new System.EventHandler(this.controls_Click);
-            // 
-            // textBox_phoneNumber
-            // 
-            this.textBox_phoneNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_phoneNumber.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.textBox_phoneNumber.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_phoneNumber.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.textBox_phoneNumber.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_phoneNumber.Location = new System.Drawing.Point(220, 550);
-            this.textBox_phoneNumber.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.textBox_phoneNumber.Name = "textBox_phoneNumber";
-            this.textBox_phoneNumber.Size = new System.Drawing.Size(284, 31);
-            this.textBox_phoneNumber.TabIndex = 14;
-            // 
-            // label_phoneNumber
-            // 
-            this.label_phoneNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label_phoneNumber.AutoSize = true;
-            this.label_phoneNumber.Location = new System.Drawing.Point(18, 553);
-            this.label_phoneNumber.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label_phoneNumber.Name = "label_phoneNumber";
-            this.label_phoneNumber.Size = new System.Drawing.Size(117, 21);
-            this.label_phoneNumber.TabIndex = 13;
-            this.label_phoneNumber.Text = "手机号(&P):";
-            // 
-            // textBox_tempCode
-            // 
-            this.textBox_tempCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_tempCode.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.textBox_tempCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_tempCode.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.textBox_tempCode.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_tempCode.Location = new System.Drawing.Point(220, 590);
-            this.textBox_tempCode.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.textBox_tempCode.Name = "textBox_tempCode";
-            this.textBox_tempCode.Size = new System.Drawing.Size(284, 31);
-            this.textBox_tempCode.TabIndex = 16;
-            this.textBox_tempCode.Visible = false;
-            // 
-            // label_tempCode
-            // 
-            this.label_tempCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label_tempCode.AutoSize = true;
-            this.label_tempCode.Location = new System.Drawing.Point(18, 593);
-            this.label_tempCode.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label_tempCode.Name = "label_tempCode";
-            this.label_tempCode.Size = new System.Drawing.Size(117, 21);
-            this.label_tempCode.TabIndex = 15;
-            this.label_tempCode.Text = "验证码(&S):";
-            this.label_tempCode.Visible = false;
-            // 
             // toolStripButton_changePassword
             // 
             this.toolStripButton_changePassword.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -449,13 +381,96 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_changePassword.Text = "改密码";
             this.toolStripButton_changePassword.Click += new System.EventHandler(this.toolStripButton_changePassword_Click);
             // 
+            // comboBox_serverAddr
+            // 
+            this.comboBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_serverAddr.BackColor = System.Drawing.SystemColors.Window;
+            this.comboBox_serverAddr.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
+            this.comboBox_serverAddr.DropDownHeight = 260;
+            this.comboBox_serverAddr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBox_serverAddr.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.comboBox_serverAddr.FormattingEnabled = true;
+            this.comboBox_serverAddr.IntegralHeight = false;
+            this.comboBox_serverAddr.Location = new System.Drawing.Point(22, 247);
+            this.comboBox_serverAddr.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.comboBox_serverAddr.Name = "comboBox_serverAddr";
+            this.comboBox_serverAddr.Size = new System.Drawing.Size(783, 32);
+            this.comboBox_serverAddr.TabIndex = 2;
+            this.comboBox_serverAddr.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBox_serverAddr_DrawItem);
+            this.comboBox_serverAddr.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.comboBox_serverAddr_MeasureItem);
+            this.comboBox_serverAddr.SelectedIndexChanged += new System.EventHandler(this.comboBox_serverAddr_SelectedIndexChanged);
+            this.comboBox_serverAddr.Click += new System.EventHandler(this.controls_Click);
+            // 
+            // textBox_phoneNumber
+            // 
+            this.textBox_phoneNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textBox_phoneNumber.BackColor = System.Drawing.SystemColors.Window;
+            this.textBox_phoneNumber.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox_phoneNumber.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.textBox_phoneNumber.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_phoneNumber.Location = new System.Drawing.Point(220, 583);
+            this.textBox_phoneNumber.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_phoneNumber.Name = "textBox_phoneNumber";
+            this.textBox_phoneNumber.Size = new System.Drawing.Size(284, 31);
+            this.textBox_phoneNumber.TabIndex = 14;
+            // 
+            // label_phoneNumber
+            // 
+            this.label_phoneNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_phoneNumber.AutoSize = true;
+            this.label_phoneNumber.Location = new System.Drawing.Point(18, 586);
+            this.label_phoneNumber.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_phoneNumber.Name = "label_phoneNumber";
+            this.label_phoneNumber.Size = new System.Drawing.Size(117, 21);
+            this.label_phoneNumber.TabIndex = 13;
+            this.label_phoneNumber.Text = "手机号(&P):";
+            // 
+            // textBox_tempCode
+            // 
+            this.textBox_tempCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textBox_tempCode.BackColor = System.Drawing.SystemColors.Window;
+            this.textBox_tempCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox_tempCode.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.textBox_tempCode.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_tempCode.Location = new System.Drawing.Point(220, 623);
+            this.textBox_tempCode.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_tempCode.Name = "textBox_tempCode";
+            this.textBox_tempCode.Size = new System.Drawing.Size(284, 31);
+            this.textBox_tempCode.TabIndex = 16;
+            this.textBox_tempCode.Visible = false;
+            // 
+            // label_tempCode
+            // 
+            this.label_tempCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_tempCode.AutoSize = true;
+            this.label_tempCode.Location = new System.Drawing.Point(18, 626);
+            this.label_tempCode.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_tempCode.Name = "label_tempCode";
+            this.label_tempCode.Size = new System.Drawing.Size(117, 21);
+            this.label_tempCode.TabIndex = 15;
+            this.label_tempCode.Text = "验证码(&S):";
+            this.label_tempCode.Visible = false;
+            // 
+            // label_serverCaption
+            // 
+            this.label_serverCaption.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_serverCaption.Font = new System.Drawing.Font("宋体", 10.71429F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_serverCaption.Location = new System.Drawing.Point(280, 211);
+            this.label_serverCaption.Name = "label_serverCaption";
+            this.label_serverCaption.Size = new System.Drawing.Size(525, 34);
+            this.label_serverCaption.TabIndex = 19;
+            this.label_serverCaption.TextAlign = System.Drawing.ContentAlignment.BottomRight;
+            // 
             // CirculationLoginDlg
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(803, 658);
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.ClientSize = new System.Drawing.Size(830, 691);
+            this.Controls.Add(this.label_serverCaption);
             this.Controls.Add(this.textBox_tempCode);
             this.Controls.Add(this.label_tempCode);
             this.Controls.Add(this.textBox_phoneNumber);
@@ -872,9 +887,9 @@ Keys keyData)
             if (this.checkBox_isReader.Checked == false)
             {
                 this.label_userName.Text = "用户名(&U):";
-                this.BackColor = SystemColors.ControlDark;
+                this.BackColor = SystemColors.Control;
                 this.ForeColor = SystemColors.ControlText;
-                this.toolStrip_server.BackColor = SystemColors.ControlDark;
+                this.toolStrip_server.BackColor = SystemColors.Control;
             }
             else
             {
@@ -959,6 +974,7 @@ Keys keyData)
 
             this.comboBox_serverAddr.Text = url.Url;
             this.UiState = url.UiState;
+            this.label_serverCaption.Text = url.Name;
         }
 
         // 将当前面板数据保存起来

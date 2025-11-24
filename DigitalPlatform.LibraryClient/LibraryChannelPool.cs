@@ -350,6 +350,26 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6550.17227, Culture=neutral,
             }
         }
 
+        public void LogoutAndClear()
+        {
+            if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+                throw new LockException("锁定尝试中超时");
+            try
+            {
+                foreach (LibraryChannelWrapper wrapper in this)
+                {
+                    wrapper.Channel.Logout(out _);
+                    wrapper.Channel.Close();
+                }
+
+                base.Clear();
+            }
+            finally
+            {
+                this.m_lock.ExitWriteLock();
+            }
+        }
+
         public void Close()
         {
             this.Clear();

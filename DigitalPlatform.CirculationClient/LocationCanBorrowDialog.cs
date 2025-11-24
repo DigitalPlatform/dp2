@@ -38,8 +38,7 @@ namespace DigitalPlatform.CirculationClient
                 goto ERROR1;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
-
+            this.MessageBoxShow(strError);
         }
 
         private void button_OK_Click(object sender, EventArgs e)

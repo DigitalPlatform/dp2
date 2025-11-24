@@ -1,29 +1,29 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
+using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DocumentFormat.OpenXml.Bibliography;
+using Microsoft.CodeAnalysis.Operations;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Xml;
-using System.IO;
-using System.Web;
-using System.Collections;
 using System.Threading.Tasks;
-
-using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Marc;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.Core;
-using DocumentFormat.OpenXml.Bibliography;
+using System.Web;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace dp2Circulation
 {
@@ -2224,7 +2224,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             var code = this.textBox_publisher_cityCode.Text;
-            if (string.IsNullOrEmpty(cityName))
+            if (string.IsNullOrEmpty(code))
             {
                 strError = "尚未输入要设置的地区代码";
                 goto ERROR1;
@@ -2333,5 +2333,525 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        private void button_zhongcihao_get_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strDbName = this.textBox_zhongcihao_dbname.Text;
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "尚未输入种次号库名";
+                goto ERROR1;
+            }
+
+            var strClass = this.textBox_zhongcihao_class.Text;
+            if (string.IsNullOrEmpty(strClass))
+            {
+                strError = "尚未输入类名";
+                goto ERROR1;
+            }
+
+            this.textBox_zhongcihao_tailNumber.Text = "";
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在获得类 '{strClass}' 的尾号 ...",
+                "disableControl");
+            try
+            {
+                long ret = channel.GetZhongcihaoTailNumber(
+                looping.Progress,
+                strDbName,
+                strClass,
+                out string tailnumber,
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+                if (ret == 0)
+                {
+                    strError = $"类 '{strClass}' 的尾号没有找到";
+                    goto ERROR1;
+                }
+                this.textBox_zhongcihao_tailNumber.Text = tailnumber;
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_zhongcihao_set_Click(object sender, EventArgs e)
+        {
+            SetZhongcihao("save");
+        }
+
+        // parameters:
+        //      action  动作。为 save 或 delete 或 conditionalpush
+        void SetZhongcihao(string action)
+        {
+            string strError = "";
+
+            if (action != "save"
+                && action != "delete"
+                && action != "conditionalpush")
+            {
+                strError = $"暂不支持 action='{action}'";
+                goto ERROR1;
+            }
+
+            string strDbName = this.textBox_zhongcihao_dbname.Text;
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "尚未输入种次号库名";
+                goto ERROR1;
+            }
+
+            var strClass = this.textBox_zhongcihao_class.Text;
+            if (string.IsNullOrEmpty(strClass))
+            {
+                strError = "尚未输入类名";
+                goto ERROR1;
+            }
+
+            var tailnumber = this.textBox_zhongcihao_tailNumber.Text;
+            if (action != "delete")
+            {
+                if (string.IsNullOrEmpty(tailnumber))
+                {
+                    strError = $"尚未输入要{action}的尾号";
+                    goto ERROR1;
+                }
+            }
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在 {action} 类 '{strClass}' 的尾号 ...",
+                "disableControl");
+            try
+            {
+                var ret = channel.SetZhongcihaoTailNumber(
+                looping.Progress,
+                action,
+                strDbName,
+                strClass,
+                tailnumber,
+                out string output_number,
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                MessageBox.Show(this, $"类 '{strClass}' 的尾号 '{tailnumber}' {action} 成功。实际设置的尾号为 '{output_number}'");
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_zhongcihao_delete_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要删除 库 {this.textBox_zhongcihao_dbname.Text}中的尾号记录 '{this.textBox_zhongcihao_class.Text}'?",
+"UtilityForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            SetZhongcihao("delete");
+        }
+
+        private void button_zhongcihao_conditionalPush_Click(object sender, EventArgs e)
+        {
+            SetZhongcihao("conditionalpush");
+        }
+
+        // 2025/11/19
+        private void button_publisher_getCityAndPublisher_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名";
+                goto ERROR1;
+            }
+
+            var isbn = this.textBox_publisher_isbnPrefix.Text;
+            if (string.IsNullOrEmpty(isbn))
+            {
+                strError = "尚未输入 ISBN 前段(格式 7-01)";
+                goto ERROR1;
+            }
+
+            this.textBox_publisher_cityAndPublisher.Text = "";
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在获得 ISBN 前缀 '{isbn}' 关联的的 出版地:出版社 ...",
+                "disableControl");
+            try
+            {
+                long ret = channel.GetUtilInfo(
+                looping.Progress,
+                "", // action
+                strDbName,
+                "ISBN", // 检索途径
+                isbn, // key 值
+                "v210", // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                out string value,
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+                if (ret == 0)
+                {
+                    strError = $"ISBN 前缀 '{isbn}' 的 出版地:出版社 没有找到";
+                    goto ERROR1;
+                }
+                this.textBox_publisher_cityAndPublisher.Text = value.Replace(";", "\r\n");
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 2025/11/19
+        private void button_publisher_setCityAndPublisher_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名";
+                goto ERROR1;
+            }
+
+            var isbn = this.textBox_publisher_isbnPrefix.Text;
+            if (string.IsNullOrEmpty(isbn))
+            {
+                strError = "尚未输入 ISBN 前缀";
+                goto ERROR1;
+            }
+
+            var value = this.textBox_publisher_cityAndPublisher.Text.Replace("\r\n", ";");
+            if (string.IsNullOrEmpty(value))
+            {
+                strError = "尚未输入要设置的 出版地:出版者";
+                goto ERROR1;
+            }
+
+            List<string> errors = VerifyBase.VerifyCityPublisher(value);
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "\r\n");
+                goto ERROR1;
+            }
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在设置 ISBN 前缀 '{isbn}' 对应的 出版地:出版社 ...",
+                "disableControl");
+            try
+            {
+                var ret = channel.SetUtilInfo(
+                looping.Progress,
+                "", // action
+                strDbName,
+                "ISBN", // 检索途径
+                "r",    // 根元素名
+                "i",    // key 属性名 (ISBN 的首字母) 这个属性名不能改，被 keys 定义为“ISBN”检索点了
+                "v210", // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                isbn, // key 值
+                value, // value 值
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                MessageBox.Show(this, $"ISBN 前缀 '{isbn}' 对应 '{value}' 设置成功");
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_publisher_deleteCityAndPublisher_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.180") < 0)
+            {
+                strError = "当前连接的 dp2library 版本必须在 3.180 以上才能使用删除功能 (但它是 " + Program.MainForm.ServerVersion + ")";
+                goto ERROR1;
+            }
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名";
+                goto ERROR1;
+            }
+
+            var isbn = this.textBox_publisher_isbnPrefix.Text;
+            if (string.IsNullOrEmpty(isbn))
+            {
+                strError = "尚未输入要删除的 ISBN 前缀";
+                goto ERROR1;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+    $"确实要删除 ISBN 前缀 '{isbn}' 对应的 出版地:出版社 ?",
+    "UtilityForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在删除 ISBN 前缀 '{isbn}' 对应的 出版地:出版社 ...",
+                "disableControl");
+            try
+            {
+                var ret = channel.SetUtilInfo(
+                looping.Progress,
+                "delete", // action
+                strDbName,
+                "ISBN", // 检索途径
+                "r",    // 根元素名
+                "i",    // key 属性名 (ISBN 的首字母) 这个属性名不能改，被 keys 定义为“ISBN”检索点了
+                "v210", // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                isbn, // key 值
+                null, // value 值
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                MessageBox.Show(this, $"ISBN 前缀 '{isbn}' 对应的 出版地:出版社 删除成功");
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_publisher_convert1_Click(object sender, EventArgs e)
+        {
+            var source = @"c:\temp\publisher.txt";
+            var target = @"c:\temp\publisher1.txt";
+            using (var writer = new StreamWriter(target, false, Encoding.GetEncoding("gb2312")))
+            using (var reader = new StreamReader(source, Encoding.GetEncoding("gb2312")))
+            {
+                while (true)
+                {
+                    var line = reader.ReadLine();
+                    if (line == null)
+                        break;
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+                    if (line.StartsWith("#"))
+                        continue;
+
+                    string[] cols = line.Split(',');
+
+                    var city = GetColumn(cols, 3);
+                    // 4-8
+                    var numbers = GetColumns(cols, 4, 8);
+                    var publisher = GetColumn(cols, 10);
+                    foreach (var number in numbers)
+                    {
+                        writer.WriteLine($"7-{number}\t{city}:{publisher}");
+                    }
+                }
+
+                MessageBox.Show(this, "OK");
+            }
+
+            string GetColumn(string[] cols, int index)
+            {
+                if (cols.Length <= index)
+                    return null;
+                return cols[index];
+            }
+
+            List<string> GetColumns(string[] cols, int start, int end)
+            {
+                var results = new List<string>();
+                for (int i = start; i <= end; i++)
+                {
+                    if (string.IsNullOrEmpty(cols[i]) == false)
+                        results.Add(cols[i]);
+                }
+
+                return results;
+            }
+
+        }
+
+        private void button_publisher_append_to_database_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (StringUtil.IsDevelopMode() == false)
+            {
+                strError = "危险功能，暂不允许非开发者使用";
+                goto ERROR1;
+            }
+
+
+            int error_count = 0;
+            int skip_count = 0;
+            int append_count = 0;
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            var looping = Looping(out LibraryChannel channel,
+    $"正在将 ISBN 前缀 和 出版地:出版社 对应信息导入 {strDbName} 库 ...",
+    "disableControl");
+            try
+            {
+                var source = @"c:\temp\publisher1.txt";
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ $" 开始从 文件 {source} 导入</div>");
+
+                using (var reader = new StreamReader(source, Encoding.GetEncoding("gb2312")))
+                {
+                    while (true)
+                    {
+                        var line = reader.ReadLine();
+                        if (line == null)
+                            break;
+                        if (string.IsNullOrEmpty(line))
+                            continue;
+
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(line) + "</div>");
+
+                        string[] cols = line.Split('\t');
+
+                        var errors = VerifyBase.VerifyCityPublisher(cols[1]);
+                        if (errors.Count > 0)
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"格式错误: " + StringUtil.MakePathList(errors)) + "</div>");
+                            error_count++;
+                            continue;
+                        }
+
+                        looping.Progress.SetMessage($"正在写入 {cols[0]} {cols[1]}");
+
+
+                        {
+                            // 先进行查重
+                            long ret = channel.GetUtilInfo(
+looping.Progress,
+"", // action
+strDbName,
+"ISBN", // 检索途径
+cols[0], // key 值
+"v210", // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+out string value,
+out strError);
+                            if (ret == -1)
+                                goto ERROR1;
+
+                            string new_value = cols[1];
+                            if (ret == 1)
+                            {
+                                // 将 value 和 line 拼接
+                                new_value = Combine(value, cols[1]);
+                                if (AreEqual(value, new_value))
+                                {
+                                    skip_count++;
+                                    Program.MainForm.OperHistory.AppendHtml("<div class='debug warning'>" + HttpUtility.HtmlEncode("和数据库中已有条目重复、跳过") + "</div>");
+                                    continue;   // 追加后内容和原来一样，那就不如跳过
+                                }
+
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug warning'>" + HttpUtility.HtmlEncode($"内容由 '{value}' 增补为 '{new_value}'") + "</div>");
+                            }
+
+
+                            ret = channel.SetUtilInfo(
+looping.Progress,
+"", // action
+strDbName,
+"ISBN", // 检索途径
+"r",    // 根元素名
+"i",    // key 属性名 (ISBN 的首字母) 这个属性名不能改，被 keys 定义为“ISBN”检索点了
+"v210", // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+cols[0], // key 值
+new_value, // value 值
+out strError);
+                            if (ret == -1)
+                                goto ERROR1;
+                            append_count++;
+                        }
+                    }
+
+                }
+                MessageBox.Show(this, $"导入完成。\r\n\r\n{append_count} 行实际导入(或追加修改)\r\n{error_count} 行格式错误(详情请看操作历史属性页。这些行已经被跳过导入)\r\n{skip_count} 行因为重复被跳过");
+                return;
+            }
+            finally
+            {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ $" 结束导入。{append_count} 行实际导入; {error_count} 行格式错误; {skip_count} 行因为重复被跳过</div>");
+
+                looping.Dispose();
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+
+            string Combine(string s1, string s2)
+            {
+                List<string> list = new List<string>();
+                if (string.IsNullOrEmpty(s1) == false)
+                    list.AddRange(s1.Split(';'));
+                if (string.IsNullOrEmpty(s2) == false)
+                    list.AddRange(s2.Split(';'));
+                StringUtil.RemoveDupNoSort(ref list);
+                return StringUtil.MakePathList(list, ";");
+            }
+
+            bool AreEqual(string s1, string s2)
+            {
+                var parts1 = s1.Split(';');
+                var parts2 = s2.Split(';');
+                Array.Sort(parts1);
+                Array.Sort(parts2);
+                return parts1.SequenceEqual(parts2);
+            }
+        }
+
+        /*
+         * 
+    <r i="7-5568" v210="南昌:二十一世纪出版社集团11">
+
+    </r>
+序号,登记地（部门）,出版地区代码,出版地,社号1,社号2,社号3,社号4,社号5,供应商,出版单位名称,出版單位（繁體）,出版单位名称曾用名,音像电子出版社,音像电子出版社号,备注
+2,,,北京,5763,5682,5640,,,A01137,北京理工大学出版社有限责任公司,北京理工大學出版社有限責任公司,北京理工大学出版社,,,
+         * 
+         */
+
+
     }
 }

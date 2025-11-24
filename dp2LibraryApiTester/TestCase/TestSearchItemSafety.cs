@@ -139,6 +139,17 @@ namespace dp2LibraryApiTester
                 if (lRet == -1)
                     goto ERROR1;
 
+
+                // 2025/11/3
+                // 临时设置 不校验条码号
+                lRet = channel.SetSystemParameter(null,
+                    "circulation",
+                    "?VerifyBarcode",
+                    "false",
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
                 // 创建册记录
                 DataModel.SetMessage($"正在创建书目的下级({_dbType})记录");
                 EntityInfo[] errorinfos = null;

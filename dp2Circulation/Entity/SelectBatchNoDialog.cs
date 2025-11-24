@@ -1,19 +1,19 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Sql;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -41,10 +41,32 @@ namespace dp2Circulation
             }
         }
 
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         private void SelectBatchNoDialog_Load(object sender, EventArgs e)
         {
             this.SetTitle();
-            this.BeginInvoke(new Action(FillList));
+            // this.BeginInvoke(new Action(FillList));
+            var token = this._cancel.Token;
+            _ = Task.Factory.StartNew(() =>
+            {
+                // 显示“请等待”
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = false;
+                    this.listView_records.Items.Add(new ListViewItem("正在获取列表 ..."));
+                });
+
+                FillList(token);
+
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = true;
+                });
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -65,6 +87,7 @@ namespace dp2Circulation
             this.Close();
         }
 
+        /*
         // 引用。调用本对话框的调主提供
         public LibraryChannel Channel
         {
@@ -78,6 +101,7 @@ namespace dp2Circulation
             get;
             set;
         }
+        */
 
         public string InventoryDbName
         {
@@ -101,25 +125,45 @@ namespace dp2Circulation
             }
         }
 
-        void FillList()
+        void FillList(CancellationToken token)
         {
+            /*
             if (this.Channel == null
                 || this.Stop == null)
                 return;
+            */
+
+            // testing
+            // Thread.Sleep(5000);
 
             string strError = "";
             int nRet = 0;
-            if (string.IsNullOrEmpty(this.InventoryDbName) == false)
-                nRet = SearchAllBatchNo(
-                     this.Channel,
-                     this.Stop,
-                     this.InventoryDbName,
-                     out strError);
-            else
-                nRet = SearchAllLocation(
-     this.Channel,
-     this.Stop,
-     out strError);
+            var looping = Program.MainForm.Looping(
+                out LibraryChannel channel,
+                "",
+                "settimeout:0:5:0");
+            token.Register(() =>
+            {
+                looping?.Progress?.DoStop();
+            });
+            try
+            {
+                if (string.IsNullOrEmpty(this.InventoryDbName) == false)
+                    nRet = SearchAllBatchNo(
+                        channel,
+                        looping.Progress,
+                        this.InventoryDbName,
+                        out strError);
+                else
+                    nRet = SearchAllLocation(
+                        channel,
+                        looping.Progress,
+                        out strError);
+            }
+            finally
+            {
+                looping.Dispose();
+            }
 
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -154,6 +198,7 @@ namespace dp2Circulation
             {
                 for (int i = 0; i < 2; i++)
                 {
+                    // 注: 两次检索的时间都可能较长，要提供中断的机会
                     long lRet = channel.SearchItem(
         stop,
         "<all>",
@@ -224,7 +269,7 @@ namespace dp2Circulation
                                 return -1;
                             }
 
-                            if (this._libraryCodeList.Count > 0 
+                            if (this._libraryCodeList.Count > 0
                                 && MatchLibraryCode(this._libraryCodeList, record.Path) == false)
                                 continue;
 
@@ -283,7 +328,7 @@ namespace dp2Circulation
 
         static bool MatchLibraryCode(List<string> librarycodes, string strLocation)
         {
-            foreach(string librarycode in librarycodes)
+            foreach (string librarycode in librarycodes)
             {
                 if (MatchLibraryCode(librarycode, strLocation) == true)
                     return true;
@@ -319,7 +364,7 @@ namespace dp2Circulation
                         + "'>");
                 // 当前是否为全局用户
                 bool bGlobalUser = this._libraryCodeList.Count == 0 || this._libraryCodeList.IndexOf("") != -1;
-                    // 全局用户只认列表中 "" 一个值。这样可以检索出全部批次号，包括各个分馆的
+                // 全局用户只认列表中 "" 一个值。这样可以检索出全部批次号，包括各个分馆的
                 if (bGlobalUser == true && this._libraryCodeList.Count != 1)
                 {
                     this._libraryCodeList.Clear();
@@ -527,6 +572,13 @@ namespace dp2Circulation
             // 排序
             this.listView_records.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
             this.listView_records.ListViewItemSorter = null;
+        }
+
+        private void SelectBatchNoDialog_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            this._cancel.Cancel();
+            this._cancel.Dispose();
+            this._cancel = null;
         }
     }
 }

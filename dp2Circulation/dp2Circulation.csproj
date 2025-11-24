@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>733</ApplicationRevision>
+    <ApplicationRevision>749</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -884,6 +884,9 @@
     <Compile Include="ManageDatabase\PageNewLoanPolicy.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ManageDatabase\WatermarkTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Message\MessageForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -921,8 +924,12 @@
       <DependentUpon>StartRebuildKeysDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="NewApplicationInfo.cs" />
+    <Compile Include="OperLogStatis\default\ChargingDetailStatis.cs" />
     <Compile Include="OperLogStatis\OperLogItemLoader.cs" />
     <Compile Include="OperLogStatis\OperLogLoader.cs" />
+    <Compile Include="OperLogStatis\OperLogStatisForm_xxx.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OperLogStatis\OperLogStatisForm_transfer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1972,6 +1979,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="default\fieldhtml.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="default\OperLogStatis\ChargingDetail\input.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="default\OperLogStatis\ChargingDetail\style.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="default\patronrights.xml">
@@ -3341,6 +3354,7 @@
     <Content Include="unimarc_cfgs\dp2circulation_marc_autogen.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="UnitTest\TestVerifyHost.cs" />
     <Compile Include="UserForm.cs">
       <SubType>Form</SubType>
     </Compile>

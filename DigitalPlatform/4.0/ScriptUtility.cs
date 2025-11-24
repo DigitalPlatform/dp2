@@ -257,7 +257,10 @@ warnings);
                     refs = temp.ToArray();
                 }
 
-                var tree = SyntaxFactory.ParseSyntaxTree(strCode);
+                var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Latest);
+                // 2025/11/21
+                var tree = CSharpSyntaxTree.ParseText(strCode, parseOptions);
+                // var tree = SyntaxFactory.ParseSyntaxTree(strCode);
                 string fileName = Guid.NewGuid().ToString();
 
                 // 

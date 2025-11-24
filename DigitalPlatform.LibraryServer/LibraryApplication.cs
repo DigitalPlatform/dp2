@@ -1,10 +1,26 @@
 ﻿// #define OPTIMIZE_API
 #define LOG_INFO
 
-
+using DigitalPlatform.Core;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Message;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using Microsoft.VisualStudio.Threading;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
+using MongoDB.Driver;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -19,24 +35,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-
-using Microsoft.VisualStudio.Threading;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver;
-using Newtonsoft.Json.Linq;
-
-using DigitalPlatform.Core;
-using DigitalPlatform.IO;
-using DigitalPlatform.LibraryServer.Common;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using System.ComponentModel;
-
+using System.Xml.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -4866,15 +4865,14 @@ out error);
 
                     this.m_bChanged = false;
 
-                    /*
                     // 2017/11/25
                     {
                         if (this.LibraryCfgDom == null)
                             this.LibraryCfgDom = new XmlDocument();
                         this.LibraryCfgDom.Load(strFileName);
                     }
-                    */
 
+                    /*
                     // 2021/7/24
                     {
                         XmlDocument dom = new XmlDocument();
@@ -4882,6 +4880,7 @@ out error);
 
                         this._libraryCfgDom = dom;
                     }
+                    */
                 }
                 finally
                 {
@@ -5952,7 +5951,7 @@ out error);
         // 注：返回1的时候strItemDbName依然可能为空。1只是表示找到了书目库定义，但是不确保有实体库定义
         // return:
         //      -1  出错
-        //      0   没有找到
+        //      0   没有找到(注意 strError 此时没有返回值)
         //      1   找到(书目库定义，但是不确保实体库存在)
         public int GetSubDbName(string strBiblioDbName,
             string dbType,
@@ -8772,6 +8771,8 @@ out strError);
         // TODO: 判断strBarcode是否为空
         // 获得册记录
         // 本函数为了执行效率方面的原因, 不去获得超过1条以上的路径。所返回的重复条数最大为1000
+        // parameters:
+        //      strBarcodeParam  册条码号。如果希望用参考ID检索，可以在前面加上 "@refID:" 前缀
         // return:
         //      -1  error
         //      0   not found
@@ -8795,9 +8796,9 @@ out strError);
             LibraryApplication app = this;
 
             string strBarcode = strBarcodeParam;
-            string strHead = "@refID:";
-
             string strFrom = "册条码";
+
+            string strHead = "@refID:";
             if (StringUtil.HasHead(strBarcode, strHead, true) == true)
             {
                 strFrom = "参考ID";
@@ -8807,6 +8808,12 @@ out strError);
                     strError = "字符串 '" + strBarcodeParam + "' 中 参考ID 部分不应为空";
                     return -1;
                 }
+            }
+            else if (strBarcode.StartsWith("@itemBarcode:")
+                || strBarcode.StartsWith("@barcode:"))
+            {
+                // 2025/10/30 支持两种新的前缀
+                strBarcode = strBarcode.Substring(strBarcode.IndexOf(":") + 1).Trim();
             }
 
             // 构造检索式
@@ -10428,7 +10435,7 @@ out strError);
         }
 
         // 根据馆代码、批次号和册条码号对盘点库进行查重
-        // 本函数只负责查重, 并不获得记录体
+        // 本函不但负责查重, 还获得命中的第一条记录的记录体
         // return:
         //      -1  error
         //      其他    命中记录条数(不超过nMax规定的极限)
@@ -10440,10 +10447,14 @@ out strError);
             string strRefID,
             int nMax,
             out List<string> aPath,
+            out string xml,
+            out byte[] timestamp,
             out string strError)
         {
             strError = "";
             aPath = new List<string>();
+            xml = "";
+            timestamp = null;
 
             string strInventoryDbName = GetInventoryDbName();
 
@@ -10490,6 +10501,27 @@ out strError);
 
             long lHitCount = lRet;
 
+            // 2025/11/11 改用 SearchResultLoader 获取记录
+            SearchResultLoader loader = new SearchResultLoader(channel,
+                null,
+                resultSetName,
+                "id,xml,timestamp",
+                "zh");
+            loader.ElementType = "Record";
+            foreach(Record record in loader)
+            {
+                // 第一条记录的 XML 和 timestamp 返回
+                if (aPath.Count == 0)
+                {
+                    xml = record.RecordBody?.Xml;
+                    timestamp = record.RecordBody?.Timestamp;
+                }
+                aPath.Add(record.Path);
+                if (nMax >= 0 && aPath.Count >= nMax)
+                    break;
+            }
+
+            /*
             lRet = channel.DoGetSearchResult(
                 resultSetName,
                 0,
@@ -10509,7 +10541,7 @@ out strError);
                 strError = "DoGetSearchResult aPath error 和前面已经命中的条件矛盾";
                 goto ERROR1;
             }
-
+            */
             return (int)lHitCount;
         ERROR1:
             return -1;
@@ -16919,9 +16951,21 @@ strLibraryCode);    // 读者所在的馆代码
             strError = "";
             strLibraryCode = "";
 
+            bool HasRights(string r, string path)
+            {
+                if (CheckAccess(sessioninfo,
+                    $"检查针对 {path} 的 {r} 权限是否具备",
+                    ResPath.GetDbName(path),
+                    r,
+                    "",
+                    out _) == null)
+                    return true;
+                return false;
+            }
+
             //      strLibraryCodeList  当前用户所管辖的馆代码列表
             string strLibraryCodeList = sessioninfo.LibraryCodeList;
-            string strRights = sessioninfo.RightsOrigin;
+            // string strRights = sessioninfo.RightsOrigin;
 
             string strActionName = "写入";
             if (strAction == "delete")
@@ -16974,7 +17018,7 @@ strLibraryCode);    // 读者所在的馆代码
                         strError = "删除文件 " + strResPath + " 被拒绝。特殊文件不允许任何用户删除";
                         return 0;
                     }
-                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    if (HasRights("managedatabase", strPath) == false)
                     {
                         strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managedatabase 权限";
                         return 0;
@@ -16982,7 +17026,7 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 else if (string.Compare(strFirstLevel, "backup", true) == 0)
                 {
-                    if (StringUtil.IsInList("backup,managedatabase", strRights) == false)
+                    if (HasRights("backup,managedatabase", strPath) == false)
                     {
                         strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 backup 或 managedatabase 权限";
                         return 0;
@@ -17013,7 +17057,7 @@ strLibraryCode);    // 读者所在的馆代码
 #endif
                 else if (string.Compare(strFirstLevel, "upload", true) == 0)
                 {
-                    if (StringUtil.IsInList("upload,managedatabase", strRights) == false)
+                    if (HasRights("upload,managedatabase", strPath) == false)
                     {
                         strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 upload 或 managedatabase 权限";
                         return 0;
@@ -17027,7 +17071,7 @@ strLibraryCode);    // 读者所在的馆代码
                         strError = "删除文件 " + strResPath + " 被拒绝。特殊文件不允许任何用户删除";
                         return 0;
                     }
-                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    if (HasRights("managedatabase", strPath) == false)
                     {
                         strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managedatabase 权限";
                         return 0;
@@ -17039,7 +17083,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strError = $"意外的第一级目录名 '{strFirstLevel}'";
                     return -1;
                     */
-                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    if (HasRights("managedatabase", strPath) == false)
                     {
                         strError = $"{strActionName}文件或目录 {strResPath} 被拒绝。不具备 managedatabase 权限";
                         return 0;
@@ -17097,17 +17141,17 @@ strLibraryCode);    // 读者所在的馆代码
                 return 1;
             }
 
-            if (StringUtil.IsInList("managedatabase", strRights))
+            if (HasRights("managedatabase", strPath))
                 return 1;
 
+            string temp_path = strPath;
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
             bool is_object_path = IsRestObjectPath(strPath);
 
             // 检查当前账户是否具有 setxxxinfo 或 writerecord 权限
             var error = CheckDbSetRights(
                 sessioninfo,
-                strRights,
-                strDbName,
+                temp_path,  // strDbName,
                 strAction,
                 out string db_type);
             if (error != null)
@@ -17132,7 +17176,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
                     if (strFirstPart == "template")
                     {
-                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        if (HasRights("writetemplate", strDbName) == false)
                         {
                             strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
@@ -17140,7 +17184,7 @@ strLibraryCode);    // 读者所在的馆代码
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
                     // 2023/1/5
-                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    if (HasRights("writecfgfile", strDbName) == false)
                     {
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
@@ -17169,6 +17213,8 @@ strLibraryCode);    // 读者所在的馆代码
     strAction,
     true,
     out _,
+    out string matched_action,
+    out string matched_operation,
     out _);
                         if (check_error != null)
                         {
@@ -17176,6 +17222,20 @@ strLibraryCode);    // 读者所在的馆代码
                             return 0;
                         }
 
+                        // 要检查 order 权限针对 orderWork 角色的情况
+                        {
+                            if (StringUtil.IsInList("order", matched_operation))
+                            {
+                                // 注: 如果希望不关注顺序检查 order Operation，可用 last_hit_right.Where(o => o.Operation == "order").Any()
+                                // 如果是 order 匹配上的，要增加对数据库角色的判断
+                                if (ResPath.IsAppendRecPath(strResPath) == false
+                                    && IsOrderWorkBiblioDb(strDbName))
+                                {
+                                    strError = $"用户 {GetCurrentUserName(sessioninfo)} 的 order 权限无法针对不具有 orderWork 角色的书目库 {strDbName} 执行覆盖修改动作 {strAction}";
+                                    return 0;
+                                }
+                            }
+                        }
                         /*
                         // 要具备 setbiblioinfo 权限
                         if (StringUtil.IsInList("setbiblioinfo,writerecord", strRights) == false)
@@ -17248,7 +17308,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
                     if (strFirstPart == "template")
                     {
-                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        if (HasRights("writetemplate", strDbName) == false)
                         {
                             strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
@@ -17256,7 +17316,7 @@ strLibraryCode);    // 读者所在的馆代码
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
                     // 2023/1/5
-                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    if (HasRights("writecfgfile", strDbName) == false)
                     {
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
@@ -17366,7 +17426,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
                     if (strFirstPart == "template")
                     {
-                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        if (HasRights("writetemplate", strDbName) == false)
                         {
                             strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
@@ -17374,7 +17434,7 @@ strLibraryCode);    // 读者所在的馆代码
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
                     // 2023/1/5
-                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    if (HasRights("writecfgfile", strDbName) == false)
                     {
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
@@ -17457,7 +17517,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
                     if (strFirstPart == "template")
                     {
-                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        if (HasRights("writetemplate", strDbName) == false)
                         {
                             strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
@@ -17465,7 +17525,7 @@ strLibraryCode);    // 读者所在的馆代码
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
                     // 2023/1/5
-                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    if (HasRights("writecfgfile", strDbName) == false)
                     {
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
@@ -17481,7 +17541,7 @@ strLibraryCode);    // 读者所在的馆代码
                     if (strPath == "")
                     {
                         // setxxxinfo
-                        if (StringUtil.IsInList($"set{util_db_type}info,writerecord", strRights) == false)
+                        if (HasRights($"set{util_db_type}info,writerecord", strDbName) == false)
                         {
                             strError = $"直接写入记录 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 set{util_db_type}info 或 writerecord 权限";
                             return 0;
@@ -17852,8 +17912,8 @@ out _);
         //      2   具备部分权限(2022/5/20)
         public int CheckGetResRights(
             SessionInfo sessioninfo,
-            string strLibraryCodeList,
-            string strRights,
+            //string strLibraryCodeList,
+            //string strRights,
             string strResPath,
             out string strLibraryCode,
             out string strFilePath,
@@ -17862,6 +17922,9 @@ out _);
             strError = "";
             strLibraryCode = "";
             strFilePath = "";
+
+            string strLibraryCodeList = sessioninfo.LibraryCodeList;
+            // string strRights = sessioninfo.RightsOrigin;
 
             string strPath = strResPath.Replace("\\", "/");
 
@@ -17878,6 +17941,18 @@ out _);
             if (nRet == -1)
                 return -1;
 
+            bool HasRights(string r, string path)
+            {
+                if (CheckAccess(sessioninfo,
+                    $"检查针对 {path} 的 {r} 权限是否具备",
+                    ResPath.GetDbName(path),
+                    r,
+                    "",
+                    out _) == null)
+                    return true;
+                return false;
+            }
+
             if (nRet == 1)
             {
                 // 读取 dp2library 本地文件
@@ -17891,11 +17966,11 @@ out _);
 
                     // 注意： strPath 中的斜杠应该是 '/'
                     string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
-                    if (StringUtil.IsInList("managedatabase,backup", strRights))
+                    if (HasRights("managedatabase,backup", strFilePath))
                     {
                         // 具备 managedatabase 或 backup 权限可以列出任何文件和目录
                     }
-                    else if (StringUtil.IsInList("download,upload", strRights))
+                    else if (HasRights("download,upload", strFilePath))
                     {
                         // 具备 download 或 upload 权限，可以列 upload 目录。注意不能列 backup 目录，这是因为 backup 目录中的文件高度敏感
                         if (strFirstLevel == "upload")
@@ -17914,7 +17989,7 @@ out _);
                             return 0;
                         }
                     }
-                    else if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
+                    else if (HasRights("managedatabase,backup", strFilePath) == false)
                     {
                         strError = $"因{GetCurrentUserName(sessioninfo)}不具备权限 managedatabase 或 backup，不允许列目录 '{strResPath}'";
                         return 0;
@@ -17971,7 +18046,7 @@ out _);
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
                 if (strFirstLevel == "log")
                 {
-                    if (StringUtil.IsInList("managedatabase,backup", strRights))
+                    if (HasRights("managedatabase,backup", strPath))
                     {
                         // 具备 managedatabase 或 backup 权限可以列出任何文件和目录
                         return 1;
@@ -18122,10 +18197,42 @@ out _);
                         if (string.IsNullOrEmpty(strObjectRights) == true)
                             goto ALLOW_ACCESS;   // 没有定义 rights 的对象是允许任何访问者来获取的
 
+                        /*
+                         * 
+                if (CanGet("download", func_checkAccess("download"), strObjectRights) == false
+                    && CanGet("preview", func_checkAccess("preview"), strObjectRights) == false)
+                    delete_fields.Add(field);
+
+                                                    (r, d) =>
+                            {
+                                if (r == "download" || r == "preview")
+                                    return strRights;
+                                return CheckAccess(sessioninfo,
+                                    $"书目记录下级对象({r})",
+                                    ResPath.GetDbName(strBiblioRecPath),
+                                    r,
+                                    "",
+                                    out _);
+                            },
+
+
+#else                         * */
+                    delegate_checkAccess func_checkAccess = (string r, string d) =>
+                        {
+                            if (r == "download" || r == "preview")
+                                return sessioninfo.RightsOrigin;
+                            return CheckAccess(sessioninfo,
+                                $"数据库 {strDbName} 记录下级对象({r})",
+                                strDbName,
+                                r,
+                                "",
+                                out _);
+                        };
+
                         string strOperation = "download";
                         if (string.IsNullOrEmpty(strPartCmd) == false)
                             strOperation = "preview";
-                        if (CanGet(strOperation, strRights, strObjectRights) == true)
+                        if (CanGet(strOperation, /*strRights*/func_checkAccess(strOperation), strObjectRights) == true)
                             goto ALLOW_ACCESS;
 
                         strError = $"读取资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备相应的权限";
@@ -18316,6 +18423,29 @@ out _);
             else
                 return $"数据库 {strDbName} 内资源不允许访问";
 
+#if ITEM_ACCESS_RIGHTS
+            if (db_type == "biblio" || db_type == "authority")
+            {
+                /*
+                // TODO: 归入 CheckGetBiblioInfoAccess()
+                // 2025/11/5
+                // 注: SequenceCheckAccess() 会顺次检查 getbiblioinfo 等几个 operation 名，优先匹配 getbiblioinfo，哪怕它在权限字符串中靠后定义。这样设计的目的是，尽量获得 getbiblioinfo=*(200-300) 中括号部分的许可字段列表
+                var error = SequenceCheckAccess(sessioninfo,
+    $"获取数据库 '{strDbName}' 内资源",
+    strDbName,
+    GetBiblioInfoAction(db_type),
+    "",
+    out _,
+    out _);
+                */
+                var error = CheckGetBiblioInfoAccess(
+    sessioninfo,
+    db_type,
+    strDbName,
+    out _);
+                return error;
+            }
+#else
             // 书目库(规范库)，先判断存取定义
             if ((db_type == "biblio" || db_type == "authority")
                 && String.IsNullOrEmpty(sessioninfo.Access) == false)
@@ -18358,24 +18488,425 @@ out _);
                 }
             }
 
+#endif
             return null;
         }
 
+        // 注: 不在此函数中直接判断 order 权限和书目库 orderWork 角色的限制情况，而是通过返回两个 matched_... 让调主随后自行追加判断
+        // parameters:
+        //      matched_source_operation    [out] 返回实际匹配的对源记录的删除 operation 权限。注意只有当 strAction 包含 “move” 时才会返回值
+        //      matched_target_operation    [out] 返回实际匹配的对源记录的修改(创建或覆盖) operation 权限。
+        public string CheckMoveBiblioInfoAccess(SessionInfo sessioninfo,
+            string strAction,
+            string strSourceBiblioRecPath,
+            string strNewBiblioRecPath,
+            out string strReadAccessParameters,
+            out string matched_source_operation,
+            out string strWriteAccessParameters,
+            out string matched_target_operation)
+        {
+            matched_source_operation = "";
+            matched_target_operation = "";
+#if ITEM_ACCESS_RIGHTS
+            strReadAccessParameters = null;
+            strWriteAccessParameters = "";
+
+            // *** 先检查源记录
+            {
+                var source_dbname = ResPath.GetDbName(strSourceBiblioRecPath);
+                var error = CheckAccess(sessioninfo,
+                    $"{strAction} 书目记录(检查源之读)",
+                    source_dbname,
+                    GetInfoRight("getbiblioinfo"),
+                    "*",
+                    out strReadAccessParameters);
+                if (error != null)
+                    return error;
+
+                // 如果是 move 操作，还要求源具备 delete 动作权限
+                if (strAction.Contains("move"))
+                {
+                    var rights = SetInfoRight("setbiblioinfo");
+                    error = CheckAccess(sessioninfo,
+        $"{strAction} 书目记录(检查源之删)",
+        source_dbname,
+        rights,
+        "delete",
+        out _,
+        out List<OperRights> hit_rights);
+                    if (error != null)
+                        return error;
+                    if (hit_rights != null)
+                    {
+                        // 重整顺序，按照 rights 中的 action 顺序
+                        Sort(hit_rights, rights.Split(','));
+                        matched_source_operation = hit_rights[0].Operation;
+                    }
+                    if (strAction.Contains("move")
+                        && HasOrder(hit_rights, rights))
+                    {
+                        // 注: order 权限具有的情况下，要继续检查 source_dbName 是否具有 orderWork 角色
+                        if (IsOrderWorkBiblioDb(source_dbname) == false)
+                            return $"(用户 {GetCurrentUserName(sessioninfo)} 的 order 权限遇到限制条件) 源书目库 {source_dbname} 不具备 orderWork 角色，无法在移动中删除源书目记录";
+                    }
+                }
+            }
+
+            // 查看命中的信息里面，是否第一个 Operation 是 'order'
+            bool HasOrder(List<OperRights> hit_rights, string rights)
+            {
+                if (hit_rights == null || hit_rights.Count == 0)
+                    return false;
+                {
+                    // 重整顺序，按照 rights 中的 action 顺序
+                    Sort(hit_rights, rights.Split(','));
+                    if (hit_rights[0].Operation == "order")
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // *** 然后检查目标记录
+            {
+                var target_dbname = ResPath.GetDbName(strNewBiblioRecPath);
+
+                string strWriteAction = "new";
+                if (ResPath.IsAppendRecPath(strNewBiblioRecPath) == false)
+                    strWriteAction = "change";
+
+                var rights = SetInfoRight("setbiblioinfo");
+
+                var error = CheckAccess(sessioninfo,
+                    $"{strAction} 书目记录(检查目标之写)",
+                    target_dbname,
+                    rights,
+                    strWriteAction,
+                    out strWriteAccessParameters,
+                    out List<OperRights> hit_rights);
+                if (error != null)
+                    return error;
+                if (hit_rights != null)
+                {
+                    // 重整顺序，按照 rights 中的 action 顺序
+                    Sort(hit_rights, rights.Split(','));
+                    matched_target_operation = hit_rights[0].Operation;
+                }
+                /*
+                if (HasOrder(hit_rights, rights))
+                {
+                    // 注: order 权限具有的情况下，要继续检查 target_dbName 是否具有 orderWork 角色
+                    if (IsOrderWorkBiblioDb(target_dbname) == false)
+                        return $"(用户 {GetCurrentUserName(sessioninfo)} 的 order 权限遇到限制条件) 目标书目库 {target_dbname} 不具备 orderWork 角色，无法写入目标书目记录";
+                }
+                */
+            }
+
+            return null;
+#else
+            strReadAccessParameters = null;
+            strWriteAccessParameters = "";
+
+            // 针对源的读权限是否已经校验过
+            bool bReadRightVerified = false;
+            // 针对目标的写权限是否已经校验过
+            bool bWriteRightVerified = false;
+
+            string source_dbname = ResPath.GetDbName(strSourceBiblioRecPath);
+
+            // 检查存取权限
+            if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+            {
+                // *** 第一步，检查源数据库相关权限
+                {
+                    // string strReadAction = "copy";
+                    string strReadAction = "*"; // 2023/3/17
+
+                    // return:
+                    //      null    指定的操作类型的权限没有定义
+                    //      ""      定义了指定类型的操作权限，但是否定的定义
+                    //      其它      权限列表。* 表示通配的权限列表
+                    string strActionList = GetDbOperRights(sessioninfo.Access,
+                        source_dbname,
+                        "getbiblioinfo");
+                    if (strActionList == null)
+                    {
+                        // 看看是不是关于 getbiblioinfo 的任何权限都没有定义?
+                        strActionList = GetDbOperRights(sessioninfo.Access,
+                            "",
+                            "getbiblioinfo");
+                        if (strActionList == null)
+                        {
+                            // 继续检查写权限
+                            goto SKIP_1;
+                        }
+                        else
+                        {
+                            return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{source_dbname}' 执行 getbiblioinfo {strReadAction} 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
+                        }
+                    }
+
+                    if (strActionList == "*")
+                    {
+                        // 通配
+                    }
+                    else
+                    {
+                        if (IsInAccessList(strReadAction,
+                            strActionList,
+                            true,   // 2023/3/20
+                            out strReadAccessParameters) == false)
+                        {
+                            return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{source_dbname}' 执行 getbiblioinfo {strReadAction} 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
+                        }
+                    }
+
+                    bReadRightVerified = true;
+                }
+
+                // 2024/11/24
+                // 检查源库的删除记录权限
+                if (strAction.IndexOf("move") != -1)
+                {
+                    string strWriteAction = "delete";
+
+                    // return:
+                    //      null    指定的操作类型的权限没有定义
+                    //      ""      定义了指定类型的操作权限，但是否定的定义
+                    //      其它      权限列表。* 表示通配的权限列表
+                    string strActionList = GetDbOperRights(sessioninfo.Access,
+                        source_dbname,
+                        "setbiblioinfo");
+                    if (strActionList == null)
+                    {
+                        // 看看是不是关于 setbiblioinfo 的任何权限都没有定义?
+                        strActionList = GetDbOperRights(sessioninfo.Access,
+                            "",
+                            "setbiblioinfo");
+                        if (strActionList == null)
+                        {
+                            goto SKIP_1;
+                        }
+                        else
+                        {
+                            return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{source_dbname}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                        }
+                    }
+
+                    if (strActionList == "*")
+                    {
+                        // 通配
+                    }
+                    else
+                    {
+                        if (IsInAccessList(strWriteAction,
+                            strActionList,
+                            true,
+                            out strWriteAccessParameters) == false)
+                        {
+                            return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{source_dbname}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                        }
+                    }
+
+                }
+
+            SKIP_1:
+
+                // *** 第二步，检查目标数据库相关权限
+                {
+                    string strTargetBiblioDbName = ResPath.GetDbName(strNewBiblioRecPath);
+
+                    string strWriteAction = "new";
+                    if (ResPath.IsAppendRecPath(strNewBiblioRecPath) == false)
+                        strWriteAction = "change";
+
+                    // return:
+                    //      null    指定的操作类型的权限没有定义
+                    //      ""      定义了指定类型的操作权限，但是否定的定义
+                    //      其它      权限列表。* 表示通配的权限列表
+                    string strActionList = GetDbOperRights(sessioninfo.Access,
+                        strTargetBiblioDbName,
+                        "setbiblioinfo");
+                    if (strActionList == null)
+                    {
+                        // 看看是不是关于 setbiblioinfo 的任何权限都没有定义?
+                        strActionList = GetDbOperRights(sessioninfo.Access,
+                            "",
+                            "setbiblioinfo");
+                        if (strActionList == null)
+                        {
+                            // 2014/3/12
+                            // TODO: 可以提示"既没有... 也没有 ..."
+                            goto CHECK_RIGHTS_2;
+                        }
+                        else
+                        {
+                            return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strTargetBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                        }
+                    }
+
+                    if (strActionList == "*")
+                    {
+                        // 通配
+                    }
+                    else
+                    {
+                        if (IsInAccessList(strWriteAction,
+                            strActionList,
+                            true,   // 2023/3/20
+                            out strWriteAccessParameters) == false)
+                        {
+                            return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strTargetBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                        }
+                    }
+
+                    bWriteRightVerified = true;
+                }
+            }
+
+
+        CHECK_RIGHTS_2:
+            if (bReadRightVerified == false)
+            {
+                // 权限字符串
+                if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")}", sessioninfo.RightsOrigin) == false) // ,order
+                {
+                    return $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备针对源数据库的 getbiblioinfo 或 order 权限。";
+                }
+            }
+            if (bWriteRightVerified == false)
+            {
+                // 权限字符串
+                if (StringUtil.IsInList("setbiblioinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
+                {
+                    return $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setbiblioinfo 或 writerecord 或 order 权限";
+                }
+            }
+            // TODO: 需要额外的检查，看看所保存的数据MARC格式是不是这个数据库要求的格式？
+
+            return null;
+#endif
+        }
+
         // 检查当前用户是否具备 SetBiblioInfo() API 的存取定义权限
+        // 注: 包含了检查 order 权限相关书目库具备 orderWork 角色的检查
+        //      规则是: 当用户只有 order 权限而没有 setbiblioinfo 权限的时候，对于具有 orderWork 角色的书目库可以修改其中的记录，但对于没有 orderWork 角色的书目库就只能在其中创建新的记录而不能修改已经存在的记录。
+        //      由于所谓追加和覆盖，并不能简单用 strAction 值来判断。存在 strAction 是 "new" 但路径是一个确定的路径，和 strAction 是 "change" 但路径是一个追加方式路径的扭曲情况，
+        //      所以只能用 strExistingXml 是否为空来辅助判断。但本函数的功能职责不宜太复杂，所以最后决定仅返回 matched_operation 即可，让调主自己另行判断
         // parameters:
         //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+        //      hit_action   [out] 匹配命中的 action 名称。注意 strAction 中可能是多个名称，而 hit_action 中只有一个名称
         // return:
         //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
         //      null    具备权限
         //      其它      不具备权限。文字是报错信息
-        string CheckSetBiblioInfoAccess(SessionInfo sessioninfo,
+        public string CheckSetBiblioInfoAccess(SessionInfo sessioninfo,
             string strDbType,
             string strBiblioDbName,
             string strAction,
             bool check_normal_right,
             out string strAccessParameters,
+            out string matched_action,
+            out string matched_operation,
             out bool bOwnerOnly)
         {
+#if ITEM_ACCESS_RIGHTS
+            strAccessParameters = "";
+            matched_action = "";
+            bOwnerOnly = false;
+            matched_operation = "";
+
+            string another_action = "";
+            if (strAction == "delete"
+                || strAction == "change"
+                || strAction == "onlydeletebiblio"
+                || strAction == "onlydeletesubrecord")
+            {
+                another_action = "owner" + strAction;
+            }
+
+            string union_action = strAction;
+            if (string.IsNullOrEmpty(another_action) == false)
+                union_action += "," + another_action;
+
+            string rights = null;
+            if (strDbType == "authority")
+                rights = SetInfoRight("setauthorityinfo");
+            else
+                rights = SetInfoRight("setbiblioinfo");
+
+            var sort_table = rights.Split(',');
+
+            List<string> errors = new List<string>();
+            var hit_rights = new List<List<OperRights>>();
+            {
+                // 然后判断原始 action
+                {
+                    var error = SequenceCheckAccess(sessioninfo,
+        $"{strAction} 书目库", // TODO: 也可能是规范库，提示要能自动变化
+        strBiblioDbName,
+        rights,
+        union_action,   // strAction,
+        out strAccessParameters,
+        out List<OperRights> temp);
+                    if (error == null)
+                    {
+                        // 重整顺序延迟进行
+                        hit_rights.Add(temp);
+                    }
+                    else
+                    {
+                        errors.Add(error);
+                    }
+                }
+            }
+
+            if (hit_rights.Count == 0)
+            {
+                Debug.Assert(errors.Count > 0);
+                return errors[errors.Count - 1];
+            }
+
+            Debug.Assert(hit_rights.Count > 0);
+
+            List<OperRights> last_hit_right = null;
+            if (hit_rights.Count == 1)
+            {
+                last_hit_right = hit_rights[0];
+                // matched_action = last_hit_right[0].Rights;
+
+                // 如果是 owner... action 匹配上了
+                if (string.IsNullOrEmpty(another_action) == false
+                    && hasOwnerChange(last_hit_right[0].Rights, strAction))
+                {
+                    bOwnerOnly = true;
+                    matched_action = another_action;
+                }
+                else
+                    matched_action = strAction;
+            }
+
+            // 重整顺序，按照 rights 中的 action 顺序
+            if (last_hit_right != null)
+            {
+                Sort(last_hit_right, sort_table);
+                matched_operation = last_hit_right[0].Operation;
+            }
+
+            /*
+            if (last_hit_right != null
+                && last_hit_right[0].Operation == "order")
+            {
+                // 注: 如果希望不关注顺序检查 order Operation，可用 last_hit_right.Where(o => o.Operation == "order").Any()
+                // 如果是 order 匹配上的，要增加对数据库角色的判断
+                if (IsOrderWorkBiblioDb(strBiblioDbName))
+                    return null;
+                return $"用户 {GetCurrentUserName(sessioninfo)} 的 order 权限无法针对不具有 orderWork 角色的书目库 {strBiblioDbName} 执行修改动作 {strAction}";
+            }
+            */
+            return null;
+#else
             strAccessParameters = "";
             bOwnerOnly = false;
 
@@ -18479,8 +19010,50 @@ out _);
             }
 
             return null;
+#endif
         }
 
+        // 判断一个 action 列表字符串中是否包含 ownerchange，但不包含 change
+        static bool hasOwnerChange(string actions, string name = "change")
+        {
+            //if (actions.Contains("*") && actions != "*")
+            //    throw new ArgumentException($"actions 参数值 '{actions}' 不合法。如果使用了星号，就不允许再包含其它字符");
+            var has_change = IsInAccessList(name, actions, out string _);
+            var has_ownerchange = IsInAccessList($"owner{name}", actions, out string _);
+            if (has_change && has_ownerchange)
+                return false;
+            if (has_ownerchange)
+                return true;
+            return false;
+        }
+
+#if ITEM_ACCESS_RIGHTS
+        // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
+        // parameters:
+        //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+        // return:
+        //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+        //      null    具备权限
+        //      其它      不具备权限。文字是报错信息
+        public string CheckGetBiblioInfoAccess(
+            SessionInfo sessioninfo,
+            string db_type,
+            string strDbName,
+            out string strAccessParameters)
+        {
+            strAccessParameters = null; // null 表示不使用这个参数
+
+            Debug.Assert((db_type == "biblio" || db_type == "authority"));
+
+            return SequenceCheckAccess(sessioninfo,
+                $"获取书目信息",
+                strDbName,
+                GetBiblioInfoAction(db_type),
+                "",
+                out strAccessParameters,
+                out _);
+        }
+#else
         // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
         // parameters:
         //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
@@ -18498,6 +19071,16 @@ out _);
             strAccessParameters = null; // null 表示不使用这个参数
 
             Debug.Assert((db_type == "biblio" || db_type == "authority"));
+
+            /*
+            var error = CheckAccess(sessioninfo,
+                $"获取书目信息",
+                strDbName,
+                GetBiblioInfoAction(db_type),
+                "",
+                out strAccessParameters);
+            return error;
+            */
 
             // 检查存取权限
             {
@@ -18565,7 +19148,7 @@ out _);
             }
             return null;
         }
-
+#endif
 
         // 检查 getxxxobject 权限
         string CheckGetObjectRights(
@@ -18611,16 +19194,20 @@ out _);
 
         // 检查 setxxxinfo 权限
         // parameters:
+        //      path        记录路径
         //      strAction   new/change/delete 之一
         string CheckDbSetRights(
             SessionInfo sessioninfo,
-            string rights,
-            string strDbName,
+            // string rights,
+            string path,
             string strAction,
             out string db_type)
         {
             db_type = "";
             string right = "";
+
+            string rights = sessioninfo.RightsOrigin;
+            string strDbName = ResPath.GetDbName(path);
 
             if (this.IsBiblioDbName(strDbName) == true)
             {
@@ -18696,7 +19283,9 @@ out _);
             else if (db_type == "biblio" || db_type == "authority")
             {
                 // 书目库(规范库)，先判断存取定义
+#if !ITEM_ACCESS_RIGHTS
                 if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+#endif
                 {
                     // 检查当前用户是否具备 SetBiblioInfo() API 的存取定义权限
                     // parameters:
@@ -18712,22 +19301,55 @@ out _);
                         strAction,
                         false,
                         out _,
+                        out string matched_action,
+                        out string matched_operation,
                         out _);
+#if ITEM_ACCESS_RIGHTS
+                    // TODO: 要检查 order 权限针对 orderWork 角色的情况
+                    {
+                        if (StringUtil.IsInList("order", matched_operation))
+                        {
+                            // 注: 如果希望不关注顺序检查 order Operation，可用 last_hit_right.Where(o => o.Operation == "order").Any()
+                            // 如果是 order 匹配上的，要增加对数据库角色的判断
+                            if (ResPath.IsAppendRecPath(path) == false
+                                && IsOrderWorkBiblioDb(strDbName))
+                            {
+                                return $"用户 {GetCurrentUserName(sessioninfo)} 的 order 权限无法针对不具有 orderWork 角色的书目库 {strDbName} 执行覆盖修改动作 {strAction}";
+                            }
+                        }
+                    }
+
+#else
                     if (error == "normal")
-                        goto NORMAL_RIGHTS;
+                        goto NORMAL_RIGHTS; // 不可能走到此处了
+#endif
                     return error;
                 }
 
+#if !ITEM_ACCESS_RIGHTS
             NORMAL_RIGHTS:
                 if (StringUtil.IsInList(right + ",writerecord", rights) == false)
                     return $"写入数据库 {strDbName} 内资源被拒绝。{GetCurrentUserName(sessioninfo)}不具备 {right} 或 writerecord 权限。";
+#endif
             }
             else
             {
-                if (StringUtil.IsInList(right + ",writerecord", rights) == false)
+                if (HasRights(right + ",writerecord", strDbName) == false)
                     return $"写入数据库 {strDbName} 内资源被拒绝。{GetCurrentUserName(sessioninfo)}不具备 {right} 或 writerecord 权限。";
             }
             return null;
+
+            bool HasRights(string r, string path1)
+            {
+                if (CheckAccess(sessioninfo,
+                    $"检查针对 {path1} 的 {r} 权限是否具备",
+                    ResPath.GetDbName(path1),
+                    r,
+                    "",
+                    out _) == null)
+                    return true;
+                return false;
+            }
         }
 
 
@@ -19429,6 +20051,7 @@ biblio_rec_path);
             "getissueobject","setissueobject",
             "getcommentobject","setcommentobject",
             "getbibliosummary",
+            "getrecord","writerecord",
             "order",
             "managedatabase",
         };
@@ -19522,6 +20145,65 @@ biblio_rec_path);
             out strAccessParameters);
         }
 
+        public static string CheckAccess(SessionInfo sessioninfo,
+string oper_name,
+string strDbNameList,
+string rights,
+string strAction,
+out string strAccessParameters,
+out List<OperRights> hit_rights)
+        {
+            SplitRights(rights,
+                string.IsNullOrEmpty(sessioninfo.Access) == false,
+                out string access_rights,
+                out string normal_rights);
+            return CheckAccess(sessioninfo,
+            oper_name,
+            strDbNameList,
+            access_rights,
+            strAction,
+            normal_rights,
+            out strAccessParameters,
+            out hit_rights);
+        }
+
+        // 多个权限分解后一个一个探测的版本。可以确保 rights 中靠前的权限优先被探测
+        public static string SequenceCheckAccess(SessionInfo sessioninfo,
+string oper_name,
+string strDbNameList,
+string rights,
+string strAction,
+out string strAccessParameters,
+out List<OperRights> hit_rights)
+        {
+            strAccessParameters = "";
+            hit_rights = null;
+
+            if (string.IsNullOrEmpty(rights))
+                throw new ArgumentException($"rights 参数值不允许为空");
+
+            var list = StringUtil.SplitList(rights);
+            List<string> errors = new List<string>();
+            foreach (string right in list)
+            {
+                var error = CheckAccess(sessioninfo,
+oper_name,
+strDbNameList,
+right,
+strAction,
+out strAccessParameters,
+out hit_rights);
+                if (error == null)
+                    return null;
+                errors.Add(error);
+            }
+
+            Debug.Assert(errors.Count > 0);
+            return errors[0];
+            // return string.Join("; ", errors);
+        }
+
+
         // 2025/10/15
         // 检查当前用户是否具备存取定义权限或普通权限
         // parameters:
@@ -19546,12 +20228,39 @@ biblio_rec_path);
             string normal_rights,
             out string strAccessParameters)
         {
+            return CheckAccess(sessioninfo,
+    oper_name,
+    strDbNameList,
+    right_names,
+    strAction,
+    normal_rights,
+    out strAccessParameters,
+    out _);
+        }
+
+        // parameters:
+        //      hit_rights  [out] 返回匹配过程命中的 OperRights 对象的集合。这是在检查存取定义阶段得到的
+        public static string CheckAccess(SessionInfo sessioninfo,
+    string oper_name,
+    string strDbNameList,
+    string right_names,
+    string strAction,
+    string normal_rights,
+    out string strAccessParameters,
+    out List<OperRights> hit_rights)
+        {
             strAccessParameters = "";
+            hit_rights = null;
 
 #if DEBUG
             ThrowIfDup(right_names);
             ThrowIfDup(normal_rights);
 #endif
+            string caption;
+            if (string.IsNullOrEmpty(oper_name) == false)
+                caption = oper_name;
+            else
+                caption = normal_rights;
 
             var errors = new List<string>();
 
@@ -19584,11 +20293,12 @@ biblio_rec_path);
                 string strAccessActionList = "";
                 // return:
                 //      null    指定的操作类型的权限没有定义
-                //      ""      定义了指定类型的操作权限，但是否定的定义
-                //      其它      权限列表。* 表示通配的权限列表
-                strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                //      匹配的权限对象的集合 返回后，调主一般只取用第一个元素。注意里面可能存在 .Rights 为 "" 的表示否定的元素
+                hit_rights = GetDbOperRightsList(sessioninfo.Access,
                     strDbNameList,
                     right_names);
+                if (hit_rights != null && hit_rights.Count > 0)
+                    strAccessActionList = hit_rights[0].Rights;
                 if (strAccessActionList == null)
                 {
                     if (string.IsNullOrEmpty(strDbNameList))
@@ -19604,11 +20314,14 @@ biblio_rec_path);
                         if (is_access_enabled
                             && string.IsNullOrEmpty(normal_rights) == false)
                         {
+                            /*
                             // TODO: 可以提示"既没有... 也没有 ..."
                             if (string.IsNullOrEmpty(strAction))
                                 errors.Add($"不具备针对数据库 '{GetDatabaseCaption(strDbNameList)}' 权限为 '{right_names}' 的存取定义权限");
                             else
                                 errors.Add($"不具备针对数据库 '{GetDatabaseCaption(strDbNameList)}' 权限为 '{right_names}' 动作为 '{strAction}' 的存取定义权限");
+                            */
+                            AddAccessError();
                             goto CHECK_RIGHTS_2;
                         }
 
@@ -19616,9 +20329,13 @@ biblio_rec_path);
                     }
 
                     {
+                        /*
                         return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + GetDatabaseCaption(strDbNameList) + "' 执行权限为 " +
                             right_names +
                             " 动作为 " + strAction + " 的存取定义权限";
+                        */
+                        AddAccessError();
+                        return JoinErrors($"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}", errors);
                     }
                 }
                 if (strAccessActionList == "*")
@@ -19632,9 +20349,13 @@ biblio_rec_path);
                         true,
                         out strAccessParameters) == false)
                     {
+                        /*
                         return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 " + GetDatabaseCaption(strDbNameList) + " 执行权限为 " +
                             right_names +
                             " 动作为 " + strAction + " 的存取定义权限";
+                        */
+                        AddAccessError();
+                        return JoinErrors($"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}", errors);
                     }
                 }
 
@@ -19643,17 +20364,18 @@ biblio_rec_path);
 
         CHECK_RIGHTS_2:
             if (bRightVerified == false
+                && string.IsNullOrEmpty(normal_rights))
+            {
+                throw new ArgumentException($"CheckAccess() 无法执行：oper_name='{oper_name}' strDbNameList='{strDbNameList}' right_names='{right_names}' strAction='{strAction}' normal_rights='{normal_rights}'");
+            }
+
+            if (bRightVerified == false
                 && string.IsNullOrEmpty(normal_rights) == false)
             {
                 // 权限字符串
-                if (StringUtil.IsInList(normal_rights, sessioninfo.RightsOrigin) == false)
+                var hit_value = IndexOfList(normal_rights, sessioninfo.RightsOrigin);
+                if (hit_value == null)
                 {
-                    string caption;
-                    if (string.IsNullOrEmpty(oper_name) == false)
-                        caption = oper_name;
-                    else
-                        caption = normal_rights;
-
                     // TODO: 根据 rights 和 normal_rights 的非空情况，决定如何组织报错文字
                     // 如果两者均为非空，可以考虑报错为“存取定义缺乏 xxx，并且普通权限也缺乏 xxx”
                     // 如果仅仅是 rights 非空，可以考虑报错为“存取定义缺乏 xxx”
@@ -19668,7 +20390,21 @@ biblio_rec_path);
 
                     return JoinErrors($"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}", errors);
                 }
-                strAccessParameters = "*";  // 这样返回，即便被调主后面当作存取定义判断也是没有问题的
+                // 从 * 里面取 () 部分，什么也取不到
+                strAccessParameters = "";   // "*";  // 这样返回，即便被调主后面当作存取定义判断也是没有问题的
+
+                // 2025/11/2
+                hit_rights = new List<OperRights>()
+                {
+                    new OperRights
+                    {
+                        Operation = hit_value,
+                        DbNames = strDbNameList,    // "*" ??
+                        Rights = "*",   // actions
+                        Normal = true,
+                    },
+                };
+                bRightVerified = true;
             }
 
             return null;
@@ -19684,6 +20420,15 @@ biblio_rec_path);
                 if (string.IsNullOrEmpty(database_caption) || database_caption == "*")
                     database_caption = "[任意数据库]";
                 return database_caption;
+            }
+
+            void AddAccessError()
+            {
+                // TODO: 可以提示"既没有... 也没有 ..."
+                if (string.IsNullOrEmpty(strAction))
+                    errors.Add($"不具备针对数据库 '{GetDatabaseCaption(strDbNameList)}' 名为 '{right_names}' 的存取定义权限");
+                else
+                    errors.Add($"不具备针对数据库 '{GetDatabaseCaption(strDbNameList)}' 名为 '{right_names}' 动作为 '{strAction}' 的存取定义权限");
             }
 
             string JoinErrors(string prefix, List<string> list)
@@ -19705,11 +20450,53 @@ biblio_rec_path);
             }
         }
 
+        // 在 list 中寻找 sub_list(由逗号间隔的列表)。返回找到的具体 value
+
+        static string IndexOfList(string sub_list, string list)
+        {
+            var large_array = list.Split(',');
+            foreach (var sub in sub_list.Split(','))
+            {
+                if (large_array.Contains(sub))
+                    return sub;
+            }
+
+            return null;
+        }
+
         static void ThrowIfDup(string rights)
         {
             var list = rights.Split(',');
             if (list.Distinct().ToList().Count != list.Length)
                 throw new ArgumentException($"权限字符串 '{rights}' 中存在重复的权限");
+        }
+
+        // 重新排序
+        // 注: 如果比较时 Key 成员值相同，则按照它们在 hit_rights 中的原始顺序排列
+        // parameters:
+        //      table   顺序范例，里面是希望排序后的操作名的顺序
+        //      style   排序方式。目前仅支持 "operation"
+        public static void Sort(List<OperRights> hit_rights,
+            string[] table,
+            string style = "operation")
+        {
+            if (style == "operation")
+            {
+                hit_rights.Sort((a, b) =>
+                {
+                    var index_a = Array.IndexOf(table, a.Operation);
+                    var index_b = Array.IndexOf(table, b.Operation);
+                    if (index_a == index_b)
+                    {
+                        // 按照原始顺序
+                        return hit_rights.IndexOf(a) - hit_rights.IndexOf(b);
+                    }
+                    return index_a - index_b;
+                });
+                return;
+            }
+
+            throw new ArgumentException($"无法识别的排序方式 '{style}'");
         }
     }
 

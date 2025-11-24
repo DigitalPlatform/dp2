@@ -165,7 +165,7 @@ namespace DigitalPlatform.CommonDialog
         {
             if (textBox_result.Text == "")
             {
-                MessageBox.Show(this, "尚未输入答案");
+                this.MessageBoxShow("尚未输入答案");
                 return;
             }
 

@@ -931,6 +931,17 @@ namespace dp2Circulation
 "ucsUpload",
 "filterScriptCode",
 "");
+                // *** 同类书区分号
+                this.textBox_callNumber_ignore_item_state.Text =
+                    ap.GetString(
+"callNumber",
+"ignore_item_state",
+"");
+                this.checkBox_callNumber_useEmptyNumber.Checked =
+                    ap.GetBoolean(
+"callNumber",
+"use_empty_number",
+false);
 
                 checkBox_charging_isbnBorrow_CheckedChanged(this, null);
                 checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
@@ -1728,6 +1739,17 @@ this.textBox_ucs_userName.Text);
 "ucsUpload",
 "filterScriptCode",
 this.textBox_ucs_filterScriptCode.Text);
+
+                // *** 同类书区分号
+                ap.SetString(
+"callNumber",
+"ignore_item_state",
+this.textBox_callNumber_ignore_item_state.Text);
+
+                ap.SetBoolean(
+            "callNumber",
+            "use_empty_number",
+            this.checkBox_callNumber_useEmptyNumber.Checked);
 
                 if (m_bServerCfgChanged == true
                     && Program.MainForm != null)

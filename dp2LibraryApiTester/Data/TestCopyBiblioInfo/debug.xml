@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<collection>
+	<env 
+		access="{source}:getbiblioinfo;{target}:setbiblioinfo|getbiblioinfo"
+		overwrite="1"
+		>
+		<trigger ret="0" code="NoError"
+				 verify_target_biblio="=newly,timestamp">
+			最普通的覆盖复制。
+		</trigger>
+	</env>
+	<env
+	access="{source}:getbiblioinfo;{target}:setbiblioinfo|getbiblioinfo"
+		>
+		<trigger ret="0" code="NoError"
+				 verify_target_biblio="=newly,timestamp">
+			最普通的追加复制。
+		</trigger>
+	</env>
+	<env 
+		access="{source}:getbiblioinfo;{target}:setbiblioinfo=*(300)|getbiblioinfo"
+		overwrite="1">
+		<trigger ret="0" code="NoError"
+				 verify_target_biblio="=existing_origin,timestamp">
+			限制目标。所允许的字段 300 在内容中不存在
+			(只有 300 能写入。实际上数据中没有 300 字段。这样就等于任何字段都不允许写入。造成了即将写入的是一条空内容记录。空内容和目标位置原有的记录合并，最终内容不变)
+		</trigger>
+	</env>
+	<env 
+	access="{source}:getbiblioinfo;{target}:setbiblioinfo=*(200)|getbiblioinfo"
+	overwrite="1"
+	change_while_copy="true">
+		<trigger ret="0" code="NoError"
+				 verify_target_biblio="=newly,timestamp">
+			限制目标。所允许的字段 200 在内容中存在
+			(目标位置写入时 200 发生了变化)
+		</trigger>
+	</env>
+	<env 
+access="{source}:getbiblioinfo=*(000-199,201-999);{target}:setbiblioinfo|getbiblioinfo"
+overwrite="1"
+change_while_copy="true">
+		<trigger ret="-1" code="AccessDenied"
+				 verify_target_biblio="=existing_origin">
+			限制源。不允许读出 200
+			(目标位置写入时 200 没有发生了变化。可惜没法完成测试意图，因为源限制字段就会引起 AccessDenied)
+		</trigger>
+	</env>
+</collection>

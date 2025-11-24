@@ -66,7 +66,7 @@ namespace dp2Circulation
         /// <param name="control">控件</param>
         /// <param name="font">字体</param>
         /// <param name="bForce">是否强制设置。强制设置是指DefaultFont == null 的时候，也要按照Control.DefaultFont来设置</param>
-        public static void SetControlFont(Control control,
+        public static void SetControlFontOld(Control control,
             Font font,
             bool bForce = false)
         {
@@ -95,6 +95,104 @@ namespace dp2Circulation
 
             ChangeDifferentFaceFont(control, font);
         }
+
+        // parameters:
+        //      bForce  是否强制设置。强制设置是指DefaultFont == null 的时候，也要按照Control.DefaultFont来设置
+        public static void SetControlFont(Control control,
+            Font font,
+            bool bForce = false)
+        {
+            if (font == null)
+            {
+                if (bForce == false)
+                    return;
+                font = Control.DefaultFont;
+            }
+
+            /*
+            if (font.Name == control.Font.Name
+                && font.Style == control.Font.Style
+                && font.SizeInPoints == control.Font.SizeInPoints)
+            { }
+            else
+                control.Font = font;
+
+            ChangeDifferentFaceFont(control, font);
+            */
+
+
+            if (font.Name == control.Font.Name
+                && font.Style == control.Font.Style
+                && font.SizeInPoints == control.Font.SizeInPoints)
+            {
+            }
+            else
+            {
+                Debug.Assert(font != control.Font, "");
+
+                // 新旧整体字体尺寸比例。即旧字体要变成新的，要乘以多少
+                float ratio = font.SizeInPoints / control.Font.SizeInPoints;
+                ChangeDifferentFaceFontEx(control, font, ratio);
+            }
+        }
+
+
+        static void ChangeDifferentFaceFontEx(Control parent,
+Font font,
+float ratio = 1.0F)
+        {
+            // 注: 不能先修改 parent 自己的 Font。因为一旦修改，子级的 Font 全部会被连带修改，算法就无法兑现了
+            // 一定要等到所子级改完，父级才能修改
+
+            if (parent is ToolStrip)
+            {
+                // 修改所有事项的字体，如果字体名不一样的话
+                foreach (ToolStripItem item in (parent as ToolStrip).Items)
+                {
+                    Font subfont = item.Font;
+                    if (subfont.Name != font.Name
+                        || ratio != 1.0F)
+                    {
+                        item.Font = new Font(font.FontFamily,
+                            ratio * subfont.SizeInPoints,
+                            subfont.Style,  // 保留原来的 Style
+                            GraphicsUnit.Point);
+                    }
+                }
+            }
+
+            // 修改所有下级控件的字体，如果字体名不一样的话
+            foreach (Control sub in parent.Controls)
+            {
+                /*
+                Font subfont = sub.Font;
+
+                if (subfont.Name != font.Name
+                    || ratio != 1.0F)
+                {
+                    subfont = new Font(font.FontFamily,
+                        ratio * subfont.SizeInPoints,
+                        subfont.Style,
+                        GraphicsUnit.Point);
+                }
+                */
+                // 递归
+                ChangeDifferentFaceFontEx(sub, font, ratio);
+            }
+
+            // 最后修改 parent 自己的 .Font
+            if (parent.Font.Name != font.Name
+                || parent.Font.Style != font.Style
+                || ratio != 1.0F)
+            {
+                parent.Font = new Font(font.FontFamily,
+                    ratio * parent.Font.SizeInPoints,
+                    parent.Font.Style,  // 保留原来的 Style
+                    GraphicsUnit.Point);
+            }
+        }
+
+
 
         static void ChangeDifferentFaceFont(Control parent,
             Font font)

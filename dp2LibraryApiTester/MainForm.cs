@@ -683,5 +683,49 @@ string style = "")
                 }
             }
         }
+
+        async private void MenuItem_test_setBiblioInfo_Click(object sender, EventArgs e)
+        {
+            await Process((token) =>
+            {
+                try
+                {
+                    NormalResult result;
+
+                    result = TestSetBiblioInfo.TestAll(token);
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}", "error");
+                }
+            });
+        }
+
+        private async void MenuItem_test_copyBiblioInfo_Click(object sender, EventArgs e)
+        {
+            await Process((token) =>
+            {
+                try
+                {
+                    NormalResult result;
+
+                    result = TestCopyBiblioInfo.TestAll(token);
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}", "error");
+                }
+            });
+        }
     }
 }

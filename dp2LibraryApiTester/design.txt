@@ -44,3 +44,8 @@
 测试 GetReaderInfo() API
 
 特别关注复杂字段权限。
+
+~~~
+测试 SetComments() 等 API 的时候，API 可能是两步检查账户权限。
+可以制造一个账户权限场景，普通权限字符串为空，只有存取定义 setcommentinfo getcommentinfo。
+然后观察创建评注记录是否成功。

@@ -2919,7 +2919,11 @@ namespace DigitalPlatform.Script
             string strError = "";
             //string strExe = Environment.CurrentDirectory + "\\dp1batch.exe";
             //string strDll = Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll";
-            string[] saRef = { "system.dll", "system.windows.forms.dll", "system.xml.dll"/*, strExe, strDll*/};
+            string[] saRef = { "system.dll", 
+                "system.windows.forms.dll",
+                "system.xml.dll",
+                "System.Core.dll",  // Linq 需要
+            };
             SaveRefs(strFileName, saRef, out strError);
 
             return 0;

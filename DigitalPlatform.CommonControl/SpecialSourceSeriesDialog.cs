@@ -39,7 +39,7 @@ namespace DigitalPlatform.CommonControl
             // 综合各种信息，设置状态
             int nRet = SetType(out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
         }
 

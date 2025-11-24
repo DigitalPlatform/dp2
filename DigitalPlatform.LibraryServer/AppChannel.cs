@@ -76,6 +76,7 @@ namespace DigitalPlatform.LibraryServer
             return list.Count;  // 返回总量
         }
 
+        // TODO: 在 results 中返回实际关闭的通道信息。注意如果数量太多，则只返回一部分即可。通过函数返回值可以知道实际关闭的通道总数
         // 管理通道
         public int ManageChannel(
             string strAction,
@@ -98,10 +99,15 @@ namespace DigitalPlatform.LibraryServer
                         if (bRet == true)
                             nCount++;
                     }
-
-                    if (string.IsNullOrEmpty(info.ClientIP) == false)
+                    else if (string.IsNullOrEmpty(info.ClientIP) == false)
                     {
                         nCount += this.SessionTable.CloseSessionByClientIP(info.ClientIP);
+                    }
+                    else if (string.IsNullOrEmpty(info.UserName) == false)
+                    {
+                        // 2025/10/24
+                        // * 表示希望关闭全部通道
+                        nCount += this.SessionTable.CloseSessionByUserID(info.UserName);
                     }
                 }
 

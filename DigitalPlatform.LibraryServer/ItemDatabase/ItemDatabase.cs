@@ -16,8 +16,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Xml.Linq;
 using static DigitalPlatform.LibraryServer.LibraryApplication;
 
 namespace DigitalPlatform.LibraryServer
@@ -1250,7 +1248,7 @@ namespace DigitalPlatform.LibraryServer
                     domNew,
                     false,  //??
 #if ITEM_ACCESS_RIGHTS
-                    (r) =>
+                    (r, d) =>
                     {
                         string db_type = this.db_type;
 
@@ -1631,7 +1629,7 @@ out strError);
                 domNew,
                 StringUtil.IsInList("outofrangeAsError", info.Style),
 #if ITEM_ACCESS_RIGHTS
-                    (r) =>
+                    (r, d) =>
                     {
                         string db_type = this.db_type;
 
@@ -2017,7 +2015,7 @@ out strError);
                         domNew,
                         StringUtil.IsInList("outofrangeAsError", info.Style),
 #if ITEM_ACCESS_RIGHTS
-                        (r) =>
+                        (r, d) =>
                         {
                             string db_type = this.db_type;
 
@@ -2201,6 +2199,9 @@ out strError);
             string strError = "";
 
             // 2023/2/21
+            string strItemDbName = "";
+            string strBiblioDbName = "";
+            string strBiblioRecId = "";
             {
                 string db_type = this.db_type;
                 string type_name = this.ItemName;
@@ -2214,72 +2215,31 @@ out strError);
                     return result;
                 }
 
-                // 权限字符串
-                string list = $"set{db_type}info,set{db_type}object,setobject";
-                if (db_type == "order")
-                    list = $"set{db_type}info,set{db_type}object,setobject,order";
+                // 原来权限检查在这里进行，后来移到后面去，以便能够支持 ITEM_ACCESS_RIGHTS
 
-                if (
-#if ITEM_ACCESS_RIGHTS
-                    CheckAccess(sessioninfo,
-                    $"修改{db_type}记录",
-                    "", // 第一阶段，不涉及数据库名
-                    list,
-                    "",
-                    out _) != null
+                strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+                strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
-                    // TODO: 注意检查第二阶段，针对每一条记录
-#else
-                    StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false
-#endif
-                    )
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)    // 2013/9/26
                 {
-                    result.Value = -1;
-                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {list} 权限之一";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-#if !ITEM_ACCESS_RIGHTS
-                    return result;
-#else
-                    normal_check_result = result;
-#endif
+                    if (String.IsNullOrEmpty(strBiblioRecId) == true)
+                    {
+                        strError = "书目记录路径 '" + strBiblioRecPath + "' 中的记录ID部分不能为空";
+                        goto ERROR1;
+                    }
+                    if (StringUtil.IsPureNumber(strBiblioRecId) == false)
+                    {
+                        strError = "书目记录路径 '" + strBiblioRecPath + "' 中的记录ID部分 '" + strBiblioRecId + "' 格式不正确，应为纯数字";
+                        goto ERROR1;
+                    }
                 }
 
-                if (StringUtil.IsInList($"{LibraryApplication.GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false)
-                {
-                    result.Value = -1;
-                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入{type_name}的权限，但不具备 get{db_type}info 权限。请修改账户权限";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-#if !ITEM_ACCESS_RIGHTS
-                    return result;
-#else
-                    normal_check_result = result;
-#endif
-                }
-            }
-
-            string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
-            string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
-
-            if (string.IsNullOrEmpty(strBiblioRecPath) == false)    // 2013/9/26
-            {
-                if (String.IsNullOrEmpty(strBiblioRecId) == true)
-                {
-                    strError = "书目记录路径 '" + strBiblioRecPath + "' 中的记录ID部分不能为空";
+                // 获得书目库对应的下级库名
+                nRet = this.GetItemDbName(strBiblioDbName,
+                     out strItemDbName,
+                     out strError);
+                if (nRet == -1)
                     goto ERROR1;
-                }
-                if (StringUtil.IsPureNumber(strBiblioRecId) == false)
-                {
-                    strError = "书目记录路径 '" + strBiblioRecPath + "' 中的记录ID部分 '" + strBiblioRecId + "' 格式不正确，应为纯数字";
-                    goto ERROR1;
-                }
-            }
-
-            // 获得书目库对应的下级库名
-            nRet = this.GetItemDbName(strBiblioDbName,
-                 out string strItemDbName,
-                 out strError);
-            if (nRet == -1)
-                goto ERROR1;
 #if NO
             if (nRet == 0)
             {
@@ -2294,16 +2254,73 @@ out strError);
             }
 #endif
 
-            // 2012/3/29
-            if (sessioninfo == null)
-            {
-                strError = "sessioninfo == null";
-                goto ERROR1;
-            }
-            if (sessioninfo.Channels == null)
-            {
-                strError = "sessioninfo.Channels == null";
-                goto ERROR1;
+                // 2012/3/29
+                if (sessioninfo == null)
+                {
+                    strError = "sessioninfo == null";
+                    goto ERROR1;
+                }
+                if (sessioninfo.Channels == null)
+                {
+                    strError = "sessioninfo.Channels == null";
+                    goto ERROR1;
+                }
+
+                // 检查权限
+                {
+                    // 权限字符串
+                    string list = $"set{db_type}info,set{db_type}object,setobject";
+                    if (db_type == "order")
+                        list = $"set{db_type}info,set{db_type}object,setobject,order";
+
+                    if (
+#if ITEM_ACCESS_RIGHTS
+                        CheckAccess(sessioninfo,
+                        $"修改{db_type}记录",
+                        App.GetTwoDbName(strItemDbName),
+                        list,
+                        "",
+                        out _) != null
+
+                        // TODO: 注意检查第二阶段，针对每一条记录
+#else
+                    StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false
+#endif
+                        )
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {list} 权限之一";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+#if !ITEM_ACCESS_RIGHTS
+                    return result;
+#else
+                        normal_check_result = result;
+#endif
+                    }
+
+                    if (
+#if ITEM_ACCESS_RIGHTS
+                        CheckAccess(sessioninfo,
+                            $"修改{db_type}记录",
+                        App.GetTwoDbName(strItemDbName),
+                            LibraryApplication.GetInfoRight($"get{db_type}info"),
+                            "",
+                        out _) != null
+#else
+                    StringUtil.IsInList($"{LibraryApplication.GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false
+#endif
+                        )
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入{type_name}的权限，但不具备 get{db_type}info 权限。请修改账户权限";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+#if !ITEM_ACCESS_RIGHTS
+                    return result;
+#else
+                        normal_check_result = result;
+#endif
+                    }
+                }
             }
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.App.WsUrl);
@@ -2339,7 +2356,7 @@ out strError);
                 // 2025/4/27
                 // 检查存取定义
                 string strAccessParameters = "";
-                { 
+                {
                     var error = this.App.CheckSetItemAccessEx(
                         sessioninfo,
                         this.db_type,
@@ -3055,17 +3072,17 @@ out strError);
                                 existing_xml,
                                 info.NewRecord,
 #if ITEM_ACCESS_RIGHTS
-                    (r) =>
-                    {
-                        string db_type = this.db_type;
+                                (r, d) =>
+                                {
+                                    string db_type = this.db_type;
 
-                        return CheckAccess(sessioninfo,
-                            $"{db_type}记录下级对象({r})",
-                            ResPath.GetDbName(info.NewRecPath),
-                            r,
-                            "",
-                            out _);
-                    },
+                                    return CheckAccess(sessioninfo,
+                                        $"{db_type}记录下级对象({r})",
+                                        ResPath.GetDbName(info.NewRecPath),
+                                        r,
+                                        "",
+                                        out _);
+                                },
 #endif
                                 out strNewXml,
                                 out strError);
@@ -3922,7 +3939,7 @@ strError);
             RmsChannel channel,
             string strBiblioRecPath,
             string strStyle,
-            DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord procCheckRecord,
+            LibraryApplication.Delegate_checkRecord procCheckRecord,
             object param,
             out long lHitCount,
             out List<DeleteEntityInfo> entityinfos,
@@ -4109,10 +4126,12 @@ strError);
                         // 2016/11/15
                         if (procCheckRecord != null)
                         {
+                            var set_or_get = StringUtil.GetParameterByPrefix(strStyle, "set_or_get");
                             nRet = procCheckRecord(
                                 sessioninfo,
                                 nStart + i,
                                 strOutputPath,
+                                set_or_get,
                                 domExist,
                                 timestamp,
                                 param,
@@ -4701,7 +4720,7 @@ strError);
                 channel,
                 strBiblioRecPath,
                 "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                (LibraryApplication.Delegate_checkRecord)null,
                 null,
                 out lHitCount,
                 out entityinfos,
@@ -5209,7 +5228,7 @@ out string strError)
                 var list = LibraryApplication.GetInfoRight($"get{db_type}info");
                 var ret = LibraryApplication.CheckRights(sessioninfo,
                     list,
-                    dbname,
+                    dbname == "?" ? "" : App.GetTwoDbName(dbname),
                     $"获取{this.ItemNameInternal}记录");
                 if (ret != null && ret.Value == -1 && ret.ErrorCode == ErrorCode.AccessDenied)
                 {
@@ -5232,10 +5251,10 @@ out string strError)
 #if ITEM_ACCESS_RIGHTS
             {
                 var ret = LibraryApplication.CheckRights(
-        sessioninfo,
-        $"get{db_type}object,getobject",
-        dbname,
-        "");
+                    sessioninfo,
+                    $"get{db_type}object,getobject",
+                    dbname == "?" ? "" : App.GetTwoDbName(dbname),
+                    "");
                 if (ret != null && ret.ErrorCode == ErrorCode.AccessDenied)
                 {
                     if (LibraryApplication.RemoveDprmsFile(item_dom))

@@ -219,8 +219,9 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
+        // TODO: 读取和修改都要放到一个锁定范围内，避免并发修改同一条种次号库记录
+        // TODO: 尾号变化要写入操作日志。日志恢复功能可以暂时忽略这些新动作类型。
         // 设置种次号尾号
-        // TODO: 增强 strZhongcihaoGroupName 语义，允许直接表达“种次号库名”
         // parameters:
         //      strAction   动作。conditionalpush, increase, +increase, increase+, save
         //      strZhongcihaoGroupName  种次号组名。如果是 '@' 打头，则表示种次号库名
@@ -427,6 +428,49 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
+                // 2025/10/23
+                strOutputNumber = strTailNumber;
+            }
+            else if (strAction == "delete")
+            {
+                // 2025/10/25 新增 delete 动作
+
+                string strTailNumber = strTestNumber;
+
+                if (nRet == 0)
+                {
+                    strError = $"组名为 '{strZhongcihaoGroupName}' 类名为 '{strClass}' 的尾号没有找到";
+                    goto ERROR1;
+                }
+                else
+                {
+                    // 删除记录
+                    if (String.IsNullOrEmpty(strPath) == true)
+                    {
+                        strError = "记录存在时strPath居然为空";
+                        goto ERROR1;
+                    }
+                }
+
+                // TODO: 要求 strTailNumber 参数给出的尾号，要和即将删除的 XML 记录中的尾号一致，才允许删除
+
+                lRet = channel.DoDeleteRes(strPath,
+    timestamp,   // timestamp,
+    out output_timestamp,
+    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                    {
+                        strError = $"删除尾号记录 {strPath} 失败: 尾号记录时间戳不匹配，说明可能被他人修改过。详细原因: {strError}";
+                        goto ERROR1;
+                    }
+
+                    strError = $"删除尾号记录 {strPath} 时出错: " + strError;
+                    goto ERROR1;
+                }
+
+                strOutputNumber = "";
             }
             else
             {

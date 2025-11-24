@@ -85,12 +85,8 @@ namespace DigitalPlatform.MessageClient
             {
                 this.EnableControls(true);
             }
-            ERROR1:
-            this.Invoke((Action)(() =>
-            {
-                MessageBox.Show(this, strError);
-            }
-));
+        ERROR1:
+            this.MessageBoxShow(strError);
         }
 
         private async void toolStripButton_refresh_Click(object sender, EventArgs e)
@@ -149,7 +145,7 @@ namespace DigitalPlatform.MessageClient
 
             this.Changed = true;
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -281,7 +277,7 @@ namespace DigitalPlatform.MessageClient
 
             this.Changed = true;
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -354,7 +350,7 @@ namespace DigitalPlatform.MessageClient
 
             this.Changed = true;
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);

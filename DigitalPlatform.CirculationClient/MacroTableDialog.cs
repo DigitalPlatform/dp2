@@ -146,7 +146,7 @@ namespace DigitalPlatform.CirculationClient
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)

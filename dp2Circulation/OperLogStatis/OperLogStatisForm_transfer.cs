@@ -44,13 +44,6 @@ TaskScheduler.Default);
 
             var items = new List<TransferItem>();
 
-            /*
-            EnableControls(false);
-
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在执行脚本 ...");
-            _stop.BeginLoop();
-            */
             var looping = Looping("正在执行脚本 ...",
                 "disableControl");
             try
@@ -122,6 +115,7 @@ TaskScheduler.Default);
                     items.Add(item);
                     return 0;
                 },
+                    "setEntity", // 2025/11/17 优化。可以控制只查看 transfer 有关的日志
                     out strError);
                 if (nRet == -1 || nRet == 1)
                     return new NormalResult
@@ -133,14 +127,6 @@ TaskScheduler.Default);
             finally
             {
                 looping.Dispose();
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                _stop.HideProgress();
-
-                EnableControls(true);
-                */
             }
 
             // 让用户选择需要统计的范围。根据批次号、目标位置来进行选择

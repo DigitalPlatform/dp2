@@ -9,14 +9,12 @@ using System.Diagnostics;
 using System.Threading;
 using System.Xml;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Threading.Tasks;
 using DigitalPlatform.LibraryServer.Common;
-using Jint.Parser.Ast;
-using Amazon.Runtime;
 
 namespace DigitalPlatform.LibraryServer
 {

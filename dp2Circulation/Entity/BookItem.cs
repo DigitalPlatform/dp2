@@ -1030,7 +1030,8 @@ namespace dp2Circulation
                 item.CallNumber = DomUtil.GetElementText(book_item.RecordDom.DocumentElement, "accessNo");
                 item.Location = DomUtil.GetElementText(book_item.RecordDom.DocumentElement, "location");
                 item.Barcode = DomUtil.GetElementText(book_item.RecordDom.DocumentElement, "barcode");
-
+                // 2025/11/17
+                item.State = DomUtil.GetElementText(book_item.RecordDom.DocumentElement, "state");
                 results.Add(item);
             }
 

@@ -213,6 +213,8 @@ this.splitContainer_main,
 
                 item.Location = entityEditControl1.LocationString;
                 item.Barcode = entityEditControl1.Barcode;
+                // 2025/11/17
+                item.State = entityEditControl1.State;
             }
 
             // FOUND:

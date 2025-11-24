@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define NEW_BLANK   // 使用不会冲突的表示空白的字符
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
@@ -45,7 +47,7 @@ namespace DigitalPlatform.Marc
 
             if (strHeader.Length < 24)
             {
-                strHeader = strHeader.PadRight(24, '?');
+                strHeader = PadHeaderRight(strHeader);
 
                 // 因为 24 个 ? 表示头标区为 null，所以此处要避免出现这种巧合
                 if (IsNullHeader(strHeader))
@@ -117,9 +119,24 @@ namespace DigitalPlatform.Marc
             return 0;
         }
 
+        // 算法内部使用的空白占位符
+        const char _fill_char = '`';    // '?'; // '?' 容易导致问题。因为利用 MarcRecord 对象产生数据的时候，默认的头标区就是 24 个 ? 会导致误判
+        // 头标区第一个字符为这个值表示整个头标区是权限足够情况下写入的空白占位符。不同于权限不够情况下写入的空白占位符
+        const char _disk_char = '*';
+
         // 判断头标区是不是 null 值
+        // 注意，_fill_char 不应该是一个平凡的字符。因为平凡字符容易和数据中本来的字符碰上，影响判断。比如使用了 _fill_char 为 '?'，那么遇到数据中真的头标区为 ???????????????????????? 时，会当作内部控制用的填充空内容，导致错误处理
         public static bool IsNullHeader(string strHeader)
         {
+#if NEW_BLANK
+            foreach (char c in strHeader)
+            {
+                if (c != _fill_char)
+                    return false;
+            }
+
+            return true;
+#else
             foreach (char c in strHeader)
             {
                 if (c != '?')
@@ -127,24 +144,39 @@ namespace DigitalPlatform.Marc
             }
 
             return true;
+#endif
         }
 
         // 判断是否为 *???????... 值。这个值表示是权限足够情况下写入的 null。不同于权限不够情况下写入的 null(24 个 ?)
         public static bool IsDiskNullHeader(string header)
         {
+#if NEW_BLANK
+            // TODO: 提高速度
+            return header == new string(_disk_char, 1).PadRight(24, _fill_char);
+#else
             return header == "*???????????????????????";
+#endif
         }
 
         // 获得一个表示空的头标区内容。注意，空不是 null
         public static string GetBlankHeader()
         {
+#if NEW_BLANK
+            return new string(_disk_char, 1).PadRight(24, _fill_char);
+
+#else
             return "*".PadRight(24, '?');
+#endif
         }
 
         // 获得头标区 null 值
         public static string GetNullHeader()
         {
+#if NEW_BLANK
+            return new string(_fill_char, 24);
+#else
             return new string('?', 24);
+#endif
         }
 
         public static string EnsureBlankHeader(string header)
@@ -172,6 +204,15 @@ namespace DigitalPlatform.Marc
             if (HasMask(strText) == true)
                 return strText.Substring(0, strText.Length - 1);
             return strText;
+        }
+
+        static string PadHeaderRight(string header)
+        {
+#if NEW_BLANK
+            return header.PadRight(24, _fill_char);
+#else
+            return header.PadRight(24, '?');
+#endif
         }
 
         // 按照字段修改权限定义，合并新旧两个 MARC 记录
@@ -314,7 +355,7 @@ out strError);
                     strOldHeader = GetNullHeader();
                 else
                 {
-                    strOldHeader = strOldHeader.PadRight(24, '?');
+                    strOldHeader = PadHeaderRight(strOldHeader);
                     // 2023/3/24
                     // 避免出现 null header 值
                     if (IsNullHeader(strOldHeader))
@@ -336,7 +377,7 @@ out strError);
                     strNewHeader = GetNullHeader();
                 else
                 {
-                    strNewHeader = strNewHeader.PadRight(24, '?');
+                    strNewHeader = PadHeaderRight(strNewHeader);
                     // 2023/3/24
                     // 避免出现 null header 值
                     if (IsNullHeader(strNewHeader))
@@ -535,6 +576,9 @@ out strError);
                 // 如果头标区被保护
                 if (strNewHeader != strOldHeader)
                     denied_change_fieldnames.Add("###");    // ### 表示头标区
+
+                // 2025/11/4 注: 如果新旧头标区内容碰巧一致，即便 changeable_list 里面缺乏 ###，也不加入 denied_change_fieldnames
+                // 这样可能会让请求本功能的人感到错愕
 
                 text.Append(strOldHeader);
             }
@@ -911,7 +955,7 @@ InsertSequenceStyle.PreferTail);
             if (strMARC.Length < 24)
             {
                 strHeader = strMARC;
-                strHeader = strHeader.PadRight(24, '?');
+                strHeader = PadHeaderRight(strHeader);
                 return;
             }
 
@@ -1016,9 +1060,9 @@ InsertSequenceStyle.PreferTail);
                 out strNewBody);
 
             if (strOldHeader.Length < 24)
-                strOldHeader = strOldHeader.PadRight(24, '?');
+                strOldHeader = PadHeaderRight(strOldHeader);
             if (strNewHeader.Length < 24)
-                strNewHeader = strNewHeader.PadRight(24, '?');
+                strNewHeader = PadHeaderRight(strNewHeader);
 
             var marc_differ = new MarcDiffer();
             var marc_builder = new MarcDiffBuilder(marc_differ);

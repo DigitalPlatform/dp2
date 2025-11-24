@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://dp2003.com/dp2library/" elementFormDefault="qualified" targetNamespace="http://dp2003.com/dp2library/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
-  <xs:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd3" namespace="http://dp2003.com/dp2kernel/" />
-  <xs:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
+  <xs:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd3" namespace="http://dp2003.com/dp2kernel/" />
+  <xs:import schemaLocation="http://localhost/dp2library/xe/$metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
   <xs:element name="GetComments">
     <xs:complexType>
       <xs:sequence>
@@ -2043,6 +2043,8 @@
       <xs:element minOccurs="0" name="ItemRecPath" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Location" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="ParentID" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Reserve" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="State" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="CallNumberSearchResult" nillable="true" type="tns:CallNumberSearchResult" />

@@ -618,9 +618,9 @@ namespace dp2LibraryApiTester.TestCase
             dom.LoadXml(xml);
 
             // 先删除已有的 dprms:file 元素
-            RemoveDprmsFileElements(dom);
+            XmlUtility.RemoveDprmsFileElements(dom);
             // 添加 dprms:file 元素
-            AddDprmsFileElement(dom, "1");
+            XmlUtility.AddDprmsFileElement(dom, "1");
 
             func_change_xml(dom);
 
@@ -677,7 +677,7 @@ namespace dp2LibraryApiTester.TestCase
                 // 非 file condition 下，把参考的 XML 中的 dprms:file 元素临时去掉，用于比较
                 if (!file)
                 {
-                    RemoveDprmsFileElements(ref_dom);
+                    XmlUtility.RemoveDprmsFileElements(ref_dom);
                 }
             }
 
@@ -708,35 +708,6 @@ namespace dp2LibraryApiTester.TestCase
                 Value = -1,
                 ErrorInfo = StringUtil.MakePathList(errors, "\r\n")
             };
-        }
-
-        static int RemoveDprmsFileElements(XmlDocument dom, string id = null)
-        {
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
-            nsmgr.AddNamespace("dprms", DpNs.dprms);
-
-            int count = 0;
-            var nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-            foreach(XmlElement file in nodes)
-            {
-                if (string.IsNullOrEmpty(id) == false
-                    && file.GetAttribute("id") != id)
-                    continue;
-                file.ParentNode.RemoveChild(file);
-                count++;
-            }
-
-            return count;
-        }
-
-        static void AddDprmsFileElement(XmlDocument dom, string id)
-        {
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
-            nsmgr.AddNamespace("dprms", DpNs.dprms);
-
-            var element = dom.CreateElement("dprms","file", DpNs.dprms);
-            dom.DocumentElement.AppendChild(element);
-            element.SetAttribute("id", id);
         }
 
         // 验证 dom1 中的元素都包含在 dom2 中了

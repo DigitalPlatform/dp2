@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<SavedWcfConfigurationInformation xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="9.1" CheckSum="GnLJaji7WJyv0Qv1+Hh+KgBywGoJlnTSEU3qJe/dyQI=">
+<SavedWcfConfigurationInformation xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="9.1" CheckSum="RwdQ+f941dTiYRNpir+vssdTMdL9ZH0NlZUlgrfcQbw=">
   <bindingConfigurations>
     <bindingConfiguration bindingType="netNamedPipeBinding" name="NetNamedPipeBinding_dp2library">
       <properties>
@@ -200,10 +200,10 @@
     </bindingConfiguration>
   </bindingConfigurations>
   <endpoints>
-    <endpoint name="WSHttpBinding_dp2library" contract="localhost.dp2library" bindingType="wsHttpBinding" address="http://localhost:8001/dp2library/xe" bindingConfiguration="WSHttpBinding_dp2library">
+    <endpoint name="WSHttpBinding_dp2library" contract="localhost.dp2library" bindingType="wsHttpBinding" address="http://localhost/dp2library/xe" bindingConfiguration="WSHttpBinding_dp2library">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>http://localhost:8001/dp2library/xe</serializedValue>
+          <serializedValue>http://localhost/dp2library/xe</serializedValue>
         </property>
         <property path="/behaviorConfiguration" isComplexType="false" isExplicitlyDefined="false" clrType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue />

@@ -251,9 +251,17 @@ namespace dp2Circulation
                 }
 
                 // 显示Ctrl+A菜单
+                // 
+                var arguments = new GenerateDataEventArgs();
+                if (strOldDbName != strNewDbName)
+                {
+                    // 数据库名改变，表示书目库改变，需要重新初始化菜单
+                    // "!createMenu" 表示重新初始化菜单
+                    arguments.ScriptEntry = "!createMenu";
+                }
                 if (Program.MainForm.PanelFixedVisible == true)
                     this._genData.AutoGenerate(this.m_marcEditor,
-                        new GenerateDataEventArgs(),
+                        arguments,
                         GetBiblioRecPathOrSyntax(),
                         true);
             }
@@ -10852,6 +10860,7 @@ out strError);
                                     "system.windows.forms.dll",
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
+                                    "System.Core.dll",  // Linq 需要
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
@@ -10924,8 +10933,9 @@ out strError);
                                     "system.windows.forms.dll",
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
-                                    "System.Linq.dll",
-                                    "System.Linq.Expressions.dll",
+                                    //"System.Linq.dll",
+                                    //"System.Linq.Expressions.dll",
+                                    "System.Core.dll",  // Linq 需要
 
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
@@ -13376,6 +13386,24 @@ out strError);
             }
         }
 
+        void ClearFontForMarcEditor()
+        {
+            {
+                MainForm.AppInfo.SetString(
+                    "marceditor",
+                    "fontstring",
+                    null);
+            }
+
+            {
+                MainForm.AppInfo.SetString(
+                    "marceditor",
+                    "fontcolor",
+                    null);
+            }
+        }
+
+
         /// <summary>
         /// 恢复缺省字体
         /// </summary>
@@ -13397,7 +13425,8 @@ out strError);
                 this.Size = oldsize;
 
                 // 保存到配置文件
-                SaveFontForMarcEditor();
+                // SaveFontForMarcEditor();
+                ClearFontForMarcEditor();
             }
         }
 
@@ -16001,14 +16030,14 @@ out strError);
                         nRet = CopyBiblio(
                             looping.Progress,
                             channel,
-            "onlycopybiblio",
-            strOldBiblioRecPath,
-            strTargetRecPathParam,
-            strMergeStyle,
-            out strXml,
-            out strOutputBiblioRecPath,
-            out baOutputTimestamp,
-            out strError);
+                            "onlycopybiblio",
+                            strOldBiblioRecPath,
+                            strTargetRecPathParam,
+                            strMergeStyle,
+                            out strXml,
+                            out strOutputBiblioRecPath,
+                            out baOutputTimestamp,
+                            out strError);
                     }
                     else
                     {
@@ -16159,6 +16188,7 @@ out strError);
                         this.SetMarcChanged(bOldChanged);
                     }
                     this.BiblioRecPath = strOldBiblioRecPath;
+                    // TODO: 注意书目库发生变化以后，要重新触发新库的 marc_autogen.cs 中的创建菜单函数
                 }
 
                 // 2024/8/12
@@ -16966,7 +16996,6 @@ out strError);
                 Program.MainForm.AppInfo.UnlinkFormState(dlg);
                 if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     return;
-
             }
             finally
             {

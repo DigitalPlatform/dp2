@@ -260,15 +260,15 @@ out string error);
 
             return results;
         }
-
+         
         public static List<string> GetContents(MarcNodeList list)
         {
-            return list.List.Select(o => o.Content).ToList();
+            return list.Select(o => o.Content).ToList();
         }
 
         public static List<string> GetNames(MarcNodeList list)
         {
-            return list.List.Select(o => o.Name).ToList();
+            return list.Select(o => o.Name).ToList();
         }
 
         // 删除一个字符串末尾的(半角)逗号
@@ -396,9 +396,10 @@ out string error);
             return null;
         }
 
+        // 现在脚本中可以用 LINQ 了，这个函数没用了
         public static MarcNode FirstOrDefault(MarcNodeList list)
         {
-            return list.List.FirstOrDefault();
+            return list.FirstOrDefault();
         }
 
 #if REMOVED
@@ -588,7 +589,49 @@ out strError);
             string field_name,
             string condition)
         {
-            var fields = this.Record.select($"field[@name='{field_name}']");
+            VerifyField(
+                this.Record,
+                field_name,
+                condition,
+                (error) => AddError(error));
+        }
+
+        // 2025/11/20
+        public static List<string> VerifyField(
+    MarcRecord record,
+    string field_name,
+    string condition)
+        {
+            var errors = new List<string>();
+            VerifyField(record,
+                field_name,
+                condition,
+                (error) => errors.Add(error));
+            return errors;
+        }
+
+        public delegate void delegate_addError(string error);
+
+
+        // 2025/11/20 改为通用版本
+        // 校验字段的必备性，指示符值，字段中子字段的必备性
+        // 注: 单字符参数的含义如下:
+        // r 必备
+        // o 可选
+        // n 可重复
+        // 1 不可重复
+        // parameters:
+        //      condition   校验要求。
+        //                  field:xxxx 字段要求
+        //                  subfield:axxxx|bxxxx|cxxxx 子字段要求
+        //                  indicator:xx|xx|xx 指示符值要求。注意空格用下划线替代
+        public static void VerifyField(
+            MarcRecord record,
+            string field_name,
+            string condition,
+            delegate_addError func_addError)
+        {
+            var fields = record.select($"field[@name='{field_name}']");
 
             var field_properties = StringUtil.GetParameterByPrefix(condition, "field");
             if (field_properties != null)
@@ -602,17 +645,35 @@ out strError);
                 {
                     if (value == 'r')
                     {
+                        if (field_properties.IndexOf('0') != -1)
+                            throw new ArgumentException($"fields:{field_properties} 中 r 和 0 相互矛盾");
+
                         if (fields.count == 0)
-                            AddError($"缺乏必备的 {field_name} 字段");
+                            func_addError($"缺乏必备的 {field_name} 字段");
                     }
-                    if (value == '1')
+                    else if (value == '1')
                     {
                         if (fields.count > 1)
-                            AddError($"{field_name} 字段多于 1 个");
+                            func_addError($"{field_name} 字段多于 1 个");
                     }
-                    if (value == 'n')
+                    else if (value == 'n')
                     {
 
+                    }
+                    else if (value == 'o')
+                    {
+
+                    }
+                    else if (value == '0')
+                    {
+                        if (field_properties.IndexOf('r') != -1)
+                            throw new ArgumentException($"fields:{field_properties} 中 0 和 r 相互矛盾");
+                        if (fields.count > 0)
+                            func_addError($"{field_name} 字段不允许出现");
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"fields:{field_properties} 中出现了无法识别的字符 '{value}'");
                     }
                 }
             }
@@ -626,11 +687,15 @@ out strError);
                     // subfield:a|b|c 参数中的名字部分集合
                     var names = GetSubfieldNames(subfield_properties);
 
-                    // 看看 field 中的各个子字段，名字是否超过 names 范围
-                    foreach (MarcSubfield subfield in field.select("subfield"))
+                    bool has_wildcard = names.Contains("*");
+                    if (has_wildcard == false)
                     {
-                        if (names.IndexOf(subfield.Name) == -1)
-                            AddError($"{field.Name} 字段 ${subfield.Name} 超出定义范围");
+                        // 看看 field 中的各个子字段，名字是否超过 names 范围
+                        foreach (MarcSubfield subfield in field.select("subfield"))
+                        {
+                            if (names.IndexOf(subfield.Name) == -1)
+                                func_addError($"{field.Name} 字段 ${subfield.Name} 超出定义范围");
+                        }
                     }
 
                     foreach (var name in names)
@@ -638,7 +703,20 @@ out strError);
                         var parameter = GetSufieldParameter(subfield_properties, name);
                         if (parameter != null)
                         {
-                            var current_subfields = field.select($"subfield[@name='{name}']");
+                            MarcNodeList current_subfields = null;
+                            if (name == "*")
+                            {
+                                var temp = field.select($"subfield").Cast<MarcNode>()
+                                    .Where(o => !names.Contains(o.Name))
+                                    .ToArray();
+                                current_subfields = new MarcNodeList();
+                                foreach (var item in temp)
+                                {
+                                    current_subfields.add(item);
+                                }
+                            }
+                            else
+                                current_subfields = field.select($"subfield[@name='{name}']");
 
                             // 2024/8/1
                             // 如果当前子字段名为 A 或者 9，并且发现子字段不存在，则要观察对应的 a 子字段是否没有包含任何汉字。如果是，则当作此子字段“存在”
@@ -664,17 +742,35 @@ out strError);
                                 // 1 不可重复
                                 if (p == 'r')
                                 {
+                                    if (parameter.IndexOf('0') != -1)
+                                        throw new ArgumentException($"subfields:{parameter} 中 r 和 0 相互矛盾");
+
                                     if (current_subfields.count == 0)
-                                        AddError($"{field_name} 字段内缺乏必备的 ${name} 子字段");
+                                        func_addError($"{field_name} 字段内缺乏必备的 ${name} 子字段");
                                 }
-                                if (p == '1')
+                                else if (p == '1')
                                 {
                                     if (current_subfields.count > 1)
-                                        AddError($"{field_name}字段内 ${name} 子字段多于 1 个");
+                                        func_addError($"{field_name}字段内 ${name} 子字段多于 1 个");
                                 }
-                                if (p == 'n')
+                                else if (p == 'n')
                                 {
 
+                                }
+                                else if (p == 'o')
+                                {
+
+                                }
+                                else if (p == '0')
+                                {
+                                    if (parameter.IndexOf('r') != -1)
+                                        throw new ArgumentException($"subfields:{parameter} 中  和 r 相互矛盾");
+                                    if (current_subfields.count != 0)
+                                        func_addError($"{field_name} 字段内不允许出现 ${name} 子字段");
+                                }
+                                else
+                                {
+                                    throw new ArgumentException($"subfields:{parameter} 中出现了无法识别的字符 '{p}'");
                                 }
                             }
                         }
@@ -694,7 +790,7 @@ out strError);
                 {
                     MarcField field = fields[0] as MarcField;
                     if (Array.IndexOf(values, field.Indicator) == -1)
-                        AddError($"{field_name} 字段指示符应为 {IndicatorsToString(values)}。但现在是 '{field.Indicator.Replace(" ", "#")}'");
+                        func_addError($"{field_name} 字段指示符应为 {IndicatorsToString(values)}。但现在是 '{field.Indicator.Replace(" ", "#")}'");
                 }
             }
 
@@ -797,7 +893,7 @@ out strError);
             var subfields_a = this.Record.select("field[@name='200']/subfield[@name='a']");
             if (subfields_a.count > 1)
             {
-                foreach (MarcSubfield subfield in subfields_a.List.Skip(1))
+                foreach (MarcSubfield subfield in subfields_a.Skip(1))
                 {
                     var title = subfield.Content;
                     // 423#0$12001#$a...$1701#0$a...
@@ -932,7 +1028,7 @@ out strError);
 
                 // result.Value
                 //      -1  出错
-                //      0   没有找到
+                //      0   没有找到(没有找到，但输入并保存了，也是返回 0)
                 //      1   找到
                 var result = GetCityCode(city,
             style,
@@ -945,7 +1041,8 @@ out strError);
                     AddError($"获取城市 '{city}' 的地区代码时出错: {result.ErrorInfo}。无法验证城市 '{city}' 和地区代码 '{code}' 对应关系的正确性，请注意核实");
                     continue;
                 }
-                if (result.Value == 0)
+                if (result.Value == 0 
+                    && string.IsNullOrEmpty(code))
                 {
                     AddWarning($"城市 '{city}' 的地区代码没有找到。无法验证城市 '{city}' 和地区代码 '{code}' 对应关系的正确性，请注意核实");
                     continue;
@@ -1035,6 +1132,50 @@ out strError);
             return results.ToString();
         }
 
+        // 从 出版地:出版者 列表字符串内容中抽出全部城市名
+        public static List<string> GetCities(string value)
+        {
+            if (value == null)
+                return new List<string>();
+            return value.Split(';')
+                .Select(x => StringUtil.ParseTwoPart(x, ":")[0])
+                .Where(x => x != null && x.Length > 0)
+                .ToList();
+        }
+
+        // 验证 出版地:出版者 列表字符串内容
+        public static List<string> VerifyCityPublisher(string value)
+        {
+            var errors = new List<string>();
+
+            string[] lines = value.Split(';');
+            foreach (string line in lines)
+            {
+                if (line.Contains(":") == false)
+                {
+                    errors.Add($"'{line}' 中应该包含冒号");
+                    continue;
+                }
+                var parts = StringUtil.SplitList(line, ":");
+                if (string.IsNullOrEmpty(parts[0]))
+                    errors.Add($"'{line}' 冒号左侧内容不允许为空");
+                if (string.IsNullOrEmpty(parts[1]))
+                    errors.Add($"'{line}' 冒号右侧内容不允许为空");
+                if (parts[1].Contains(":"))
+                    errors.Add($"'{line}' 冒号右侧内容不允许再有冒号");
+                if (parts[0] == "出版地")
+                    errors.Add($"'{line}' 冒号左侧内容应为具体的出版地名称");
+                if (parts[1] == "出版社"
+                    || parts[1] == "出版社名"
+                    || parts[1] == "出版者"
+                    || parts[1] == "出版机构")
+                    errors.Add($"'{line}' 冒号右侧内容应为具体的出版机构名称");
+            }
+
+            return errors;
+        }
+
+
         // 获得用于 102$a$b 的出版地代码。
         // 代码值 "CN:110000" 是完整状态。
         // 如果代码值为 "110000"，保存到数据库的时候自动转换为 "CN:110000" (也就是说默认中国)
@@ -1044,9 +1185,11 @@ out strError);
          * */
         // parameters:
         //      style   风格。如果包含 "askInput" 表示如果没有找到对应的城市代码，则询问用户输入
+        //              如果包含 maintain，表示要进行维护管理，检索找到后显示在对话框中允许编辑然后保存回去
+        //              如果包含 error_prompt_hide，表示报错提示内容中包含提醒可输入 hide 的内容
         // result.Value
         //      -1  出错
-        //      0   没有找到
+        //      0   没有找到。注：一种特定情况，如果是数据库中没有找到，但 style 中包含 askInput，操作者输入后会自动保存，这时候依然是返回 0，不过 result.ErrorCode 中为 "input"
         //      1   找到
         public static NormalResult GetCityCode(string city,
             string style,
@@ -1064,6 +1207,10 @@ out strError);
                     ErrorInfo = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名"
                 };
             }
+
+            var askInput = StringUtil.IsInList("askInput", style);
+            var maintain = StringUtil.IsInList("maintain", style);
+            var error_prompt_hide = StringUtil.IsInList("error_prompt_hide", style);
 
             var channel = Program.MainForm.GetChannel();
             var old_timeout = channel.Timeout;
@@ -1098,13 +1245,15 @@ out strError);
                         ErrorCode = channel.ErrorCode.ToString()
                     };
                 // TODO: 专门实现一个对话框，具有 checkbox “下次不再显示本对话框”
-                if (ret == 0 && StringUtil.IsInList("askInput", style))
+                if ((ret == 0 && askInput)
+                    || maintain)
                 {
+                    string input_code = maintain ? code : default_code;
                 REDO_INPUT:
-                    var input_code = InputDlg.GetInput(Program.MainForm,
-                        $"地区代码没有找到，请输入",
+                    input_code = InputDlg.GetInput(Program.MainForm,
+                        maintain ? "维护地区代码" : $"地区代码没有找到，请输入",
                         $"'{city}' 的地区代码(6字符):",
-                        default_code,
+                        input_code,
                         Program.MainForm.Font);
                     if (input_code == null)
                         return new NormalResult
@@ -1156,11 +1305,14 @@ out strError);
 
                     if (errors.Count > 0)
                     {
-                        MessageBox.Show(Program.MainForm, $"{StringUtil.MakePathList(errors, "\r\n")}\r\n\r\n请重新输入\r\n\r\n(若希望不再显示，可输入 hide)");
+                        var info = $"{StringUtil.MakePathList(errors, "\r\n")}\r\n\r\n请重新输入";
+                        if (error_prompt_hide)
+                            info += "\r\n\r\n(若希望不再显示，可输入 hide)";
+                        MessageBox.Show(Program.MainForm, info);
                         goto REDO_INPUT;
                     }
 
-                    code = input_code;
+                    code = long_code;
                     // 保存到服务器
                     var save_result = SetCityCode(city, long_code);
                     if (save_result.Value == -1)
@@ -1491,7 +1643,7 @@ ref string locationString)
                 new_field,
                 InsertSequenceStyle.PreferTail);
             {
-                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
                 locationString = MarcRecordUtility.GetLocationString(
                     subfield_a);
             }
@@ -1539,7 +1691,7 @@ ref string locationString)
                 new_field,
                 InsertSequenceStyle.PreferTail);
             {
-                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
                 locationString = MarcRecordUtility.GetLocationString(
                     subfield_a);
             }
@@ -1587,7 +1739,7 @@ ref string locationString)
                 new_field,
                 InsertSequenceStyle.PreferTail);
             {
-                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
                 locationString = MarcRecordUtility.GetLocationString(
                     subfield_a);
             }
@@ -1637,7 +1789,7 @@ ref string locationString)
             // 返回 423$a 的定位
             if (new_field != null)
             {
-                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
                 locationString = MarcRecordUtility.GetLocationString(
                     subfield_a);
             }
@@ -1704,7 +1856,7 @@ ref string locationString)
             // 返回 423$a 的定位
             if (new_field != null)
             {
-                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
                 locationString = MarcRecordUtility.GetLocationString(
                     subfield_a);
             }
@@ -1816,7 +1968,7 @@ ref string locationString)
                 InsertSequenceStyle.PreferTail);
 
             // 返回 304$a 的定位
-            var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+            var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
             locationString = MarcRecordUtility.GetLocationString(
                 subfield_a);
             return old_marc != record.Text;
@@ -1860,7 +2012,7 @@ ref string locationString)
                 InsertSequenceStyle.PreferTail);
 
             // 返回 307$a 的定位
-            var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+            var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
             locationString = MarcRecordUtility.GetLocationString(
                 subfield_a);
             return old_marc != record.Text;
@@ -2036,12 +2188,12 @@ ref string locationString)
                 // 转为找到第一个 200$f
                 if (field_7xx?.Name == "701")
                 {
-                    subfield_f = VerifyHost.FirstOrDefault(record.select("field[@name='200']/subfield[@name='f']")) as MarcSubfield;
+                    subfield_f = record.select("field[@name='200']/subfield[@name='f']").FirstOrDefault() as MarcSubfield;
                 }
                 // 转为找到第一个 200$g
                 else if (field_7xx?.Name == "702")
                 {
-                    subfield_f = VerifyHost.FirstOrDefault(record.select("field[@name='200']/subfield[@name='g']")) as MarcSubfield;
+                    subfield_f = record.select("field[@name='200']/subfield[@name='g']").FirstOrDefault() as MarcSubfield;
                 }
                 else
                     subfield_f = null;
@@ -2065,13 +2217,13 @@ ref string locationString)
                     InsertSequenceStyle.PreferTail);
 
                 // 返回 7xx$a 的定位
-                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
                 locationString = MarcRecordUtility.GetLocationString(
                     subfield_a);
             }
             else
             {
-                var subfield_a = VerifyHost.FirstOrDefault(field_7xx.select("subfield[@name='a']")) as MarcSubfield;
+                var subfield_a = field_7xx.select("subfield[@name='a']").FirstOrDefault() as MarcSubfield;
                 if (subfield_a == null)
                 {
                     subfield_a = new MarcSubfield("a", subfield_f.Content);
@@ -2168,7 +2320,7 @@ int caret_offs_in_end_level)
                 new_field.select("subfield[@name='a']")[0].Content = right;
 
                 // 返回 7xx$a 的定位
-                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                var subfield_a = new_field.select("subfield[@name='a']").FirstOrDefault();
                 locationString = MarcRecordUtility.GetLocationString(
                     subfield_a);
             }
@@ -2236,8 +2388,10 @@ ref string locationString)
                 && style != "auto")
                 throw new ArgumentException($"style 参数值 '{style}' 不合法。应为 force13 force10 auto 之一");
 
+            /*
             if (style == "auto")
                 throw new ArgumentException("暂未实现");
+            */
 
             string old_marc = record.Text;
 
@@ -2249,7 +2403,7 @@ ref string locationString)
             }
 
             if (node == null)
-                node = VerifyHost.FirstOrDefault(record.select("field[@name='010']/subfield[@name='a']"));
+                node = record.select("field[@name='010']/subfield[@name='a']").FirstOrDefault();
 
             if (node == null)
                 return false;
@@ -2258,9 +2412,9 @@ ref string locationString)
             if (node is MarcSubfield)
                 subfield = node as MarcSubfield;
             else if (node is MarcField)
-                subfield = VerifyHost.FirstOrDefault(node.select("subfield[@name='a']")) as MarcSubfield;
+                subfield = node.select("subfield[@name='a']").FirstOrDefault() as MarcSubfield;
             else
-                subfield = VerifyHost.FirstOrDefault(record.select("field[@name='010']/subfield[@name='a']")) as MarcSubfield;
+                subfield = record.select("field[@name='010']/subfield[@name='a']").FirstOrDefault() as MarcSubfield;
 
             if (subfield == null)
                 return false;
@@ -2408,7 +2562,7 @@ ref string locationString)
 200  $a4444".Replace('$', 'ǂ');
             string correct = "100/a";
             MarcRecord record = MarcRecord.FromWorksheet(worksheet);
-            var node = record.select("field[@name='100']/subfield[@name='a']").List.FirstOrDefault();
+            var node = record.select("field[@name='100']/subfield[@name='a']").FirstOrDefault();
             var locationString = MarcRecordUtility.GetLocationString(node);
             Assert.AreEqual(correct, locationString);
         }
@@ -2423,7 +2577,7 @@ ref string locationString)
 200  $a4444".Replace('$', 'ǂ');
             string correct = "100:1/a:1";
             MarcRecord record = MarcRecord.FromWorksheet(worksheet);
-            var node = record.select("field[@name='100'][2]/subfield[@name='a'][2]").List.FirstOrDefault();
+            var node = record.select("field[@name='100'][2]/subfield[@name='a'][2]").FirstOrDefault();
             var locationString = MarcRecordUtility.GetLocationString(node);
             Assert.AreEqual(correct, locationString);
         }
@@ -2438,7 +2592,7 @@ ref string locationString)
 200  $a4444".Replace('$', 'ǂ');
             string correct = "001";
             MarcRecord record = MarcRecord.FromWorksheet(worksheet);
-            var node = record.select("field[@name='001']").List.FirstOrDefault();
+            var node = record.select("field[@name='001']").FirstOrDefault();
             var locationString = MarcRecordUtility.GetLocationString(node);
             Assert.AreEqual(correct, locationString);
         }

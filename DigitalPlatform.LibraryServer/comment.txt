@@ -376,6 +376,19 @@ c) WriteRes() API 写入书目记录下级对象。需要 setbiblioobject 或者
 
 
 ~~~
+CheckWriteResRights() 中判断当前账户是否具备 managedatabase 的时候，目的是要
+判断对一些资源是否具有管理权限。但实际上 managedatabase 权限是针对数据库的，所以
+存取定义中 managedatabase 针对特定数据库的权限如何能管到这里的资源是个问题。
+一个临时的方法是，只要存取定义中有 managedatabase 权限(无论针对什么数据库)，就认为具备管理权限。
+
+检查全部 CanGet() 函数调用，看看有没有遗漏的地方没有考虑存取定义
+~~~
 发现一个内务种册窗的 bug
 先让当前账户缺乏 setbiblioobject 和 setobject 权限
 然后把一条书目记录下属的某个对象删除，然后全部保存。会报错说缺乏权限。但此时种册窗的“全部保存”按钮变成灰色了
+
+
+~~~~
+ListFile() API 的 delete 功能，和 WriteRes() API，在涉及到书目库记录的时候，
+如果当前账户是 order 权限，要测试此书目库具有和不具有 orderWork 角色时的不同表现。
+WriteRes() API 的 respath 是否为追加形态，也会产生影响。

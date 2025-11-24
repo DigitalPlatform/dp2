@@ -8,6 +8,7 @@ using System.Collections;
 using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
+using System.Linq;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
@@ -20,7 +21,6 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {

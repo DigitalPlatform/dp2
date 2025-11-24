@@ -36,6 +36,10 @@ namespace DigitalPlatform.dp2.Statis
             if (m_nNavigating > 0)
                 return;
 
+            // 2025/11/17
+            if (this.extendedWebBrowser1.Document == null)
+                throw new ArgumentException("HtmlInputDialog 中文档尚未准备好");
+
             SubmitResult.Clear();
 
             // 准备SubmitResult信息
