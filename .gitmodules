@@ -2,3 +2,6 @@
 	path = dp-library
 	url = https://github.com/DigitalPlatform/dp-library.git
 	branch = master
+[submodule "TextEditor"]
+	path = TextEditor
+	url = https://github.com/library-studio/TextEditor.git
