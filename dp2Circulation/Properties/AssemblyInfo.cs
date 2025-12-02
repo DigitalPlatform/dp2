@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.108.*")]
-[assembly: AssemblyFileVersion("3.108.0.0")]
+[assembly: AssemblyVersion("3.109.*")]
+[assembly: AssemblyFileVersion("3.109.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -276,3 +276,4 @@ using System.Runtime.InteropServices;
 //                  DetailHost 类增加 UnimarcAddPublisher() 和 UnimarcManagePublisher() 两个函数
 //                  同类书区分号对话框继续改进重构。
 //                  各种脚本文件中都支持使用 LINQ 函数了。(加入了 System.Core.dll 引用)
+// 3.109 2025/12/2  改进同类书区分号窗。

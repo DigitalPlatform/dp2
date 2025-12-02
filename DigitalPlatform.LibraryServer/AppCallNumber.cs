@@ -828,6 +828,15 @@ namespace DigitalPlatform.LibraryServer
 
             if (strAction == "add")
             {
+                // 2025/12/2
+                // 防止字符串尺寸过大造成内存问题
+                if (strClass?.Length > 500)
+                    throw new ArgumentException($"strClass 长度超过 500");
+                if (strNumber?.Length > 50)
+                    throw new ArgumentException($"strNumber 长度超过 50");
+                if (strArrangeGroupName?.Length > 100)
+                    throw new ArgumentException($"strArrangeGroupName 长度超过 100");
+
                 MemoTailNumber item = new MemoTailNumber();
                 item.ArrangeGroupName = strArrangeGroupName;
                 item.Class = strClass;

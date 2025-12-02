@@ -6084,6 +6084,11 @@ out strError);
         {
             get
             {
+                // 3.196 以下
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.196") < 0)
+                {
+                    return "";
+                }
                 return this.AppInfo?.GetString(
 "callNumber",
 "ignore_item_state",

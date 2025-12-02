@@ -515,6 +515,13 @@ namespace dp2Circulation
             return "!" + strLocation;
         }
 
+        // 服务器版本太低不足以显示状态列
+        bool ServerVersionLow()
+        {
+            // 3.196 以下
+            return (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.196") < 0);
+        }
+
         int FillList(bool bSort,
             string strStyle,
             out string strError)
@@ -542,6 +549,7 @@ namespace dp2Circulation
              * */
 
             bool bFast = StringUtil.IsInList("fast", strStyle);
+            var use_empty_number = (Program.MainForm.CallNumberUseEmptyNumber);
 
             /*
             EnableControls(false);
@@ -588,6 +596,8 @@ namespace dp2Circulation
                 if (looping != null)
                     looping.Progress.SetProgressRange(0, lHitCount);
 
+                var server_serverion_low = ServerVersionLow();
+
                 // 装入浏览格式
                 for (; ; )
                 {
@@ -603,8 +613,11 @@ namespace dp2Circulation
 
                     bool bShift = Control.ModifierKeys == Keys.Shift;
                     string strBrowseStyle = "cols";
+                    // 2025/12/2
+                    // 如果要利用空号，则不能省略 'cols' browse style。因为这时要用到 state 列
+                    // TODO: 针对 dp2library 最新版还可以考虑利用 @coldef:xxxx 精确指定需要 state 列
                     if (bShift == true || this.checkBox_returnBrowseCols.Checked == false
-                        || bFast == true)
+                        || (bFast == true && use_empty_number == false))
                     {
                         strBrowseStyle = "";
                         lCurrentPerCount = lPerCount * 10;
@@ -643,7 +656,9 @@ namespace dp2Circulation
 
                         ListViewUtil.ChangeItemText(item,
                             COLUMN_STATE,
-                            result_item.State);
+                            string.IsNullOrEmpty(result_item.State) == false ?
+                            result_item.State
+                            : server_serverion_low ? "(不支持)" : "");
 
                         if (String.IsNullOrEmpty(result_item.ErrorInfo) == false)
                         {
@@ -738,7 +753,10 @@ this.listView_number,
 COLUMN_CALLNUMBER);
 
                 // 如果设置了“利用空号”
-                this.FirstEmtpyNumber = GetZhongcihaoPart(GetBlankNumber(this.listView_number));
+                this.FirstEmtpyNumber = GetBlankNumber(
+                    this.listView_number.Items.Cast<ListViewItem>(),
+                    _usedEmptyNumbers,
+                    Program.MainForm.CallNumberIgnoreItemState);
 
                 this.MaxNumber = GetZhongcihaoPart(GetTopNumber(this.listView_number));
 
@@ -878,6 +896,8 @@ COLUMN_CALLNUMBER);
             // location --> arrangement name
             Hashtable info_table = new Hashtable();
 
+            var server_serverion_low = ServerVersionLow();
+
             // 加入内存中的实体记录
             for (int i = 0; i < this.MyselfCallNumberItems.Count; i++)
             {
@@ -933,7 +953,11 @@ COLUMN_CALLNUMBER);
                 list_item.ImageIndex = TYPE_CURRENT;
                 list_item.Text = item.RecPath;
 
-                ListViewUtil.ChangeItemText(list_item, COLUMN_STATE, item.State);
+                ListViewUtil.ChangeItemText(list_item,
+                    COLUMN_STATE,
+                    string.IsNullOrEmpty(item.State) == false ?
+                    item.State
+                    : server_serverion_low ? "(不支持)" : "");
 
                 // 2025/11/17
                 ListViewUtil.ChangeItemText(list_item, COLUMN_CALLNUMBER, strCallNumber);
@@ -991,6 +1015,42 @@ COLUMN_CALLNUMBER);
             return strZhongcihao;
              * */
             return GetLeftPureNumberPart(strZhongcihao);
+        }
+
+        // 获得 I247.5/2-9(xxx) 中 2-9 部分
+        static string GetRangePart(string strCallNumber)
+        {
+            if (string.IsNullOrEmpty(strCallNumber))
+                return "";
+            string[] lines = strCallNumber.Split(new char[] { '/' });
+            if (lines.Length < 2)
+                return "";
+
+            string strZhongcihao = lines[1].Trim();
+            return GetLeftRangePart(strZhongcihao);
+        }
+
+        // 获得 2-9(xxx) 左边的 2-9 部分
+        static string GetLeftRangePart(string strText)
+        {
+            if (String.IsNullOrEmpty(strText) == true)
+                return "";
+
+            strText = strText.TrimStart();
+
+            StringBuilder s = new StringBuilder();
+            foreach(char ch in strText)
+            {
+                if (ch == '-' || char.IsDigit(ch))
+                {
+
+                }
+                else
+                    break;
+                s.Append(ch);
+            }
+
+            return s.ToString();
         }
 
         // 2009/11/24
@@ -1152,16 +1212,74 @@ COLUMN_CALLNUMBER);
         }
 #endif
         // 取出最小的第一个空白的种次号。事先不需要排序
-        string GetBlankNumber(ListView list)
+        public static string GetBlankNumber(
+            IEnumerable<ListViewItem> items,
+            List<string> usedEmptyNumbers,
+            string ignore_state)
         {
-            var sorter = new ZhongcihaoComparer() { Descending = false};
-            var ignore_state = Program.MainForm.CallNumberIgnoreItemState;
-            return list.Items
-                .Cast<ListViewItem>()
-                .Where(item => string.IsNullOrEmpty(item.Text) == true)
-                .Select(item => ListViewUtil.GetItemText(item, COLUMN_CALLNUMBER))
+            // DumpList(items);
+            var sorter = new RangeComparer() { Descending = false };
+            var ranges = items
+                .Where(item =>
+                {
+                    // 只选择第一列为空的。第一列(路径)为空，表示这是空号行
+                    if (string.IsNullOrEmpty(item.Text) == false)
+                        return false;
+                    if (string.IsNullOrEmpty(ignore_state))
+                        return true;
+                    string state = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                    return !(StringUtil.IsInList(ignore_state, state));
+                })
+                .Select(item => GetRangePart(ListViewUtil.GetItemText(item, COLUMN_CALLNUMBER)))
+                .Where(s => string.IsNullOrEmpty(s) == false)
                 .OrderBy(item => item, sorter)
-                .FirstOrDefault() ?? "";
+                .ToList();
+            // 找到第一个可用的号
+            foreach (var range in ranges)
+            {
+                // TODO: 2-9 这种形态要拆成单个的号码
+                if (range.Contains("-"))
+                {
+                    var numbers = StringUtil.ParseTwoPart(range, "-");
+                    if (int.TryParse(numbers[0], out int start) == false)
+                    {
+                        throw new ArgumentException($"范围中的号码 '{numbers[0]}' 不合法。应为整数");
+                    }
+                    if (int.TryParse(numbers[1], out int end) == false)
+                    {
+                        throw new ArgumentException($"范围中的号码 '{numbers[1]}' 不合法。应为整数");
+                    }
+                    if (start > end)
+                        throw new ArgumentException($"范围 '{range}' 不合法。后一个数字不应该大于前一个数字");
+                    for (int i = start; i <= end; i++)
+                    {
+                        if (usedEmptyNumbers.Contains(i.ToString()) == false)
+                            return i.ToString();
+                    }
+                }
+                else
+                {
+                    if (usedEmptyNumbers.Contains(range) == false)
+                        return range;
+                }
+            }
+
+            return "";
+        }
+
+        static void DumpList(IEnumerable<ListViewItem> list)
+        {
+#if DEBUG
+            StringBuilder text = new StringBuilder();
+            foreach (ListViewItem item in list)
+            {
+                var recpath = item.Text;
+                var accessNo = ListViewUtil.GetItemText(item, COLUMN_CALLNUMBER);
+                text.AppendLine($"{recpath}, {accessNo}");
+            }
+
+            Debug.WriteLine(text);
+#endif
         }
 
         // 获得若干号
@@ -1189,20 +1307,30 @@ COLUMN_CALLNUMBER);
                 return -1;
 
             // 获得 第一个空号
-            strFirstEmptyNumber = GetZhongcihaoPart(GetBlankNumber(this.listView_number));
+            strFirstEmptyNumber = GetBlankNumber(
+                this.listView_number.Items.Cast<ListViewItem>(),
+                _usedEmptyNumbers,
+                Program.MainForm.CallNumberIgnoreItemState);
 
             if (strFirstEmptyNumber != this.FirstEmtpyNumber)
                 throw new ArgumentException($"独立得到的空号 '{strFirstEmptyNumber}' 和 FillList() 得到的空号 '{this.FirstEmtpyNumber}' 不一致");
 
             // 2017/3/2
             // 由于 FillList() 里面用了 EndUpdate()，如果后来窗口很快关闭了，就会来不及显示 ListView 的更新情况，所以需要这里 Update()，才能看到瞬间 ListView 刷新显示的效果
-            this.Update();
+            // this.Update();
+
+            var ignore_state = Program.MainForm.CallNumberIgnoreItemState;
 
             for (int i = 0; i < this.listView_number.Items.Count; i++)
             {
                 ListViewItem item = this.listView_number.Items[i];
                 string strRecPath = item.Text;
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
+                string state = ListViewUtil.GetItemText(item, COLUMN_STATE);
+
+                // 2025/12/2
+                if (StringUtil.IsInList(ignore_state, state))
+                    continue;
 
                 if (String.IsNullOrEmpty(strOtherMaxNumber) == true)
                 {
@@ -1949,9 +2077,12 @@ COLUMN_CALLNUMBER);
             public string Number { get; set; }  // 区分号
         }
 
+        // return:
+        //      -1  出错。如果 strError == "used"，表示这个号码已被占用(但 strOutputNumber 中返回的号码并不靠谱，不能直接用)
         int ProtectTailNumber(
             string strAction,
             string strTestNumber,
+            bool is_empty_number,
             List<MemoTailNumber> numbers,
             out string strOutputNumber,
             out string strError)
@@ -1984,6 +2115,26 @@ COLUMN_CALLNUMBER);
                     out strError);
                 if (nRet == -1)
                     return -1;
+
+                // 2025/12/2
+                // TODO: 进一步改进 API，增加一个 protect_empty action，让 API 根据空号情况返回 strTestNumber
+                if (is_empty_number)
+                {
+                    /*
+                    var expected = StringUtil.IncreaseNumber(strTestNumber, 1);
+                    if (expected != strOutputNumber)
+                    {
+                        strError = "used";
+                        return -1;
+                    }
+                    */
+                    if (strTestNumber != strOutputNumber)
+                    {
+                        strError = "used";
+                        return -1;
+                    }
+                    strOutputNumber = strTestNumber;
+                }
 
                 if (numbers != null)
                 {
@@ -2413,9 +2564,14 @@ COLUMN_CALLNUMBER);
             strError = "";
             int nRet = 0;
             protectedNumbers = new List<MemoTailNumber>();
+            bool is_empty_number = false;   // 是否为利用了空号
+
 
             this.ClassNumber = strClass;
             this.LocationString = strLocationString;
+
+            int redo_count = 0;
+        REDO:
 
             // 仅利用书目统计最大号
             if (style == ZhongcihaoStyle.Biblio)
@@ -2452,7 +2608,8 @@ COLUMN_CALLNUMBER);
                     && string.IsNullOrEmpty(first_blank_number) == false)
                 {
                     strNumber = first_blank_number;
-                    goto PROTECT_END;
+                    is_empty_number = true;
+                    goto PROTECT_END;   // 保护但不要增量
                 }
 
                 if (String.IsNullOrEmpty(strOtherMaxNumber) == false)
@@ -2728,11 +2885,29 @@ COLUMN_CALLNUMBER);
                 nRet = ProtectTailNumber(
                     "protect",
                     strTestNumber,
+                    is_empty_number,
                     this.MemoNumbers,
                     out strNumber,
                     out strError);
                 if (nRet == -1)
+                {
+                    if (is_empty_number
+                        && strError == "used")
+                    {
+                        // 空号已被别的前端占用。需要跳过这个空号再找下一个空号或者(最大号+1)
+
+                        // 在 listView 中表示这个空号被占用
+                        _usedEmptyNumbers.Add(strTestNumber == "0" ? "0" : strTestNumber.TrimStart('0'));
+                        redo_count++;
+                        if (redo_count > 10)
+                        {
+                            strError = "遇到号码被占用并重试次数太多，放弃取号";
+                            goto ERROR1;
+                        }
+                        goto REDO;
+                    }
                     goto ERROR1;
+                }
 
                 // 返回本次保护过的号码
                 for (int i = start; i < this.MemoNumbers.Count; i++)
@@ -2745,6 +2920,7 @@ COLUMN_CALLNUMBER);
             return -1;
         }
 
+        List<string> _usedEmptyNumbers = new List<string>();
         int GetAllBiblioSummary(out string strError)
         {
             strError = "";
@@ -3023,4 +3199,22 @@ COLUMN_CALLNUMBER);
                 return CallNumberForm.CompareZhongcihao(s1, s2);
         }
     }
+
+    class RangeComparer : IComparer<string>
+    {
+        public bool Descending { get; set; }
+
+        public int Compare(string s1, string s2)
+        {
+            // 允许 null 安全处理
+            if (ReferenceEquals(s1, s2)) return 0;
+
+            if (Descending)
+                return -1 * CallNumberForm.CompareZhongcihao(s1, s2);
+            else
+                return CallNumberForm.CompareZhongcihao(s1, s2);
+        }
+    }
+
+
 }
