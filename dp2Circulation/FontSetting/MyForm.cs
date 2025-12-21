@@ -1503,11 +1503,13 @@ out string strError)
                 return -1;
             }
 
-            // EnableControls(false);
-
-            Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
+            Debug.Assert(strAction == "protect"
+                || strAction == "unmemo"
+                || strAction == "memo",
+                $"出现了不期望的 strAction '{strAction}'");
 
             // 显示到操作历史中
+            /*
             {
                 string oper_name = "保护";
                 if (strAction == "unmemo")
@@ -1515,17 +1517,11 @@ out string strError)
                 string text = $"{oper_name} 种次号 '{strTestNumber}' (类号={strClass}, 排架体系名={strArrangeGroupName})";
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(text) + "</div>");
             }
-
-            /*
-            LibraryChannel channel = this.GetChannel();
-            string strOldMessage = Progress.Initial(strAction == "protect" ? "正在请求保护尾号 ..." : "正在请求释放保护尾号 ...");
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 1, 0);
             */
+
             var looping = Looping(out LibraryChannel channel,
                 strAction == "protect" ? "正在请求保护尾号 ..." : "正在请求释放保护尾号 ...",
                 "timeout:0:1:0");
-
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
@@ -1538,22 +1534,30 @@ out string strError)
                     out strError);
                 if (lRet == -1)
                 {
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug red'>" + HttpUtility.HtmlEncode($"返回出错:{strError}") + "</div>");
+                    DisplayHistory(strError);
+                    //Program.MainForm.OperHistory.AppendHtml("<div class='debug red'>" + HttpUtility.HtmlEncode($"返回出错:{strError}") + "</div>");
                     return -1;
                 }
 
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>" + HttpUtility.HtmlEncode($"返回成功:strOutputNumber={strOutputNumber}, lRet={lRet}, strError={strError}") + "</div>");
+                DisplayHistory(strError);
+                //Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>" + HttpUtility.HtmlEncode($"返回成功:strOutputNumber={strOutputNumber}, lRet={lRet}, strError={strError}") + "</div>");
                 return (int)lRet;
+
+                // 显示到操作历史中
+                void DisplayHistory(string error)
+                {
+                    /*
+                    string oper_name = "保护";
+                    if (strAction == "unmemo")
+                        oper_name = "解除保护";
+                    */
+                    string text = $"{strAction} 种次号 '{strTestNumber}' (类号={strClass}, 排架体系名={strArrangeGroupName}) ret={lRet} error={error}";
+                    Program.MainForm.OperHistory.AppendHtml($"<div class='debug {(lRet == -1 || string.IsNullOrEmpty(error) == false? "error" : "green")}'>" + HttpUtility.HtmlEncode(text) + "</div>");
+                }
             }
             finally
             {
                 looping.Dispose();
-                /*
-                Progress.Initial(strOldMessage);
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-                */
             }
         }
 

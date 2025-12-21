@@ -1,42 +1,39 @@
 ﻿// #define _TEST_PINYIN
 
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.CommonDialog;
+using DigitalPlatform.Drawing;
+using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Marc;
+using DigitalPlatform.MarcDom;
+using DigitalPlatform.MessageClient;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DigitalPlatform.Z3950;
+using dp2Circulation.Script;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Xml;
 using System.Diagnostics;
-using System.Threading;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using System.Text;
-using System.Linq;
-
-using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.CommonDialog;
-using DigitalPlatform.MessageClient;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Drawing;
-using DigitalPlatform.Z3950;
-
+using System.Windows.Forms;
+using System.Xml;
 using UcsUpload;
-using dp2Circulation.Script;
-using System.Data.SqlTypes;
-// using DocumentFormat.OpenXml.Wordprocessing;
+using static dp2Circulation.CallNumberForm;
 
 namespace dp2Circulation
 {
@@ -61,8 +58,9 @@ namespace dp2Circulation
             }
         }
 
+        // TODO: 需要改为 getter setter。但需要注意和以前脚本代码的兼容性
         // 记忆临时种次号
-        public List<dp2Circulation.CallNumberForm.MemoTailNumber> MemoNumbers { get; set; }
+        public List<MemoTailNumber> MemoNumbers { get; set; }
 
         // 拥有。需要及时 Dispose()
         GenerateData _genData = null;
@@ -2935,7 +2933,8 @@ true);
 
             if (this.MemoNumbers != null && this.MemoNumbers.Count != 0)
             {
-                foreach (dp2Circulation.CallNumberForm.MemoTailNumber number in this.MemoNumbers)
+                MainForm.OutputText("begin EntityForm.ReleaseProtectNumbers()");
+                foreach (var number in this.MemoNumbers)
                 {
                     string strError = "";
                     int nRet = ReleaseProtectedTailNumber(number,
@@ -2945,7 +2944,19 @@ true);
                 }
 
                 this.MemoNumbers.Clear();
+                MainForm.OutputText("end EntityForm.ReleaseProtectNumbers()");
+
             }
+        }
+
+        public void AddMemoNumbers(IEnumerable<MemoTailNumber> numbers)
+        {
+            // 带有增加去重功能
+            foreach (var number in numbers)
+            {
+                MemoTailNumber.AddNumber(this.MemoNumbers, number);
+            }
+            // this.MemoNumbers.AddRange(numbers);
         }
 
         // 
@@ -3308,7 +3319,7 @@ TaskScheduler.Default);
 
             // 2012/7/25 移动到这里
             // 因为 LoadBiblioRecord() 会导致填充AutoGen菜单
-            this._genData.ClearViewer();
+            this._genData?.ClearViewer();
 
             if (this.m_commentViewer != null)
                 this.m_commentViewer.Clear();
@@ -3359,6 +3370,7 @@ TaskScheduler.Default);
             this.BiblioTimestamp = info.Timestamp;
             this.BiblioRecPath = "";    // info.RecPath; 
 
+            // TODO: 是否要检测一下当前是否拥有 Focus 才显示 Ctrl+A 菜单
             // 显示Ctrl+A菜单
             if (Program.MainForm.PanelFixedVisible == true)
                 this._genData.AutoGenerate(this.m_marcEditor,
@@ -8204,6 +8216,13 @@ out strError);
             return true;    // cleared
         }
 
+        private void EntityForm_Deactivate(object sender, System.EventArgs e)
+        {
+            // 如果不在顶层
+            this._genData?.ClearViewer();
+        }
+
+
         private void EntityForm_Activated(object sender, EventArgs e)
         {
             // 2009/1/15 
@@ -10159,7 +10178,7 @@ out strError);
                     strAction = "new";
 
                 string strStyle = "";
-                REDO:
+            REDO:
                 long lRet = channel.SetBiblioInfo(
                     stop,
                     strAction,
@@ -17680,6 +17699,21 @@ out strError);
             var strMARC = this.MarcEditor.Marc;
             var record = new MarcRecord(strMARC);
 
+            string action = "N";
+            if (Has049(record))
+                action = "U";
+            else
+                action = "N";
+
+            var error = PrepareRecord(record,
+            action,
+            this.BiblioRecPath);
+            if (error != null)
+            {
+                strError = error;
+                goto ERROR1;
+            }
+
             // 2024/10/13
             // 利用脚本对 MARC 记录进行过滤
             // 对 MARC 记录进行过滤
@@ -17694,7 +17728,12 @@ UCS_UPLOAD_CACHE_KEY,
 script_code,
 "",
 record,
-null,
+(h) => {
+    h.ClearParameter();
+    h.Table = new Hashtable();
+    h.Table["recpath"] = this.BiblioRecPath;
+    h.Table["action"] = action;
+},
 ref host,
 out string error1);
                     if (ret < 0)
@@ -17719,20 +17758,6 @@ out string error1);
                 }
             }
 
-            string action = "N";
-            if (Has049(record))
-                action = "U";
-            else
-                action = "N";
-
-            var error = PrepareRecord(record,
-            action,
-            this.BiblioRecPath);
-            if (error != null)
-            {
-                strError = error;
-                goto ERROR1;
-            }
 
             string format = GetRecordFormat(record, true);    // "BK";
 

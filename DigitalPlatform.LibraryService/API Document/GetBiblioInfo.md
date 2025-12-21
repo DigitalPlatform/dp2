@@ -104,18 +104,20 @@ iso2709:utf-8|backup	    ·µ»Ø ISO2709 ¸ñÊ½£¬Ä¬ÈÏ `utf-8`£¬²»´ø `|backup` Ê±£¬°´Õ
 ===
 
 ×¢: 
+Ã°ºÅ×ó²àÊÇÊý¾Ý¸ñÊ½£¬ÓÒ²àÊÇÐÞÊÎÊôÐÔ¡£Èç¹û´æÔÚÐÞÊÎÊôÐÔ£¬ÔòÁ½²àÖÐ¼äµÄÃ°ºÅ²»¿ÉÊ¡ÂÔ£¬×¢Òâ²»ÒªÎóÓÃÎª `|` ÊúÏß×Ö·û¡£
+ÊúÏß×Ö·ûÊÇÓÃÀ´·Ö¸ô¶à¸öÐÞÊÎÊôÐÔµÄ¡£
 `marc` ¸ñÊ½·µ»ØµÄÊÇ»úÄÚ¸ñÊ½µÄ MARC ¼ÇÂ¼×Ö·û´®£»
 `marc:syntax` ·µ»ØµÄÄÚÈÝÐÎÌ¬Èç `unimarc|xxxx` »ò `usmarc|xxxx`£¬ÆäÖÐÊúÏß×ó²à±íÊ¾¾ßÌåµÄ MARC ¸ñÊ½Ãû³Æ£¬Îª `unimarc``usmarc` Ö®Ò»£»ÊúÏßÓÒ²àÎª»úÄÚ¸ñÊ½ÄÚÈÝ¡£
-`|backup` »áÓ°Ïìµ½·µ»ØÄÚÈÝµÄÏêÂÔ³Ì¶È¡£´ø `|backup` Ê±£¬·µ»ØÍêÕûÐÅÏ¢£»²»´ø `|backup` Ê±£¬·µ»ØµÄÐÅÏ¢»áÒÀ¾Ýµ±Ç°µÇÂ¼ÓÃ»§µÄÈ¨ÏÞ¶øÓÐËùÏÞÖÆ¡£
+Ìí¼ÓÐÞÊÎÊôÐÔ`backup` »áÓ°Ïìµ½·µ»ØÄÚÈÝµÄÏêÂÔ³Ì¶È¡£´ø `backup` Ê±£¬·µ»ØÍêÕûÐÅÏ¢£»²»´ø `backup` Ê±£¬·µ»ØµÄÐÅÏ¢»áÒÀ¾Ýµ±Ç°µÇÂ¼ÓÃ»§µÄÈ¨ÏÞ¶øÓÐËùÏÞÖÆ¡£
 
-¹ØÓÚ `|backup` Ó°Ïì·µ»ØÄÚÈÝÏêÂÔµÄÇéÐÎ£¬¾ÙÀýÈçÏÂ£º
+¹ØÓÚÐÞÊÎÊôÐÔ `backup` Ó°Ïì·µ»ØÄÚÈÝÏêÂÔµÄÇéÐÎ£¬¾ÙÀýÈçÏÂ£º
 ¼ÙÉèÒ»¸öÕË»§µÄ´æÈ¡¶¨ÒåÈ¨ÏÞÈç
 `ÖÐÎÄÍ¼Êé:getbiblioinfo=*(200)`£¬±íÊ¾Ö»ÔÊÐí·µ»ØÖÐÎÄÍ¼ÊéÕâ¸öÊéÄ¿¿âÖÐµÄ¼ÇÂ¼µÄ 200 ×Ö¶Î£¬ÆäËü×Ö¶Î²»»á·µ»Ø¡£(ÐÇºÅ±íÊ¾ÈÎºÎ¶¯×÷¶¼ÔÊÐí£¬ÆäºóµÄÔ²À¨ºÅÖÐÊÇ×Ö¶ÎÁÐ±í)
 ÓÃÕâ¸öÕË»§Éí·ÝÇëÇó±¾ API Ê±£¬formats ²ÎÊýÎª `marc` »ò `iso2709:utf-8`£¬Ôò·µ»ØµÄ MARC ¼ÇÂ¼ÖÐÖ»»á°üº¬ 200 ×Ö¶Î£¬ÆäËû×Ö¶Î»á±»Ê¡ÂÔµô¡£
 È»ºó£¬¸øÕâ¸öÕË»§Ôö¼Ó `backup` È¨ÏÞºó£¬ÔÙ´ÎÇëÇó±¾ API Ê±£¬
 Èç¹û formats ²ÎÊýÎª `marc:syntax|backup` »ò `iso2709:utf-8|backup`£¬Ôò·µ»ØµÄ MARC ¼ÇÂ¼»áÊÇÍêÕûµÄ£¬²»»á±»Ê¡ÂÔÈÎºÎ×Ö¶Î¡£
 
-TODO: iso2709|backup ÓÃ·¨ÎªºÎ²»Ö§³Ö
+×¢: iso2709|backup ÓÃ·¨ÎªºÎ»á±¨´í£¿ÒòÎªÕâÀïÎóÓÃÁËÊúÏß£¬backup ÊÇÐÞÊÎÊôÐÔ£¬Ëü×ó²àÓ¦¸ÃÊ¹ÓÃÃ°ºÅ¡£
 
 ### [out] results
 

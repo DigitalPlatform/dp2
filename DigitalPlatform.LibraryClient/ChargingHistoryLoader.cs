@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -97,5 +98,29 @@ namespace DigitalPlatform.LibraryClient
                     yield break;
             }
         }
+
+        // 将 20120101 - 20151231 这样的日期字符串形态转换为 SearchCharging() API 能接受的时间范围字符串形态
+        // 注意 SearchCharging() API 要的时间范围字符串，中间是一个波浪号而不是横杠
+        public static string GetTimeRange(string strText)
+        {
+            string strStart = "";
+            string strEnd = "";
+            StringUtil.ParseTwoPart(strText, "-", out strStart, out strEnd);
+            strStart = strStart.Trim();
+            strEnd = strEnd.Trim();
+            if (string.IsNullOrEmpty(strStart) == false)
+            {
+                DateTime time = DateTimeUtil.Long8ToDateTime(strStart);
+                strStart = time.ToString("G");
+            }
+            if (string.IsNullOrEmpty(strEnd) == false)
+            {
+                DateTime time = DateTimeUtil.Long8ToDateTime(strEnd);
+                strEnd = time.AddDays(1).ToString("G"); // 注意 ~ 后面是 < 的意思，所以要放到第二天的零点
+            }
+
+            return strStart + "~" + strEnd;
+        }
+
     }
 }

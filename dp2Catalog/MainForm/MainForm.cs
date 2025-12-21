@@ -418,6 +418,32 @@ namespace dp2Catalog
             }));
         }
 
+        /// <summary>
+        /// 向控制台输出 HTML
+        /// </summary>
+        /// <param name="strHtml">要输出的 HTML 字符串</param>
+        public static void OutputHtml(string strHtml)
+        {
+            Program.MainForm.OperHistory.AppendHtml(strHtml);
+        }
+
+        // parameters:
+        //      nWarningLevel   0 正常文本(白色背景) 1 警告文本(黄色背景) >=3 错误文本(红色背景)
+        /// <summary>
+        /// 向控制台输出纯文本
+        /// </summary>
+        /// <param name="strText">要输出的纯文本字符串</param>
+        /// <param name="nWarningLevel">警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=3 错误文本(红色背景)</param>
+        public static void OutputText(string strText, int nWarningLevel = 0)
+        {
+            string strClass = "normal";
+            if (nWarningLevel == 1)
+                strClass = "warning";
+            else if (nWarningLevel >= 2)
+                strClass = "error";
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+        }
+
         // 将 zserver.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         void MoveZServerXml()
         {

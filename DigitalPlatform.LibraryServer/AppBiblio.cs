@@ -155,6 +155,8 @@ namespace DigitalPlatform.LibraryServer
                 else
                     strItemBarcode = "@bibliorecpath:" + strItemBarcode;
 
+
+
                 // parameters:
                 //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 LibraryServerResult result = GetBiblioSummary(
@@ -3044,43 +3046,45 @@ namespace DigitalPlatform.LibraryServer
 #endif
             }
 
-            // 从配置文件中获得和实体库对应的书目库名
-
-            /*
-            // 准备工作: 映射数据库名
-            nRet = this.GetGlobalCfg(sessioninfo.Channels,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-             * */
-
-            string strItemDbName = ResPath.GetDbName(strOutputItemPath);
-            string strBiblioDbName = "";
-
-            // 根据书目下属库名, 找到对应的书目库名
-            // return:
-            //      -1  出错
-            //      0   没有找到
-            //      1   找到
-            nRet = this.GetBiblioDbNameByChildDbName(strItemDbName,
-                out strBiblioDbName,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-            if (nRet == 0)
+            // 获得和实体库对应的书目库名
             {
-                strError = "下属库名 '" + strItemDbName + "' 没有找到所从属的书目库名";
-                goto ERROR1;
+                string strItemDbName = ResPath.GetDbName(strOutputItemPath);
+                string strBiblioDbName = "";
+
+                // 根据书目下属库名, 找到对应的书目库名
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                nRet = this.GetBiblioDbNameByChildDbName(strItemDbName,
+                    out strBiblioDbName,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "下属库名 '" + strItemDbName + "' 没有找到所从属的书目库名";
+                    goto ERROR1;
+                }
+
+                // string strBiblioXml = "";
+                strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
             }
 
+        LOADBIBLIO:
+
+
 #if ITEM_ACCESS_RIGHTS
-            Debug.Assert(string.IsNullOrEmpty(strBiblioDbName) == false);
+            // 2025/12/18
+            if (string.IsNullOrEmpty(strBiblioRecPath))
+                throw new ArgumentException("strBiblioRecPath 此处不应为空");
+            Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false);
             if (delay_check_rights)
             {
                 var error = CheckAccess(
                     sessioninfo,
                     "获取书目摘要",
-                    strBiblioDbName,   // 第二阶段检查，要指定数据库名
+                    ResPath.GetDbName(strBiblioRecPath),   // 第二阶段检查，要指定数据库名
                     "getbibliosummary,order",
                     "",
                     out string access_parameters);
@@ -3096,10 +3100,6 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-            // string strBiblioXml = "";
-            strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
-
-        LOADBIBLIO:
 
             // 2025/10/30 增加方向指令
             if (string.IsNullOrEmpty(direction) == false)

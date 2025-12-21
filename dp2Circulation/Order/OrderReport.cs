@@ -355,7 +355,7 @@ text);
             public IXLCell SetCellText(string text)
             {
                 List<int> column_max_chars = this.ColumnMaxChars;
-                ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
+                ClosedXmlUtil.SetMaxChars(column_max_chars,
     TABLE_LEFT_BLANK_COLUMS + this.Column,
     text.Length);
                 this.ColumnMaxChars = column_max_chars;
@@ -391,7 +391,7 @@ text);
             string text,
             ref List<int> column_max_chars)
         {
-            ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
+            ClosedXmlUtil.SetMaxChars(column_max_chars,
 column,
 text.Length);
             WriteExcelCell(

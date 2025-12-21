@@ -932,16 +932,25 @@ namespace dp2Circulation
 "filterScriptCode",
 "");
                 // *** 同类书区分号
-                this.textBox_callNumber_ignore_item_state.Text =
-                    ap.GetString(
+
+                // 3.196 以下
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.196") < 0)
+                {
+                    this.textBox_callNumber_ignore_item_state.Text = "";
+                    this.textBox_callNumber_ignore_item_state.Enabled = false;
+                }
+                else
+                    this.textBox_callNumber_ignore_item_state.Text =
+    ap.GetString(
 "callNumber",
 "ignore_item_state",
 "");
+
                 this.checkBox_callNumber_useEmptyNumber.Checked =
-                    ap.GetBoolean(
-"callNumber",
-"use_empty_number",
-false);
+                        ap.GetBoolean(
+    "callNumber",
+    "use_empty_number",
+    false);
 
                 checkBox_charging_isbnBorrow_CheckedChanged(this, null);
                 checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
@@ -1741,7 +1750,14 @@ this.textBox_ucs_userName.Text);
 this.textBox_ucs_filterScriptCode.Text);
 
                 // *** 同类书区分号
-                ap.SetString(
+
+                // 3.196 以下
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.196") < 0)
+                {
+
+                }
+                else
+                    ap.SetString(
 "callNumber",
 "ignore_item_state",
 this.textBox_callNumber_ignore_item_state.Text);

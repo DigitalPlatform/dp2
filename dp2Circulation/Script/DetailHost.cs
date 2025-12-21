@@ -2190,10 +2190,6 @@ namespace dp2Circulation
             dlg.AutoBeginSearch = true;
 
             dlg.Floating = true;
-
-            dlg.FormClosed -= new FormClosedEventHandler(dlg_FormClosed);
-            dlg.FormClosed += new FormClosedEventHandler(dlg_FormClosed);
-
             Program.MainForm.AppInfo.LinkFormState(dlg, "callnumber_floating_state");
             dlg.Show();
 
@@ -2202,13 +2198,6 @@ namespace dp2Circulation
             MessageBox.Show(this.DetailForm, strError);
         }
 
-        void dlg_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            if (sender != null)
-            {
-                // Program.MainForm.AppInfo.UnlinkFormState(sender as Form);
-            }
-        }
 #if NO
         #region 乐山图书馆四角号码。这里是验证用。实际应用的时候需要写在脚本中
 
@@ -4415,75 +4404,79 @@ chi	中文	如果是中文，则为空。
 #endif
 
                     // 获得种次号
-                    CallNumberForm dlg = new CallNumberForm();
-
-                    try
+                    using (CallNumberForm dlg = new CallNumberForm())
                     {
-                        dlg.MainForm = Program.MainForm;
-                        // dlg.TopMost = true;
-                        if (sender is Form)
-                            dlg.Owner = (Form)sender;
-                        dlg.MyselfItemRecPath = strItemRecPath;
-                        dlg.MyselfParentRecPath = this.DetailForm.BiblioRecPath;
-                        dlg.MyselfCallNumberItems = callnumber_items;   // 2009/6/4 
 
-                        Debug.Assert(this.DetailForm.MemoNumbers != null, "");
-                        dlg.MemoNumbers = this.DetailForm.MemoNumbers;
-
-                        dlg.Show();
-
-                        ZhongcihaoStyle style = ZhongcihaoStyle.Seed;
-
-                        if (String.IsNullOrEmpty(info.ZhongcihaoDbname) == true)
-                            style = ZhongcihaoStyle.Biblio; // 没有配置种次号库，只好从书目数据库中统计获得最大号
-                        else
+                        try
                         {
-                            style = ZhongcihaoStyle.BiblioAndSeed;   // 有了尾号库，就用书目+尾号
+                            dlg.MainForm = Program.MainForm;
+                            // dlg.TopMost = true;
+                            if (sender is Form)
+                                dlg.Owner = (Form)sender;
+                            dlg.MyselfItemRecPath = strItemRecPath;
+                            dlg.MyselfParentRecPath = this.DetailForm.BiblioRecPath;
+                            dlg.MyselfCallNumberItems = callnumber_items;   // 2009/6/4 
 
-                            // style = ZhongcihaoStyle.Seed;   // 有了尾号库，就用尾号
+                            Debug.Assert(this.DetailForm.MemoNumbers != null, "");
+                            dlg.MemoNumbers = this.DetailForm.MemoNumbers;
+
+                            dlg.Show();
+
+                            ZhongcihaoStyle style = ZhongcihaoStyle.Seed;
+
+                            if (String.IsNullOrEmpty(info.ZhongcihaoDbname) == true)
+                                style = ZhongcihaoStyle.Biblio; // 没有配置种次号库，只好从书目数据库中统计获得最大号
+                            else
+                            {
+                                style = ZhongcihaoStyle.BiblioAndSeed;   // 有了尾号库，就用书目+尾号
+
+                                // style = ZhongcihaoStyle.Seed;   // 有了尾号库，就用尾号
+                            }
+
+                            // TODO: 这里尽量用数据中统计出来的最大号，而不用尾号
+                            // 需要注意，如果同一书目记录中已经有了一个种次号，就直接用它
+                            // 如果要用Seed风格，可以实现在autogen脚本中，而不在这里实现
+
+                            // return:
+                            //      -1  error
+                            //      0   canceled
+                            //      1   succeed
+                            nRet = dlg.GetZhongcihao(
+                                style,
+                                strClass,
+                                strLocation,
+                                out List<MemoTailNumber> protectedNumbers,
+                                out strQufenhao,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            // 2020/6/9
+                            // 让 DetailForm 里面的成员也随之改变
+                            // this.DetailForm.MemoNumbers = dlg.MemoNumbers;
+
+                            // TODO: 最好有去重功能
+                            this.DetailForm.AddMemoNumbers(protectedNumbers);
+
+                            // 2020/4/8
+                            GetCallNumberParameter parameter = new GetCallNumberParameter();
+                            if (e.Parameter == null)    // 如果不为 null 则后面这些代码都不起作用
+                                e.Parameter = parameter;
+                            if (parameter.ProtectedNumbers == null)
+                                parameter.ProtectedNumbers = new List<MemoTailNumber>();
+                            parameter.ProtectedNumbers.AddRange(protectedNumbers);
+                            if (nRet == 0)
+                                return 0;
                         }
-
-                        // TODO: 这里尽量用数据中统计出来的最大号，而不用尾号
-                        // 需要注意，如果同一书目记录中已经有了一个种次号，就直接用它
-                        // 如果要用Seed风格，可以实现在autogen脚本中，而不在这里实现
-
-                        // return:
-                        //      -1  error
-                        //      0   canceled
-                        //      1   succeed
-                        nRet = dlg.GetZhongcihao(
-                            style,
-                            strClass,
-                            strLocation,
-                            out List<MemoTailNumber> protectedNumbers,
-                            out strQufenhao,
-                            out strError);
-                        if (nRet == -1)
+                        catch (Exception ex)
+                        {
+                            strError = "DetailHost {3D00C7E0-9E54-43D4-B77A-84BCC91BE45A} exception: " + ExceptionUtil.GetAutoText(ex);
                             goto ERROR1;
+                        }
+                    }
 
-                        // 2020/6/9
-                        // 让 DetailForm 里面的成员也随之改变
-                        this.DetailForm.MemoNumbers = dlg.MemoNumbers;
-
-                        // 2020/4/8
-                        GetCallNumberParameter parameter = new GetCallNumberParameter();
-                        if (e.Parameter == null)
-                            e.Parameter = parameter;
-                        if (parameter.ProtectedNumbers == null)
-                            parameter.ProtectedNumbers = new List<MemoTailNumber>();
-                        parameter.ProtectedNumbers.AddRange(protectedNumbers);
-                        if (nRet == 0)
-                            return 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "DetailHost {3D00C7E0-9E54-43D4-B77A-84BCC91BE45A} exception: " + ExceptionUtil.GetAutoText(ex);
-                        goto ERROR1;
-                    }
-                    finally
-                    {
-                        dlg.Close();
-                    }
+                    if (sender is Form)
+                        ((Form)sender)?.Activate();
                 }
                 else
                 {

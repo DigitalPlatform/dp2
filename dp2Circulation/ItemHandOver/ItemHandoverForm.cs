@@ -2627,7 +2627,7 @@ strContent);
                     }
 
                     // 最大字符数
-                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars,
+                    ClosedXmlUtil.SetMaxChars(column_max_chars,
                         PrintOrderForm.TABLE_LEFT_BLANK_COLUMS + col_index,
                         strContent.Length);
                     sheet.Row(PrintOrderForm.TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines + 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;

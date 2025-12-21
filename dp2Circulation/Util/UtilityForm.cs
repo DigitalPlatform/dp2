@@ -1360,6 +1360,9 @@ MessageBoxDefaultButton.Button2);
                 controls.Add(this.textBox_biblioRecPath);
                 controls.Add(this.textBox_biblioTableStyle);
 
+                controls.Add(this.textBox_callNumber_arrangement);
+                controls.Add(this.textBox_callNumber_class);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1376,6 +1379,9 @@ MessageBoxDefaultButton.Button2);
 
                 controls.Add(this.textBox_biblioRecPath);
                 controls.Add(this.textBox_biblioTableStyle);
+
+                controls.Add(this.textBox_callNumber_arrangement);
+                controls.Add(this.textBox_callNumber_class);
 
                 GuiState.SetUiState(controls, value);
             }
@@ -2841,6 +2847,169 @@ out strError);
                 return parts1.SequenceEqual(parts2);
             }
         }
+
+        private void button_callNumber_protect_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            var strArrangeGroupName = this.textBox_callNumber_arrangement.Text;
+            var strClass = this.textBox_callNumber_class.Text;
+            string strTestNumber = this.textBox_callNumber_testNumber.Text;
+            
+            var ret = SetOneClassTailNumber(
+    "protect",
+    strArrangeGroupName,
+    strClass,
+    strTestNumber,
+    out string strOutputNumber,
+    out strError);
+            if (ret == -1)
+                goto ERROR1;
+            MessageDlg.Show(this,
+                $"请求自动保护号码: {strTestNumber}\r\nret: {ret}\r\n返回的可用号码为: {strOutputNumber}\r\n\r\nerror: {strError}",
+                "protect");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_callNumber_memo_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            var strArrangeGroupName = this.textBox_callNumber_arrangement.Text;
+            var strClass = this.textBox_callNumber_class.Text;
+            string strTestNumber = this.textBox_callNumber_testNumber.Text;
+
+            var ret = SetOneClassTailNumber(
+    "memo",
+    strArrangeGroupName,
+    strClass,
+    strTestNumber,
+    out string strOutputNumber,
+    out strError);
+            if (ret == -1)
+                goto ERROR1;
+            MessageDlg.Show(this,
+                $"请求保护号码: {strTestNumber}\r\nret: {ret}\r\n返回: {strOutputNumber}\r\n\r\nerror: {strError}",
+                "protect");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_callNumber_unmemo_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            var strArrangeGroupName = this.textBox_callNumber_arrangement.Text;
+            var strClass = this.textBox_callNumber_class.Text;
+            string strTestNumber = this.textBox_callNumber_testNumber.Text;
+
+            var ret = SetOneClassTailNumber(
+    "unmemo",
+    strArrangeGroupName,
+    strClass,
+    strTestNumber,
+    out string strOutputNumber,
+    out strError);
+            if (ret == -1)
+                goto ERROR1;
+            MessageDlg.Show(this,
+                $"请求取消保护号码: {strTestNumber}\r\nret: {ret}\r\n返回: {strOutputNumber}\r\n\r\nerror: {strError}",
+                "protect");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_callNumber_listMemo_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            var strArrangeGroupName = this.textBox_callNumber_arrangement.Text;
+            var strClass = this.textBox_callNumber_class.Text;
+            string strTestNumber = this.textBox_callNumber_testNumber.Text;
+
+            if (string.IsNullOrEmpty(strTestNumber) == false)
+            {
+                DialogResult result = MessageBox.Show(this,
+$"确实要限定只查看种次号为 {strTestNumber} 中的保护信息?\r\n\r\n(如果不想限制查看的号码，请先清空种次号输入框)",
+"UtilityForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
+            }
+
+            var ret = SetOneClassTailNumber(
+    "listmemo",
+    strArrangeGroupName,
+    strClass,
+    strTestNumber,
+    out string strOutputNumber,
+    out strError);
+            if (ret == -1)
+                goto ERROR1;
+            MessageDlg.Show(this,
+                DomUtil.GetIndentXml(strOutputNumber),
+                $"总数={ret}");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // parameters:
+        //      strArrangeGroupName 排架体系名。
+        //                          如果为 ! 打头，表示用馆藏地名称来表示。
+        public int SetOneClassTailNumber(
+    string strAction,
+    string strArrangeGroupName,
+    string strClass,
+    string strTestNumber,
+    out string strOutputNumber,
+    out string strError)
+        {
+            strOutputNumber = "";
+
+            if (string.IsNullOrEmpty(strTestNumber) == false
+                && strTestNumber.Contains("/") == true)
+            {
+                strError = $"strTestNumber 参数值中不应包含 '/' ('{strTestNumber}')";
+                return -1;
+            }
+
+            var looping = Looping(out LibraryChannel channel,
+                "正在请求 SetOneClassTailNumber() API ...",
+                "timeout:0:1:0");
+
+            try
+            {
+                long lRet = channel.SetOneClassTailNumber(
+                    looping.Progress,
+                    strAction,
+                    strArrangeGroupName,
+                    strClass,
+                    strTestNumber,
+                    out strOutputNumber,
+                    out strError);
+                DisplayHistory(strError);
+                return (int)lRet;
+
+                // 显示到操作历史中
+                void DisplayHistory(string error)
+                {
+                    string text = $"UtilityForm {strAction} 种次号 '{strTestNumber}' (类号={strClass}, 排架体系名={strArrangeGroupName}) ret={lRet} error={error}";
+                    Program.MainForm.OperHistory.AppendHtml($"<div class='debug {(lRet == -1 || string.IsNullOrEmpty(error) == false ? "error" : "green")}'>" + HttpUtility.HtmlEncode(text) + "</div>");
+                }
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+        }
+
 
         /*
          * 

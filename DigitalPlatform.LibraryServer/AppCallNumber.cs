@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Threading;
-
+﻿using DigitalPlatform.rms.Client;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using DigitalPlatform.rms.Client;
-
-using DigitalPlatform.rms.Client.rmsws_localhost;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -347,7 +347,7 @@ namespace DigitalPlatform.LibraryServer
                         // 前端指定的格式。全部放入 .Reserve 返回。XML 格式
                         XmlDocument dom = new XmlDocument();
                         dom.LoadXml("<cols></cols>");
-                        foreach(var col in record.Cols)
+                        foreach (var col in record.Cols)
                         {
                             var new_col = dom.CreateElement("col");
                             dom.DocumentElement.AppendChild(new_col);
@@ -528,11 +528,15 @@ namespace DigitalPlatform.LibraryServer
             return strArrangeGroupName;
         }
 
+        // 2025/12/5
+        // 给 memo protect unmemo 几个动作丰富了返回值 result.Value，0 表示没有实质性改变
         // TODO： 需要加锁。增加写入操作日志类型
         // 设置种次号尾号
         // parameters:
         //      strAction   动作。memo, unmemo, skipmemo, protect, conditionalpush, increase, save
+        //                  listmemo 列出所有的保护事项
         //      strArrangeGroupName  排架体系名。如果是 '@' 打头，则表示种次号库名
+        //                              TODO: 要验证排架体系名是否确实存在，如果不存在要报错
         public LibraryServerResult SetOneClassTailNumber(
             SessionInfo sessioninfo,
             string strAction,
@@ -547,7 +551,8 @@ namespace DigitalPlatform.LibraryServer
 
             LibraryServerResult result = new LibraryServerResult();
 
-            if (String.IsNullOrEmpty(strArrangeGroupName) == true)
+            if (String.IsNullOrEmpty(strArrangeGroupName) == true
+                && strAction != "listmemo")
             {
                 strError = "strArrangeGroupName 参数值不能为空";
                 goto ERROR1;
@@ -556,19 +561,41 @@ namespace DigitalPlatform.LibraryServer
             if (strAction == "memo")
             {
                 // 临时记忆用过的号码
-                SetTempNumber(strArrangeGroupName,
+                // return:
+                //      false   表示操作没有实质性改变。
+                //              对于 add 动作来说这表示事项在操作以前已经存在(因而谈不上添加)；对于 remove 动作来说表示事项在操作以前并不存在(因而谈不上删除)
+                //      true    操作成功
+                var ret = SetTempNumber(strArrangeGroupName,
             strClass,
             strTestNumber,
             "add");
+                if (ret == false)
+                    return new LibraryServerResult
+                    {
+                        Value = 0,
+                        ErrorCode = ErrorCode.AlreadyExist,
+                        ErrorInfo = "事项已经存在",
+                    };
                 goto END1;
             }
             else if (strAction == "unmemo")
             {
                 // 删除记忆用过的号码
-                SetTempNumber(strArrangeGroupName,
+                // return:
+                //      false   表示操作没有实质性改变。
+                //              对于 add 动作来说这表示事项在操作以前已经存在(因而谈不上添加)；对于 remove 动作来说表示事项在操作以前并不存在(因而谈不上删除)
+                //      true    操作成功
+                var ret = SetTempNumber(strArrangeGroupName,
             strClass,
             strTestNumber,
             "remove");
+                if (ret == false)
+                    return new LibraryServerResult
+                    {
+                        Value = 0,
+                        ErrorCode = ErrorCode.AlreadyExist,
+                        ErrorInfo = "事项并不存在，无法删除",
+                    };
                 goto END1;
             }
             else if (strAction == "skipmemo")
@@ -591,11 +618,23 @@ namespace DigitalPlatform.LibraryServer
                 strTestNumber,
                 false);
                     // 记忆这个号码
-                    SetTempNumber(strArrangeGroupName,
+                    // return:
+                    //      false   表示操作没有实质性改变。
+                    //              对于 add 动作来说这表示事项在操作以前已经存在(因而谈不上添加)；对于 remove 动作来说表示事项在操作以前并不存在(因而谈不上删除)
+                    //      true    操作成功
+                    var ret = SetTempNumber(strArrangeGroupName,
     strClass,
     strOutputNumber,
     "add",
     false);
+                    if (ret == false)
+                        return new LibraryServerResult
+                        {
+                            Value = 0,
+                            ErrorCode = ErrorCode.AlreadyExist,
+                            ErrorInfo = "add 过程中遇到问题: 事项已经存在",
+                        };
+
                 }
                 finally
                 {
@@ -603,6 +642,33 @@ namespace DigitalPlatform.LibraryServer
                 }
                 goto END1;
             }
+            else if (strAction == "listmemo")
+            {
+                // 从 strTestNumber 参数中析出范围信息
+                int start = 0;
+                int count = -1;
+                /*
+                if (string.IsNullOrEmpty(strTestNumber) == false)
+                {
+                    // TODO: 对格式不合法的报错
+                    var parts = StringUtil.ParseTwoPart(strTestNumber, ",");
+                    if (string.IsNullOrEmpty(parts[0]) == false)
+                        start = Convert.ToInt32(parts[0]);
+                    if (string.IsNullOrEmpty(parts[1]) == false)
+                        count = Convert.ToInt32(parts[1]);
+                }
+                */
+                var results = ListTempNumber(strArrangeGroupName,
+strClass,
+strTestNumber,
+start,
+count,
+true,
+out int total_count);
+                strOutputNumber = MemoTailNumber.ToXml(results);
+                return new LibraryServerResult { Value = total_count };
+            }
+
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -811,6 +877,60 @@ namespace DigitalPlatform.LibraryServer
             public string ArrangeGroupName { get; set; } // 排架体系名
             public string Class { get; set; } // 类号
             public string Number { get; set; }  // 区分号
+
+            public override string ToString()
+            {
+                return $"ArrangeGroupName={ArrangeGroupName}, Class={Class}, Number={Number}";
+            }
+
+            public static string ToXml(IEnumerable<MemoTailNumber> items)
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml("<collection />");
+                foreach(var item in items)
+                {
+                    var element = dom.CreateElement("item");
+                    element.SetAttribute("group", item.ArrangeGroupName);
+                    element.SetAttribute("class", item.Class);
+                    element.SetAttribute("number", item.Number);
+                    dom.DocumentElement.AppendChild(element);
+                }
+
+                return dom.DocumentElement.OuterXml;
+            }
+
+            public static string BuildKey(MemoTailNumber item)
+            {
+                return item.ArrangeGroupName + "|" + item.Class + "|" + item.Number;
+            }
+
+            public static MemoTailNumber FromKey(string key)
+            {
+                var result = new MemoTailNumber();
+                var parts = key.Split('|');
+                if (parts.Length > 0)
+                result.ArrangeGroupName = parts[0];
+                if (parts.Length > 1)
+                    result.Class = parts[1];
+                if (parts.Length > 2)
+                    result.Number = parts[2];
+                return result;
+            }
+
+            public bool Match(MemoTailNumber pattern)
+            {
+                if (string.IsNullOrEmpty(pattern.ArrangeGroupName) == false
+                    && this.ArrangeGroupName != pattern.ArrangeGroupName)
+                    return false;
+                if (string.IsNullOrEmpty(pattern.Class) == false
+                    && this.Class != pattern.Class)
+                    return false;
+                if (string.IsNullOrEmpty(pattern.Number) == false
+                    && this.Number != pattern.Number)
+                    return false;
+
+                return true;
+            }
         }
 
         const int MAX_TEMP_NUMBER = 10000;
@@ -818,7 +938,12 @@ namespace DigitalPlatform.LibraryServer
         // private static readonly Object syncRoot_tempNumberTable = new Object();
         internal ReaderWriterLockSlim _lock_tempNumberTable = new ReaderWriterLockSlim();
 
-        void SetTempNumber(string strArrangeGroupName,
+        // 2025/12/5 改为有返回值
+        // return:
+        //      false   表示操作没有实质性改变。
+        //              对于 add 动作来说这表示事项在操作以前已经存在(因而谈不上添加)；对于 remove 动作来说表示事项在操作以前并不存在(因而谈不上删除)
+        //      true    操作成功
+        bool SetTempNumber(string strArrangeGroupName,
             string strClass,
             string strNumber,
             string strAction,
@@ -828,6 +953,15 @@ namespace DigitalPlatform.LibraryServer
 
             if (strAction == "add")
             {
+                // 2025/12/2
+                // 防止字符串尺寸过大造成内存问题
+                if (strClass?.Length > 500)
+                    throw new ArgumentException($"strClass 长度超过 500");
+                if (strNumber?.Length > 50)
+                    throw new ArgumentException($"strNumber 长度超过 50");
+                if (strArrangeGroupName?.Length > 100)
+                    throw new ArgumentException($"strArrangeGroupName 长度超过 100");
+
                 MemoTailNumber item = new MemoTailNumber();
                 item.ArrangeGroupName = strArrangeGroupName;
                 item.Class = strClass;
@@ -845,9 +979,10 @@ namespace DigitalPlatform.LibraryServer
                         _tempNumberTable.Clear();
                         this.WriteErrorLog("_tempNumberTable 因元素个数超过 " + MAX_TEMP_NUMBER + "，被强制清空一次(此举可能会造成取种次号防范重号功能短暂局部失效)");
                     }
-
+                    if (_tempNumberTable.ContainsKey(strKey) == true)
+                        return false;
                     _tempNumberTable[strKey] = item;
-                    return;
+                    return true;
                 }
                 finally
                 {
@@ -865,9 +1000,13 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     if (_tempNumberTable.ContainsKey(strKey))
+                    {
                         _tempNumberTable.Remove(strKey);
 
-                    return;
+                        return true;
+                    }
+                    else
+                        return false;
                 }
                 finally
                 {
@@ -900,6 +1039,83 @@ namespace DigitalPlatform.LibraryServer
                     _lock_tempNumberTable.ExitReadLock();
             }
         }
+
+        // parameters:
+        //      start   起始偏移
+        //      count   要输出的个数。如果为 -1 表示希望尽可能多。但无论如何超过 100 会被限制为只返回 100
+        List<MemoTailNumber> ListTempNumber(string strArrangeGroupName,
+    string strClass,
+    string strNumber,
+    int start,
+    int count,
+    bool bLock,
+    out int total_count)
+        {
+            total_count = 0;
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+
+            var pattern = MemoTailNumber.FromKey(strArrangeGroupName + "|" + strClass + "|" + strNumber);
+
+            if (bLock)
+                _lock_tempNumberTable.EnterReadLock();
+            try
+            {
+                var results = new List<MemoTailNumber>();
+                foreach (string key in _tempNumberTable.Keys)
+                {
+                    var item = _tempNumberTable[key] as MemoTailNumber;
+                    if (item.Match(pattern) == true)
+                    {
+                        results.Add(item);
+                    }
+                }
+                total_count = results.Count;
+                if (start >= results.Count)
+                    return new List<MemoTailNumber>();
+                if (count == -1)
+                    count = results.Count - start;
+
+                if (count > 100)
+                    count = 100;
+                var sorter = new MemoItemComparer();
+                return results.OrderBy(o => o, sorter)
+                    .Skip(start)
+                    .Take(count)
+                    .ToList();
+            }
+            finally
+            {
+                if (bLock)
+                    _lock_tempNumberTable.ExitReadLock();
+            }
+        }
+
+        class MemoItemComparer : IComparer<MemoTailNumber>
+        {
+            public MemoItemComparer()
+            {
+            }
+
+            public int Compare(MemoTailNumber x, MemoTailNumber y)
+            {
+                var ret = string.CompareOrdinal(x.ArrangeGroupName, y.ArrangeGroupName);
+                if (ret != 0)
+                    return ret;
+                ret = string.CompareOrdinal(x.Class, y.Class);
+                if (ret != 0)
+                    return ret;
+
+                var max_length = Math.Max(x.Number?.Length ?? 0, x.Number?.Length ?? 0);
+                if (max_length == 0)
+                    return 0;
+
+                string number1 = x.Number?.PadLeft(max_length, '0');
+                string number2 = y.Number?.PadLeft(max_length, '0');
+
+                return string.CompareOrdinal(number1, number2);
+            }
+        }
+
 
         // 检查临时存储的号码里面是否有指定的号码。如果有，则自动增量这个号码，直到在临时存储的号码里面找不到这个号码
         string SkipTempNumber(string strArrangeGroupName,

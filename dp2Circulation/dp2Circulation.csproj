@@ -21,8 +21,8 @@
     <SccProvider>
     </SccProvider>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>74A61DCC4F74A3629B28540F398A82A8782DBB5B</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Circulation_2_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>344A8BEE51999A95608EE38B116E9841E8613BE1</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Circulation_3_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>false</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>749</ApplicationRevision>
+    <ApplicationRevision>757</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -995,6 +995,7 @@
     <Compile Include="Print\BindPrintOptionDlg.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ReaderStatis\BorrowDetailStatis.cs" />
     <Compile Include="Reader\AddFriendsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -2983,7 +2984,7 @@
       <SubType>Designer</SubType>
       <DependentUpon>UserForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UtilityForm.resx">
+    <EmbeddedResource Include="Util\UtilityForm.resx">
       <DependentUpon>UtilityForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Util\CallNumberForm.resx">
@@ -3048,6 +3049,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="dp2Circulation_2_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_3_TemporaryKey.pfx" />
     <None Include="dp2Circulation_TemporaryKey.pfx" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
@@ -3365,10 +3367,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="Utility.cs" />
-    <Compile Include="UtilityForm.cs">
+    <Compile Include="Util\UtilityForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UtilityForm.Designer.cs">
+    <Compile Include="Util\UtilityForm.Designer.cs">
       <DependentUpon>UtilityForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Util\CallNumberForm.cs">
@@ -3383,6 +3385,7 @@
     <Compile Include="Util\RfidToolForm.Designer.cs">
       <DependentUpon>RfidToolForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Util\UnitTest\TestCallNumber.cs" />
     <Compile Include="XmlStatis\XmlStatis.cs" />
     <Compile Include="XmlStatis\XmlStatisForm.cs">
       <SubType>Form</SubType>

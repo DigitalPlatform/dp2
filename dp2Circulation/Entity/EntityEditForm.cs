@@ -19,6 +19,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
 using static dp2Circulation.MainForm;
 using static dp2Circulation.CallNumberForm;
+using Jint.Parser.Ast;
 
 namespace dp2Circulation
 {
@@ -274,7 +275,13 @@ namespace dp2Circulation
                 if (Control.ModifierKeys == Keys.Control)
                     e1.ScriptEntry = "ManageCallNumber";
                 else
+                {
+                    // 2025/12/18
+                    // 先取消对以前保护过的号码的保护，避免(不关闭册登记对话框的情况下)多次点击“创建索取号”导致用掉多个号码
+                    CancelProtect(this.ProtectedNumbers);
+
                     e1.ScriptEntry = "CreateCallNumber";
+                }
                 e1.FocusedControl = sender; // sender为最原始的子控件
                 this.GenerateData(this, e1);
                 var parameter = e1.Parameter as GetCallNumberParameter;
@@ -427,6 +434,13 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            var old_accessno = this.entityEditControl_existing.AccessNo;
+            MemoTailNumber.RemoveNumber(
+                this.ProtectedNumbers,
+                this.entityEditControl_editing.LocationString,
+                this.entityEditControl_editing.AccessNo);
+
+            CancelProtect(this.ProtectedNumbers);
             OnButton_OK_Click(sender, e);
         }
 
@@ -1575,7 +1589,8 @@ out strError);
                             RfidToolForm.FilterUserBankElements(chip, uhfProtocol);
                             return Program.MainForm.UhfWriteUserBank;
                         },
-                        () => {
+                        () =>
+                        {
                             if (StringUtil.IsInList("OwnerInstitution", Program.MainForm.UhfUserBankElements))
                                 return true;
                             return false;
@@ -1757,22 +1772,44 @@ out strError);
             if (this.DialogResult == DialogResult.Cancel)
             {
                 // 对保护过的号码放弃保护
-                if (ProtectedNumbers != null)
+                CancelProtect(this.ProtectedNumbers);
+            }
+        }
+
+        public void AddProtectedNumber(
+string location,
+string access_no)
+        {
+            MemoTailNumber.AddNumber(
+                this.ProtectedNumbers,
+                location,
+                access_no);
+        }
+
+        public void CancelProtect(List<MemoTailNumber> list)
+        {
+            // 对保护过的号码放弃保护
+            if (list != null)
+            {
+                foreach (var number in list)
                 {
-                    foreach (var number in ProtectedNumbers)
+                    MainForm.OutputText("begin EntityEditForm.CancelProtect()");
+                    int nRet = ProtectTailNumber(
+"unmemo",
+number.ArrangeGroupName,
+number.Class,
+number.Number,
+out string strOutputNumber,
+out string strError);
+                    MainForm.OutputText("end EntityEditForm.CancelProtect()");
+                    if (nRet == -1)
                     {
-                        int nRet = ProtectTailNumber(
-    "unmemo",
-    number.ArrangeGroupName,
-    number.Class,
-    number.Number,
-    out string strOutputNumber,
-    out string strError);
-                        if (nRet == -1)
-                            MessageBox.Show(this, strError);
+                        MessageBox.Show(this, $"CancelProtect() error: {strError}");
                     }
                 }
             }
+
+            list.Clear();
         }
 
 
@@ -1799,14 +1836,7 @@ out strError);
 
             Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
 
-            // 显示到操作历史中
-            {
-                string oper_name = "保护";
-                if (strAction == "unmemo")
-                    oper_name = "解除保护";
-                string text = $"{oper_name} 种次号 '{strTestNumber}' (类号={strClass}, 排架体系名={strArrangeGroupName})";
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(text) + "</div>");
-            }
+
 
             LibraryChannel channel = Program.MainForm.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
@@ -1823,12 +1853,26 @@ out strError);
                     out strError);
                 if (lRet == -1)
                 {
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug red'>" + HttpUtility.HtmlEncode($"返回出错:{strError}") + "</div>");
+                    DisplayHistory(strError);
+                    //Program.MainForm.OperHistory.AppendHtml("<div class='debug red'>" + HttpUtility.HtmlEncode($"返回出错:{strError}") + "</div>");
                     return -1;
                 }
 
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>" + HttpUtility.HtmlEncode($"返回成功:strOutputNumber={strOutputNumber}, lRet={lRet}, strError={strError}") + "</div>");
+                DisplayHistory(strError);
+                //Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>" + HttpUtility.HtmlEncode($"返回成功:strOutputNumber={strOutputNumber}, lRet={lRet}, strError={strError}") + "</div>");
                 return (int)lRet;
+
+                // 显示到操作历史中
+                void DisplayHistory(string error)
+                {
+                    /*
+                    string oper_name = "保护";
+                    if (strAction == "unmemo")
+                        oper_name = "解除保护";
+                    */
+                    string text = $"{strAction} 种次号 '{strTestNumber}' (类号={strClass}, 排架体系名={strArrangeGroupName}) ret={lRet} error={error}";
+                    Program.MainForm.OperHistory.AppendHtml($"<div class='debug {(lRet == -1 || string.IsNullOrEmpty(error) == false ? "error" : "green")}'>" + HttpUtility.HtmlEncode(text) + "</div>");
+                }
             }
             finally
             {

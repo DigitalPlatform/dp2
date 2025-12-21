@@ -2701,7 +2701,7 @@ null);
                     */
                     if (string.IsNullOrEmpty(strText) == false)
                     {
-                        ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, strText.Length);
+                        ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, strText.Length);
                     }
 
                     IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);

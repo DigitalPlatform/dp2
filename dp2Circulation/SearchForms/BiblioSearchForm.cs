@@ -6475,6 +6475,11 @@ out strError);
                 RefreshPropertyView(false);
                 return nCount;
             }
+            catch(Exception ex)
+            {
+                strError = $"VerifyBiblioRecord() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
+            }
             finally
             {
                 /*

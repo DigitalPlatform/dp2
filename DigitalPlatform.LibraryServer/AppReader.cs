@@ -7666,6 +7666,11 @@ out strError);
             parameters = "";
             if (strResultType == null)
                 strResultType = "";
+
+            // 2025/12/17
+            if (strResultType.Contains("|") && strResultType.Contains(":") == false)
+                throw new ArgumentException($"格式参数值 '{strResultType}' 不合法，缺乏冒号(注意冒号右侧的多个修饰属性之间才能用竖线间隔)");
+
             if (String.Compare(strResultType, strName, true) == 0)
                 return true;
             if (strResultType.StartsWith(strName + ":") == true)

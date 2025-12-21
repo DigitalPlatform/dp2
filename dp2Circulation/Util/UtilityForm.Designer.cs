@@ -140,6 +140,7 @@
             this.label20 = new System.Windows.Forms.Label();
             this.textBox_accessNo_lines = new System.Windows.Forms.TextBox();
             this.tabPage_publisher = new System.Windows.Forms.TabPage();
+            this.label29 = new System.Windows.Forms.Label();
             this.button_publisher_append_to_database = new System.Windows.Forms.Button();
             this.button_publisher_convert1 = new System.Windows.Forms.Button();
             this.button_publisher_deleteCityAndPublisher = new System.Windows.Forms.Button();
@@ -168,7 +169,18 @@
             this.label23 = new System.Windows.Forms.Label();
             this.textBox_zhongcihao_class = new System.Windows.Forms.TextBox();
             this.label24 = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
+            this.tabPage_callNumber = new System.Windows.Forms.TabPage();
+            this.label33 = new System.Windows.Forms.Label();
+            this.textBox_callNumber_class = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.textBox_callNumber_arrangement = new System.Windows.Forms.TextBox();
+            this.label31 = new System.Windows.Forms.Label();
+            this.button_callNumber_listMemo = new System.Windows.Forms.Button();
+            this.button_callNumber_unmemo = new System.Windows.Forms.Button();
+            this.button_callNumber_memo = new System.Windows.Forms.Button();
+            this.button_callNumber_protect = new System.Windows.Forms.Button();
+            this.textBox_callNumber_testNumber = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -205,6 +217,7 @@
             this.tabPage_accessNo.SuspendLayout();
             this.tabPage_publisher.SuspendLayout();
             this.tabPage_zhongcihao.SuspendLayout();
+            this.tabPage_callNumber.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -224,6 +237,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_accessNo);
             this.tabControl_main.Controls.Add(this.tabPage_publisher);
             this.tabControl_main.Controls.Add(this.tabPage_zhongcihao);
+            this.tabControl_main.Controls.Add(this.tabPage_callNumber);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
@@ -1586,6 +1600,15 @@
             this.tabPage_publisher.Text = "出版者工具";
             this.tabPage_publisher.UseVisualStyleBackColor = true;
             // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(170, 362);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(579, 21);
+            this.label29.TabIndex = 16;
+            this.label29.Text = "注: 格式为 出版地:出版社名。可以有多个，每个占据一行。";
+            // 
             // button_publisher_append_to_database
             // 
             this.button_publisher_append_to_database.Location = new System.Drawing.Point(170, 457);
@@ -1864,14 +1887,122 @@
             this.label24.TabIndex = 2;
             this.label24.Text = "类名:";
             // 
-            // label29
+            // tabPage_callNumber
             // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(170, 362);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(579, 21);
-            this.label29.TabIndex = 16;
-            this.label29.Text = "注: 格式为 出版地:出版社名。可以有多个，每个占据一行。";
+            this.tabPage_callNumber.Controls.Add(this.label33);
+            this.tabPage_callNumber.Controls.Add(this.textBox_callNumber_class);
+            this.tabPage_callNumber.Controls.Add(this.label32);
+            this.tabPage_callNumber.Controls.Add(this.textBox_callNumber_arrangement);
+            this.tabPage_callNumber.Controls.Add(this.label31);
+            this.tabPage_callNumber.Controls.Add(this.button_callNumber_listMemo);
+            this.tabPage_callNumber.Controls.Add(this.button_callNumber_unmemo);
+            this.tabPage_callNumber.Controls.Add(this.button_callNumber_memo);
+            this.tabPage_callNumber.Controls.Add(this.button_callNumber_protect);
+            this.tabPage_callNumber.Controls.Add(this.textBox_callNumber_testNumber);
+            this.tabPage_callNumber.Controls.Add(this.label30);
+            this.tabPage_callNumber.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_callNumber.Name = "tabPage_callNumber";
+            this.tabPage_callNumber.Size = new System.Drawing.Size(943, 592);
+            this.tabPage_callNumber.TabIndex = 15;
+            this.tabPage_callNumber.Text = "种次号工具";
+            this.tabPage_callNumber.UseVisualStyleBackColor = true;
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(147, 59);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(547, 21);
+            this.label33.TabIndex = 2;
+            this.label33.Text = "注:排架体系名或馆藏地点。馆藏地点要前导一个感叹号 !";
+            // 
+            // textBox_callNumber_class
+            // 
+            this.textBox_callNumber_class.Location = new System.Drawing.Point(151, 104);
+            this.textBox_callNumber_class.Name = "textBox_callNumber_class";
+            this.textBox_callNumber_class.Size = new System.Drawing.Size(364, 31);
+            this.textBox_callNumber_class.TabIndex = 4;
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(17, 107);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(63, 21);
+            this.label32.TabIndex = 3;
+            this.label32.Text = "类号:";
+            // 
+            // textBox_callNumber_arrangement
+            // 
+            this.textBox_callNumber_arrangement.Location = new System.Drawing.Point(151, 25);
+            this.textBox_callNumber_arrangement.Name = "textBox_callNumber_arrangement";
+            this.textBox_callNumber_arrangement.Size = new System.Drawing.Size(364, 31);
+            this.textBox_callNumber_arrangement.TabIndex = 1;
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(17, 28);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(105, 21);
+            this.label31.TabIndex = 0;
+            this.label31.Text = "排架体系:";
+            // 
+            // button_callNumber_listMemo
+            // 
+            this.button_callNumber_listMemo.Location = new System.Drawing.Point(151, 359);
+            this.button_callNumber_listMemo.Name = "button_callNumber_listMemo";
+            this.button_callNumber_listMemo.Size = new System.Drawing.Size(156, 31);
+            this.button_callNumber_listMemo.TabIndex = 10;
+            this.button_callNumber_listMemo.Text = "查看保护";
+            this.button_callNumber_listMemo.UseVisualStyleBackColor = true;
+            this.button_callNumber_listMemo.Click += new System.EventHandler(this.button_callNumber_listMemo_Click);
+            // 
+            // button_callNumber_unmemo
+            // 
+            this.button_callNumber_unmemo.Location = new System.Drawing.Point(151, 265);
+            this.button_callNumber_unmemo.Name = "button_callNumber_unmemo";
+            this.button_callNumber_unmemo.Size = new System.Drawing.Size(156, 31);
+            this.button_callNumber_unmemo.TabIndex = 9;
+            this.button_callNumber_unmemo.Text = "取消保护";
+            this.button_callNumber_unmemo.UseVisualStyleBackColor = true;
+            this.button_callNumber_unmemo.Click += new System.EventHandler(this.button_callNumber_unmemo_Click);
+            // 
+            // button_callNumber_memo
+            // 
+            this.button_callNumber_memo.Location = new System.Drawing.Point(151, 228);
+            this.button_callNumber_memo.Name = "button_callNumber_memo";
+            this.button_callNumber_memo.Size = new System.Drawing.Size(156, 31);
+            this.button_callNumber_memo.TabIndex = 8;
+            this.button_callNumber_memo.Text = "保护";
+            this.button_callNumber_memo.UseVisualStyleBackColor = true;
+            this.button_callNumber_memo.Click += new System.EventHandler(this.button_callNumber_memo_Click);
+            // 
+            // button_callNumber_protect
+            // 
+            this.button_callNumber_protect.Location = new System.Drawing.Point(151, 191);
+            this.button_callNumber_protect.Name = "button_callNumber_protect";
+            this.button_callNumber_protect.Size = new System.Drawing.Size(156, 31);
+            this.button_callNumber_protect.TabIndex = 7;
+            this.button_callNumber_protect.Text = "自动保护";
+            this.button_callNumber_protect.UseVisualStyleBackColor = true;
+            this.button_callNumber_protect.Click += new System.EventHandler(this.button_callNumber_protect_Click);
+            // 
+            // textBox_callNumber_testNumber
+            // 
+            this.textBox_callNumber_testNumber.Location = new System.Drawing.Point(151, 141);
+            this.textBox_callNumber_testNumber.Name = "textBox_callNumber_testNumber";
+            this.textBox_callNumber_testNumber.Size = new System.Drawing.Size(364, 31);
+            this.textBox_callNumber_testNumber.TabIndex = 6;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(17, 144);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(84, 21);
+            this.label30.TabIndex = 5;
+            this.label30.Text = "种次号:";
             // 
             // UtilityForm
             // 
@@ -1942,6 +2073,8 @@
             this.tabPage_publisher.PerformLayout();
             this.tabPage_zhongcihao.ResumeLayout(false);
             this.tabPage_zhongcihao.PerformLayout();
+            this.tabPage_callNumber.ResumeLayout(false);
+            this.tabPage_callNumber.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2088,5 +2221,17 @@
         private System.Windows.Forms.Button button_publisher_convert1;
         private System.Windows.Forms.Button button_publisher_append_to_database;
         private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.TabPage tabPage_callNumber;
+        private System.Windows.Forms.Button button_callNumber_unmemo;
+        private System.Windows.Forms.Button button_callNumber_memo;
+        private System.Windows.Forms.Button button_callNumber_protect;
+        private System.Windows.Forms.TextBox textBox_callNumber_testNumber;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Button button_callNumber_listMemo;
+        private System.Windows.Forms.TextBox textBox_callNumber_class;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.TextBox textBox_callNumber_arrangement;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Label label33;
     }
 }
