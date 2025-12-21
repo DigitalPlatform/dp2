@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Linq;
 
 using DigitalPlatform.Text;
+using LibraryStudio.Forms;
 
 namespace DigitalPlatform.Marc
 {
@@ -13,12 +13,15 @@ namespace DigitalPlatform.Marc
     /// <summary>
     /// 字段集合
     /// </summary>
-    public class FieldCollection : List<Field>
+    public class FieldCollection : IList<Field>
     {
-        /// <summary>
-        /// 所从属的记录对象
-        /// </summary>
-        internal Record record = null;
+        // 编辑器的 DOM 对象
+        internal DomRecord _domRecord = null;
+
+        public FieldCollection(DomRecord domRecord)
+        {
+            _domRecord = domRecord;
+        }
 
         /// <summary>
         /// 排序
@@ -29,6 +32,7 @@ namespace DigitalPlatform.Marc
 
         }
 
+#if REMOVED
         // 摘要:
         //     获取或设置指定索引处的元素。
         //
@@ -63,6 +67,7 @@ namespace DigitalPlatform.Marc
                 base[nIndex] = value;
             }
         }
+#endif
 
         /// <summary>
         /// 获取指定字段名的若干个字段中的某一个
@@ -90,7 +95,7 @@ namespace DigitalPlatform.Marc
             int nIndex,
             string strIndicatorMatch = "**")
         {
-            FieldCollection fields = this.GetFields(strFieldName, strIndicatorMatch);
+            var fields = this.GetFields(strFieldName, strIndicatorMatch);
             if (nIndex < 0 || nIndex >= fields.Count)
                 return null;
 
@@ -103,17 +108,17 @@ namespace DigitalPlatform.Marc
         /// <param name="strFieldName">字段名</param>
         /// <param name="strIndicatorMatch">字段指示符筛选条件。缺省为 "**"</param>
         /// <returns>字段对象集合</returns>
-        public FieldCollection GetFields(string strFieldName,
+        public List<Field> GetFields(string strFieldName,
             string strIndicatorMatch = "**")
         {
-            FieldCollection fields = new FieldCollection();
+            var fields = new List<Field>();
             foreach (Field field in this)
             {
-                if (field.m_strName == strFieldName)
+                if (field.Name == strFieldName)
                 {
                     if (strIndicatorMatch != "**"
-                        && string.IsNullOrEmpty(field.m_strIndicator) == false
-                        && MarcUtil.MatchIndicator(strIndicatorMatch, field.m_strIndicator) == false)
+                        && string.IsNullOrEmpty(field.Indicator) == false
+                        && MarcUtil.MatchIndicator(strIndicatorMatch, field.Indicator) == false)
                         continue;
                     // 这里要特别注意
                     fields.Add(field);
@@ -182,7 +187,7 @@ namespace DigitalPlatform.Marc
             string strIndicatorMatch)
         {
             List<string> results = new List<string>();
-            FieldCollection fields = this.GetFields(strFieldName, strIndicatorMatch);
+            var fields = this.GetFields(strFieldName, strIndicatorMatch);
             foreach (Field field in fields)
             {
                 foreach (Subfield subfield in field.Subfields)
@@ -252,8 +257,39 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.record.marcEditor;
+                return this._domRecord.GetControl() as MarcEditor;
             }
+        }
+
+        public int Count => _domRecord.FieldCount;
+
+        bool ICollection<Field>.IsReadOnly => true;
+
+        public Field this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= _domRecord.FieldCount)
+                {
+                    throw new ArgumentException("index 下标越界");
+                }
+                var source = _domRecord.GetField(index);
+                return new Field(this, source);
+            }
+            set
+            {
+                // 替换一个字段
+                _domRecord.GetField(index).Text = value.Text;
+            }
+        }
+
+        // 获得当前输入焦点所在的字段
+        public Field GetFocusedField()
+        {
+            var field = _domRecord.LocateField(_domRecord.CaretOffset);
+            if (field == null)
+                return null;
+            return new Field(this, field);
         }
 
         //--------------------------追加字段-------------------
@@ -278,46 +314,31 @@ namespace DigitalPlatform.Marc
         {
             nOutputPosition = -1;
 
-#if DEBUG
-            if (strValue.IndexOf((char)31) != -1)
-                Debug.Assert(false, "AddInternal()函数的strValue参数中不应包含ASCII 31");
-#endif
-
-            string strCaption = this.record.marcEditor.GetLabel(strName);
-
-            Field field = new Field(this);
-            field.m_strNameCaption = strCaption;
-            field.m_strName = strName;
-            field.m_strIndicator = strIndicator;
-            field.m_strValue = strValue;
-            if (this.Count == 0)
-            {
-                field.m_strName = "###";
-                field.m_strIndicator = "";
-                field.m_strValue = field.m_strValue.PadRight(24, '?');
-            }
-
-            field.CalculateHeight(null, false);
+            nOutputPosition = _domRecord.FieldCount;
             if (bInOrder == false)
             {
-                base.Add(field);
+
             }
             else
             {
                 //先定位，再用insert
-                int nPosition = this.GetPosition(field.Name);
-                this.InsertInternal(nPosition + 1,
-                    field);
+                int nPosition = this.GetPosition(strName);
                 nOutputPosition = nPosition;
             }
 
+            _domRecord.InsertField(nOutputPosition,
+    strName,
+    strIndicator,
+    strValue);
+
+            /*
             if (bFireTextChanged == true)
             {
                 // 文档发生改变
                 this.MarcEditor.FireTextChanged();
             }
-
-            return field;
+            */
+            return this[nOutputPosition];
         }
 
 
@@ -342,50 +363,24 @@ namespace DigitalPlatform.Marc
             string strValue,
             bool bInOrder)
         {
-            strValue = strValue.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+            // strValue = strValue.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
 
-            int nOutputPosition = -1;
-            Field field = this.AddInternal(strName,
+            var field = this.AddInternal(strName,
                 strIndicator,
                 strValue,
                 true,
                 bInOrder,
-                out nOutputPosition);
-
+                out _);
 
             // 界面失效区域
 
-            InvalidateRect iRect = new InvalidateRect();
-            iRect.bAll = false;
-            if (nOutputPosition == -1)
-            {
-                iRect.rect = this.MarcEditor.GetItemBounds(this.Count - 1,
-                    1,
-                    BoundsPortion.FieldAndBottom);
-            }
-            else
-            {
-                if (this.MarcEditor.FocusedFieldIndex > nOutputPosition)
-                {
-                    this.MarcEditor.SelectedFieldIndices[0] = (int)this.MarcEditor.SelectedFieldIndices[0] + 1;
-                }
-                iRect.rect = this.MarcEditor.GetItemBounds(nOutputPosition,
-                    -1,
-                    BoundsPortion.FieldAndBottom);
-            }
-
             // 根据字段类型，设焦点位置
-            if (field.m_strName == this.MarcEditor.DefaultFieldName)
+            if (field.Name == this.MarcEditor.DefaultFieldName)
                 this.MarcEditor.SetActiveField(field, 1);
-            else if (Record.IsControlFieldName(field.m_strName) == true)
+            else if (Record.IsControlFieldName(field.Name) == true)
                 this.MarcEditor.SetActiveField(field, 3);
             else
                 this.MarcEditor.SetActiveField(field, 2);
-
-            //this.marcEditor.ActiveField(field,3);
-
-            this.MarcEditor.AfterDocumentChanged(ScrollBarMember.Both,
-                iRect);
 
             return field;
         }
@@ -411,47 +406,6 @@ namespace DigitalPlatform.Marc
 
         //--------------------------前插字段-------------------
 
-        // 前插一个新字段，只供内部使用，
-        // 因为该函数只处理内存对象，不涉及界面的事情
-        // 操作历史: 无
-        // parameters:
-        //		nIndex	参考的位置
-        //		strName	新字段名称
-        //		strIndicator	新字段指示符
-        //		strValue	新字段值
-        // return:
-        //		void
-        internal Field InsertInternal(int nIndex,
-            Field field)
-        {
-            if (this.Count == 0)
-                throw new Exception("当前 MARC 记录没有头标区。请先创建头标区");
-
-            Debug.Assert(nIndex <= this.Count, "nIndex ["+nIndex.ToString()+"] 不合法");
-
-            string strCaption = this.MarcEditor.GetLabel(field.m_strName);
-
-            field.m_strNameCaption = strCaption;
-            field.container = this;
-            field.CalculateHeight(null, false);
-            if (this.Count == 0)
-            {
-                field.m_strName = "###";
-                field.m_strIndicator = "";
-                field.m_strValue = field.m_strValue.PadRight(24, '?');
-            }
-
-            base.Insert(nIndex, field);
-
-            if (this.MarcEditor.curEdit != null)
-                this.MarcEditor.curEdit.ContentIsNull = true;    // 防止后面调用时送回内存 2009/7/3
-
-            // 文档发生改变
-            this.MarcEditor.FireTextChanged();
-
-            return field;
-        }
-
         // 根据机内格式的表示多个字段的字符串，给nIndex位置前新增多个字段
         // 操作历史: 无
         // parameters:
@@ -465,7 +419,7 @@ namespace DigitalPlatform.Marc
             nNewFieldsCount = 0;
 
             // 先找到有几个字段
-            strFieldsMarc = strFieldsMarc?.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+            // strFieldsMarc = strFieldsMarc?.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
             List<string> fields = Record.GetFields(strFieldsMarc, out _);
             if (fields == null || fields.Count == 0)
                 return;
@@ -475,6 +429,12 @@ namespace DigitalPlatform.Marc
             this.InsertInternal(nIndex, fields);
         }
 
+        public void InsertFields(int nIndex,
+            List<string> fields)
+        {
+            InsertInternal(nIndex, fields);
+        }
+
         // 操作历史: 无
         internal void InsertInternal(int nIndex,
             List<string> fields)
@@ -482,86 +442,14 @@ namespace DigitalPlatform.Marc
             if (fields == null || fields.Count == 0)
                 return;
 
-            // 2007/7/17
-            // 把小edit控件隐藏
-            this.MarcEditor.HideTextBox();
-
-            // 2014/7/10
-            if (this.MarcEditor.curEdit != null)
-                this.MarcEditor.curEdit.ContentIsNull = true;    // 防止后面调用时送回内存
-
-            // 如果插入的第一个元素涉及到头标区，要进行特殊的处理
-            // 2009/3/5
-            if (nIndex == 0)
+            foreach (var text in fields)
             {
-                Debug.Assert(fields.Count > 0, "");
-                if (fields[0].Length > 24)
-                {
-                    string strValue = fields[0];
-                    string strHeader = strValue.Substring(0, 24);
-                    string strOther = strValue.Substring(24);
-                    fields[0] = strHeader;
-                    fields.Insert(1, strOther);
-                }
+                _domRecord.InsertField(nIndex, text);
+                nIndex++;
             }
-
-            // 把多个字段加进去一个临时数组里
-            // List<Field> aField = new List<Field>();
-            int nTempIndex = nIndex;
-            for (int i = 0; i < fields.Count; i++)
-            {
-                Field field = new Field(this);
-                base.Insert(nTempIndex, field);
-                nTempIndex++;
-                // aField.Add(field);
-                field.SetFieldMarc(fields[i], false);
-
-                // if (this.Count == 0 && i == 0)
-                if (nTempIndex == 1)
-                {
-                    field.m_strName = "###";
-                    field.m_strIndicator = "";
-                    field.m_strValue = field.m_strValue.PadRight(24, '?');
-                }
-            }
-
-            /*
-            // 插入了记录中
-            this.InsertRange(nIndex, aField);
-             * */
-
-            int nTailIndex = -1;
-            if (this.MarcEditor.SelectedFieldIndices.Count > 0)
-                nTailIndex = this.MarcEditor.SelectedFieldIndices[this.MarcEditor.SelectedFieldIndices.Count - 1];
-
-            // 2007/7/17
-            // 焦点字段下标也被推动
-            if (nTailIndex != -1)
-            {
-                if (nIndex <= nTailIndex)
-                {
-                    // this.MarcEditor.FocusedFieldIndex += fields.Count;
-
-                    // 2014/7/10
-                    for (int i = 0; i < this.MarcEditor.SelectedFieldIndices.Count; i++)
-                    {
-                        this.MarcEditor.SelectedFieldIndices[i] += fields.Count;
-                    }
-                }
-            }
-
 
             // 文档发生变化
-            this.MarcEditor.FireTextChanged();
-
-            // 2007/7/17
-            // 插入后，小编辑器位置可能被推动？
-            this.MarcEditor.SetEditPos();
-
-#if NO
-            // 把新内容赋到小edit控件里
-            this.MarcEditor.ItemTextToEditControl();
-#endif
+            // this.MarcEditor.FireTextChanged();
         }
 
         // 前插一个新字段，可供内部或外部使用，
@@ -586,17 +474,17 @@ namespace DigitalPlatform.Marc
             string strIndicator,
             string strValue)
         {
-            strValue = strValue.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+            // strValue = strValue.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
 
-            Field field = new Field(this);
-            field.m_strName = strName.PadLeft(3, '*');
-            field.m_strIndicator = strIndicator;
-            field.m_strValue = strValue;
+            Field field = new Field(this,
+                strName.PadLeft(3, '*'),
+                strIndicator,
+                strValue,
+                nIndex == 0 ? true : false);
 
             this.Insert(nIndex,
                 field);
-
-            return field;
+            return this[nIndex];
         }
 
         // 前插一个字段
@@ -606,38 +494,18 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="nIndex">位置</param>
         /// <param name="field">字段对象</param>
-        public /*override*/ new void Insert(int nIndex,
+        public void Insert(int nIndex,
             Field field)
         {
-            Debug.Assert(nIndex <= this.Count, "nIndex参数不合法");
-            // Debug.Assert(oValue is Field, "必须为Field类型");
-            // Field field = (Field)oValue;
+            // Debug.Assert(nIndex > this.Count, "nIndex参数不合法");
 
-            // 把内容还原，把当前焦点设为空，省得Active时把下标搞错
-            this.MarcEditor.ClearSelectFieldIndices();
-
-            this.InsertInternal(nIndex,
-                field);
-
-            // 根据字段类型，设焦点位置
-            if (field.m_strName == this.MarcEditor.DefaultFieldName)
-                this.MarcEditor.SetActiveField(field, 1);
-            else if (Record.IsControlFieldName(field.m_strName) == true)
-                this.MarcEditor.SetActiveField(field, 3);
-            else
-                this.MarcEditor.SetActiveField(field, 2);
-
-            // 失效范围
-            int nStartIndex = 0;
-            if (nIndex > 0)
-                nStartIndex = nIndex - 1;
-            InvalidateRect iRect = new InvalidateRect();
-            iRect.bAll = false;
-            iRect.rect = this.MarcEditor.GetItemBounds(nStartIndex,
-                -1,
-                BoundsPortion.FieldAndBottom);
-            this.MarcEditor.AfterDocumentChanged(ScrollBarMember.Both,
-                iRect);
+            _domRecord.InsertField(nIndex,
+                field.Text);    // TODO: 注意检查 field.Text 末尾是否有字段结束符
+            _domRecord.GetFieldOffsRange(nIndex,
+                1,
+                out int start,
+                out int end);
+            _domRecord.Select(start, end, end);
         }
 
         //--------------------------后插字段-------------------
@@ -664,17 +532,17 @@ namespace DigitalPlatform.Marc
             string strIndicator,
             string strValue)
         {
-            strValue = strValue.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+            // strValue = strValue.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
 
-            Field field = new Field();
-            field.m_strName = strName;
-            field.m_strIndicator = strIndicator;
-            field.m_strValue = strValue;
+            Field field = new Field(this,
+                strName,
+                strIndicator,
+                strValue);
 
             this.InsertAfter(nIndex,
                 field);
 
-            return field;
+            return this[nIndex+1];
         }
 
         // 后插字段
@@ -687,49 +555,12 @@ namespace DigitalPlatform.Marc
         public void InsertAfter(int nIndex,
             Field field)
         {
-            Debug.Assert(nIndex < this.Count, "InsertAfterField(),nIndex参数不合法");
-
-            // 内存对象加一个
-            this.InsertInternal(nIndex + 1,
+            this.Insert(nIndex + 1,
                 field);
-
-            // 根据字段类型，设焦点位置
-            if (field.m_strName == this.MarcEditor.DefaultFieldName)
-                this.MarcEditor.SetActiveField(field, 1);
-            else if (Record.IsControlFieldName(field.m_strName) == true)
-                this.MarcEditor.SetActiveField(field, 3);
-            else
-                this.MarcEditor.SetActiveField(field, 2);
-
-            // 失效从当前新增字段到末尾的区域
-            InvalidateRect iRect = new InvalidateRect();
-            iRect.bAll = false;
-            iRect.rect = this.MarcEditor.GetItemBounds(nIndex + 1,
-                -1,
-                BoundsPortion.FieldAndBottom);
-            this.MarcEditor.AfterDocumentChanged(ScrollBarMember.Horz,
-                iRect);
         }
 
         //--------------------------删除字段-------------------
 
-        // 删除一个字段，只供内部使用，
-        // 操作历史: 无
-        // 因为该函数只处理内存对象，不涉及界面的事情
-        // parameters:
-        //		nFieldIndex	字段索引号
-        // return:
-        //		void
-        internal Field RemoveAtInternal(int nFieldIndex)
-        {
-            var old_field = this[nFieldIndex];
-            base.RemoveAt(nFieldIndex);
-
-            // 文档发生改变
-            this.MarcEditor.FireTextChanged();
-
-            return old_field;
-        }
 
         // 删除一个字段，可供内部或外部使用，
         // 该函数不仅处理内存对象，还处理界面的事情
@@ -740,74 +571,83 @@ namespace DigitalPlatform.Marc
         /// 在指定位置删除一个字段对象
         /// </summary>
         /// <param name="nFieldIndex">位置</param>
-        public /*override*/ new void RemoveAt(int nFieldIndex)
+        public void RemoveAt(int nFieldIndex)
         {
-            this.MarcEditor.Flush();
-            this.RemoveAtInternal(nFieldIndex);
-
-            // 把小edit控件隐藏
-            this.MarcEditor.SelectedFieldIndices.Remove(nFieldIndex);
-            this.MarcEditor.HideTextBox();
-
-            if (nFieldIndex < this.Count)
-                this.MarcEditor.SetActiveField(nFieldIndex, this.MarcEditor.m_nFocusCol);
-
-            // 应把失效区域计算出来，进行优化
-            InvalidateRect iRect = new InvalidateRect();
-            iRect.bAll = false;
-            //iRect.rect = 
-            this.MarcEditor.AfterDocumentChanged(ScrollBarMember.Vert,
-                iRect);
+            _domRecord.DeleteField(nFieldIndex);
         }
 
-        // 操作历史: 无
-        /// <summary>
-        /// 删除若干字段对象
-        /// </summary>
-        /// <param name="fieldIndices">位置下标数组</param>
-        public void RemoveAt(int[] fieldIndices)
-        {
-            // 清除选中对象
-            this.MarcEditor.ClearSelectFieldIndices();
-
-            int nMinIndex = 1000;
-            for (int i = 0; i < fieldIndices.Length; i++)
-            {
-                int nIndex = fieldIndices[i];
-                if (nIndex < nMinIndex)
-                    nMinIndex = nIndex;
-                this[nIndex] = null;
-            }
-
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (this[i] == null)
-                {
-                    this.RemoveAtInternal(i);
-                    i--;
-                }
-            }
-
-            if (nMinIndex < this.Count)
-                this.MarcEditor.SetActiveField(nMinIndex, this.MarcEditor.m_nFocusCol);
-
-            // 应把失效区域计算出来，进行优化
-            InvalidateRect iRect = new InvalidateRect();
-            iRect.bAll = true;
-            this.MarcEditor.AfterDocumentChanged(ScrollBarMember.Vert,
-                iRect);
-        }
 
         #region 仅操作集合，不触发任何事件
 
+        /*
         internal void _removeAt(int field_index)
         {
-            base.RemoveAt(field_index);
+            this.RemoveAt(field_index);
         }
 
         internal void _insert(int field_index, Field field)
         {
-            base.Insert(field_index, field);
+            this.Insert(field_index, field);
+        }
+        */
+
+        public int IndexOf(Field item)
+        {
+            return item.Index;
+        }
+
+
+        public void Add(Field item)
+        {
+            _domRecord.InsertField(_domRecord.FieldCount,
+                item.Name,
+                item.Indicator,
+                item.Value);
+        }
+
+        public void Clear()
+        {
+            _domRecord.Clear();
+        }
+
+        public bool Contains(Field item)
+        {
+            if (item.IsDeleted)
+                return false;
+            var index = item.Index;
+            if (index >= 0 && index < this.Count)
+                return true;
+            return false;
+        }
+
+        void ICollection<Field>.CopyTo(Field[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(Field item)
+        {
+            var ret = Contains(item);
+            if (ret == false)
+                return false;
+            RemoveAt(item.Index);
+            return true;
+        }
+
+        IEnumerator<Field> IEnumerable<Field>.GetEnumerator()
+        {
+            foreach (var field in _domRecord)
+            {
+                yield return new Field(this, field);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            foreach (var field in _domRecord)
+            {
+                yield return new Field(this, field);
+            }
         }
 
         #endregion
@@ -823,9 +663,9 @@ namespace DigitalPlatform.Marc
             if (x.Name == y.Name)
                 return 0;
 
-            if (x.Name == "hdr")
+            if (x.IsHeader)
                 return -1;
-            if (y.Name == "hdr")
+            if (y.IsHeader)
                 return 1;
 
             // 把符号'-'替换为'/'，这样就比'0'还小

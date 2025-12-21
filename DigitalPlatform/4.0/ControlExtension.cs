@@ -104,6 +104,11 @@ namespace DigitalPlatform
             this Control form,
             Action method)
         {
+            if (form == null)
+            {
+                method?.Invoke();
+                return;
+            }
             if (form.InvokeRequired)
                 form.Invoke((Action)(method));
             else

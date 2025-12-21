@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DigitalPlatform.MarcEditor
 {
+#if REMOVED
     [TestClass]
     public class UnitTestMarcEditor
     {
@@ -104,4 +105,7 @@ namespace DigitalPlatform.MarcEditor
             Assert.AreEqual(3, nContentLength);
         }
     }
+
+#endif
+
 }

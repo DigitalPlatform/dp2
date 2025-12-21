@@ -1,0 +1,27 @@
+
+2025/11/25
+
+MarcEditor.ReadOnly 直接使用 MarcControl 的 ReadOnly 成员。
+
+MarcEditor.BidiAdjust 属性删除。原来是为了 Unicode 处理中的困难设计的，现在问题不存在了
+
+2025/12/9
+左侧 label 显示
+Ctrl+M 定长模板
+回车是到下一行还是插入一个字段结束符，可以配置
+字段名和指示符应该允许单独指定 FixedFont
+
+~~~
+2025/12/16
+现有 FireFieldSelectChanged() 机制只根据 careinfo.ChildIndex 变化触发。也就是说
+无法根据键盘输入(和剪切粘贴等)修改字段名子字段名而触发。
+作为对现有 FireFieldSelectChanged() 机制的补充：
+捕获 TextChange 事件后，判断 CaretFieldIndex 所在的字段名(和 Caret 所在的子字段名)和以前记忆的字段名是否
+一致。如果不一致则触发 FieldSelectChanged 事件。这个过程异步做，避免拖慢 base 类
+的处理键盘输入的过程。
+CaretFieldIndex 变化后，及时修改存储的这个字段名，以免影响后继的判断。
+
+这个功能的难度在于需要不影响键盘等操作的速度。
+
+目前已经存在 delay update 机制，可以考虑由延迟了的 update 来负责触发检查动作，以节省
+CPU 资源。

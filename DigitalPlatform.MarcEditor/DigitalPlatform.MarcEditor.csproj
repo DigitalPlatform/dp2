@@ -122,6 +122,14 @@
       <Project>{623ea980-be0a-46bb-9e3e-dd8d0fe54f6f}</Project>
       <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TextEditor\MarcControl\MarcControl.csproj">
+      <Project>{251dee42-bcfa-4f53-8c6d-5bf242fdd16d}</Project>
+      <Name>MarcControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TextEditor\TextControl\TextControl.csproj">
+      <Project>{CD5BF479-BFBC-4082-AA44-09CE598FEFF0}</Project>
+      <Name>TextControl</Name>
+    </ProjectReference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -178,7 +186,6 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ChangeAction.cs" />
     <Compile Include="DeleteFieldDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -193,13 +200,16 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MarcEditor.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="FixedTemplateDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MyEdit.cs">
-      <SubType>Component</SubType>
+    <Compile Include="MarcEditor_delayEvent.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MarcEditor_popupMenu.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="NewFieldDlg.cs">
       <SubType>Form</SubType>
@@ -273,6 +283,7 @@
     <Content Include="log\12.7.txt" />
     <Content Include="log\12.8.txt" />
     <Content Include="log\12.9.txt" />
+    <Content Include="refactor.txt" />
     <EmbeddedResource Include="DeleteFieldDlg.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DeleteFieldDlg.cs</DependentUpon>
@@ -287,10 +298,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FixedTemplateDlg.resx">
       <DependentUpon>FixedTemplateDlg.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MyEdit.resx">
-      <DependentUpon>MyEdit.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="NewFieldDlg.resx">

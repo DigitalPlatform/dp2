@@ -894,6 +894,10 @@
       <Project>{0a64722f-5f1b-4540-ac95-2e5c6b7a3ba8}</Project>
       <Name>DigitalPlatform.Z3950</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TextEditor\MarcControl\MarcControl.csproj">
+      <Project>{251DEE42-BCFA-4F53-8C6D-5BF242FDD16D}</Project>
+      <Name>MarcControl</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="asciicodetables.xml">

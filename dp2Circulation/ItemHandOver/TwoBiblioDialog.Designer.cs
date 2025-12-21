@@ -102,16 +102,12 @@ namespace dp2Circulation
             // 
             // marcEditor1
             // 
-            this.marcEditor1.CaptionFont = new System.Drawing.Font("ËÎÌו", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.marcEditor1.Changed = true;
             this.marcEditor1.ContentBackColor = System.Drawing.SystemColors.Window;
             this.marcEditor1.ContentTextColor = System.Drawing.SystemColors.WindowText;
             this.marcEditor1.CurrentImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.marcEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.marcEditor1.DocumentOrgX = 0;
-            this.marcEditor1.DocumentOrgY = 0;
             this.marcEditor1.FieldNameCaptionWidth = 0;
-            this.marcEditor1.FixedSizeFont = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Bold);
             this.marcEditor1.FocusedField = null;
             this.marcEditor1.FocusedFieldIndex = -1;
             this.marcEditor1.HorzGridColor = System.Drawing.Color.LightGray;
@@ -128,7 +124,6 @@ namespace dp2Circulation
             this.marcEditor1.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
             this.marcEditor1.NameTextColor = System.Drawing.Color.Blue;
             this.marcEditor1.ReadOnly = false;
-            this.marcEditor1.SelectionStart = -1;
             this.marcEditor1.Size = new System.Drawing.Size(179, 159);
             this.marcEditor1.TabIndex = 1;
             this.marcEditor1.Text = "marcEditor1";
@@ -177,16 +172,12 @@ namespace dp2Circulation
             // 
             // marcEditor2
             // 
-            this.marcEditor2.CaptionFont = new System.Drawing.Font("ËÎÌו", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.marcEditor2.Changed = true;
             this.marcEditor2.ContentBackColor = System.Drawing.SystemColors.Window;
             this.marcEditor2.ContentTextColor = System.Drawing.SystemColors.WindowText;
             this.marcEditor2.CurrentImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.marcEditor2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.marcEditor2.DocumentOrgX = 0;
-            this.marcEditor2.DocumentOrgY = 0;
             this.marcEditor2.FieldNameCaptionWidth = 0;
-            this.marcEditor2.FixedSizeFont = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Bold);
             this.marcEditor2.FocusedField = null;
             this.marcEditor2.FocusedFieldIndex = -1;
             this.marcEditor2.HorzGridColor = System.Drawing.Color.LightGray;
@@ -203,7 +194,6 @@ namespace dp2Circulation
             this.marcEditor2.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
             this.marcEditor2.NameTextColor = System.Drawing.Color.Blue;
             this.marcEditor2.ReadOnly = true;
-            this.marcEditor2.SelectionStart = -1;
             this.marcEditor2.Size = new System.Drawing.Size(186, 139);
             this.marcEditor2.TabIndex = 1;
             this.marcEditor2.Text = "marcEditor2";

@@ -1669,6 +1669,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
         public void SetHtmlString(string strHtml,
             string strTempFileType)
         {
+            if (this.WebBrowser == null)
+                return;
+
             this.WebBrowser.TryInvoke(() =>
             {
                 this.StopPrevious();

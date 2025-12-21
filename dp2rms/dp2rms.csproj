@@ -38,7 +38,7 @@
     <ManifestCertificateThumbprint>34DDC8BA0C12A62F998359DB90989DB694CABB6D</ManifestCertificateThumbprint>
     <ManifestKeyFile>dp2rms_3_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <OldToolsVersion>2.0</OldToolsVersion>
     <TargetFrameworkProfile />
@@ -166,6 +166,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TextEditor\MarcControl\MarcControl.csproj">
+      <Project>{251dee42-bcfa-4f53-8c6d-5bf242fdd16d}</Project>
+      <Name>MarcControl</Name>
     </ProjectReference>
     <Reference Include="System">
       <Name>System</Name>

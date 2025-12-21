@@ -14,6 +14,8 @@ namespace TestMarcEditor
         [STAThread]
         static void Main()
         {
+            LibraryStudio.Forms.Utility.SetDpiAwareness();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

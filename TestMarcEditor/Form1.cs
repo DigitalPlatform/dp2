@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using LibraryStudio.Forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,14 +20,17 @@ namespace TestMarcEditor
         {
             InitializeComponent();
 
-            marcEditor1.Click += MarcEditor1_Click;
+            // this.marcEditor1.BorderStyle = BorderStyle.None;
+            //marcEditor1.Click += MarcEditor1_Click;
             marcEditor1.SelectedFieldChanged += MarcEditor1_SelectedFieldChanged;
         }
 
         private void MarcEditor1_SelectedFieldChanged(object sender, EventArgs e)
         {
+            /*
             var index = marcEditor1.FocusedFieldIndex;
             var field = marcEditor1.FocusedField;
+            */
         }
 
         private void MarcEditor1_Click(object sender, EventArgs e)
@@ -43,10 +48,30 @@ namespace TestMarcEditor
             // e.Path 中可能是 "marcdef" 或 "marcvaluelist"
             string filename = Path.Combine(Environment.CurrentDirectory,
                 e.Path);
+            if (filename.Contains("#"))
+            {
+                StringUtil.ParseTwoPart(filename,
+                    "#",
+                    out filename,
+                    out string strFragment);
+            }
+
             XmlDocument dom = new XmlDocument();
             dom.Load(filename);
 
             e.XmlDocument = dom;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            this.marcEditor1.Content = MarcRecord.BuildContent(
+                @"012345678901234567890123
+001ABCDEFG
+2001 $aAAA$bBBB
+801  $aCN$bBBB$cCCC"
+);
+
+            this.marcControl1.Content = "012345678901234567890123";
         }
     }
 }

@@ -1719,7 +1719,7 @@ namespace DigitalPlatform.EasyMarc
             strOutputValue = StringUtil.ReplaceContinue(strOutputValue, '_', ' ');
 
             // 替换子字段符号
-            strOutputValue = strOutputValue.Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);   // $?
+            // strOutputValue = strOutputValue.Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);   // $?
 
             e.Value = strOutputValue;
             e.ErrorInfo = "";

@@ -3756,7 +3756,7 @@ out string strErrorCode)
             {
                 // 2012/7/25 移动到这里
                 // 因为 LoadBiblioRecord() 会导致填充AutoGen菜单
-                this._genData.ClearViewer();
+                this._genData?.ClearViewer();
 
                 if (this.m_commentViewer != null)
                     this.m_commentViewer.Clear();
@@ -13303,10 +13303,6 @@ out strError);
         // 2022/1/11
         void LoadMarcEditorParam()
         {
-            MarcEditor.BidiAdjust = MainForm.AppInfo.GetBoolean(
-                "marceditor",
-                "bidi_adjust",
-                false);
             this.m_marcEditor.FieldNameCaptionWidth = MainForm.AppInfo.GetInt(
                 "marceditor",
                 "name_width",
@@ -13347,10 +13343,6 @@ out strError);
         // 2022/1/11
         void SaveMarcEditorParam()
         {
-            MainForm.AppInfo.SetBoolean(
-    "marceditor",
-    "bidi_adjust",
-    MarcEditor.BidiAdjust);
             MainForm.AppInfo.SetInt(
     "marceditor",
     "name_width",
@@ -15416,7 +15408,7 @@ out strError);
 
         private void MarcEditor_SelectedFieldChanged(object sender, EventArgs e)
         {
-            this._genData.RefreshViewerState();
+            this._genData?.RefreshViewerState();
         }
 
         private void binaryResControl1_Enter(object sender, EventArgs e)

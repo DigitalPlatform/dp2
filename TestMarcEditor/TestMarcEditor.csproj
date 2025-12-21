@@ -108,6 +108,22 @@
       <Project>{184700D7-F172-4001-9EE6-440779D286E1}</Project>
       <Name>DigitalPlatform.MarcEditor</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-ef96-457e-852d-5c21a3ea8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{C5B517C1-7344-45A5-89DC-06A9B130AE36}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TextEditor\MarcControl\MarcControl.csproj">
+      <Project>{251DEE42-BCFA-4F53-8C6D-5BF242FDD16D}</Project>
+      <Name>MarcControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TextEditor\TextControl\TextControl.csproj">
+      <Project>{cd5bf479-bfbc-4082-aa44-09ce598feff0}</Project>
+      <Name>TextControl</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
