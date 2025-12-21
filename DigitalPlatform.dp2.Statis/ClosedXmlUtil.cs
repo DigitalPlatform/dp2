@@ -1,20 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.IO;
-using System.Drawing;
-using System.Diagnostics;
 
 using ClosedXML.Excel;
-
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.dp2.Statis
 {
     public class ClosedXmlUtil
     {
+        // 计算一个字符串的“西文字符宽度”。汉字相当于两个西文字符宽度
+        public static int GetCharWidth(string strText)
+        {
+            int result = 0;
+            foreach (char c in strText)
+            {
+                result += StringUtil.IsHanzi(c) == true ? 2 : 1;
+            }
+
+            return result;
+        }
+
         public static double GetAverageCharPixelWidth(Control control)
         {
             return control.TryGet(() =>
@@ -249,6 +261,27 @@ dp2Circulation 版本: dp2Circulation, Version=3.7.7278.20124, Culture=neutral, 
             return 1;
         }
 
+        // parameters:
+        //      max_chars   字符数超过这个数量的列不用做调整
+        public static void AdjustColumnWidth(IXLWorksheet sheet,
+            List<int> column_max_chars,
+            int max_chars)
+        {
+            // 字符数太多的列不要做 width auto adjust
+            {
+                int i = 0;
+                foreach (IXLColumn column in sheet.Columns())
+                {
+                    // int nChars = column_max_chars[i];
+                    int nChars = ClosedXmlUtil.GetMaxChars(column_max_chars, i);
+                    if (nChars < max_chars)
+                        column.AdjustToContents();
+                    else
+                        column.Width = Math.Min(max_chars, nChars);
+                    i++;
+                }
+            }
+        }
 
         public static int GetMaxChars(List<int> column_max_chars, int index)
         {
@@ -258,6 +291,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.7.7278.20124, Culture=neutral, 
             if (index >= column_max_chars.Count)
                 return 0;
             return column_max_chars[index];
+        }
+
+        public static void SetMaxChars(List<int> column_max_chars,
+            int index,
+            string text)
+        {
+            SetMaxChars(column_max_chars, index, GetCharWidth(text));
         }
 
         public static void SetMaxChars(/*ref*/ List<int> column_max_chars, int index, int chars)

@@ -1,29 +1,27 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
+using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using dp2Circulation.defaultHosts;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using System.Xml;
-using System.Reflection;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Runtime.Remoting;
+using System.Text;
 using System.Web;   // HttpUtility
-
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Script;
-using DigitalPlatform.IO;
-using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
-
-using DigitalPlatform.dp2.Statis;
-
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Core;
-using DigitalPlatform.LibraryClient;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace dp2Circulation
 {
@@ -126,7 +124,7 @@ namespace dp2Circulation
                 "<全部>");
 
             // 方案名
-            this.textBox_projectName.Text = Program.MainForm.AppInfo.GetString(
+            this.comboBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                 "readerstatisform",
                 "projectname",
                 "");
@@ -212,7 +210,7 @@ namespace dp2Circulation
                 Program.MainForm.AppInfo.SetString(
                     "readerstatisform",
                     "projectname",
-                    this.textBox_projectName.Text);
+                    this.comboBox_projectName.Text);
 
                 // 部门名称列表
                 Program.MainForm.AppInfo.SetString(
@@ -432,12 +430,33 @@ namespace dp2Circulation
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 
-                nRet = PrepareScript(strProjectName,
+                if (strProjectName.StartsWith("#"))
+                {
+                    if (strProjectName == "#借阅详情")
+                        objStatis = new BorrowDetailStatis
+                        {
+                            ReaderStatisForm = this,
+                            ProjectDir = Path.Combine(Program.MainForm.DataDir, "default\\OperLogStatis\\ChargingDetail"),
+                            InstanceDir = this.InstanceDir,
+                            // OperLogFilter = "borrow,return"
+                        };
+                    else
+                    {
+                        strError = $"无法识别的内置统计方案名 '{strProjectName}'";
+                        goto ERROR1;
+                    }
+                }
+                else
+                {
+                    nRet = PrepareScript(strProjectName,
                     strProjectLocate,
                     out objStatis,
                     out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    objStatis.ProjectDir = strProjectLocate;
+                }
 
                 if (strInitialParamString == "test_compile")
                     return new RunScriptResult
@@ -447,7 +466,7 @@ namespace dp2Circulation
                         Warning = strWarning
                     };
 
-                objStatis.ProjectDir = strProjectLocate;
+                // objStatis.ProjectDir = strProjectLocate;
                 objStatis.Console = this.Console;
 
                 objStatis.DepartmentNames = this.textBox_departmentNames.Text;
@@ -1210,35 +1229,39 @@ namespace dp2Circulation
 
             if (this.tabControl_main.SelectedTab == this.tabPage_selectProject)
             {
-                string strProjectName = this.textBox_projectName.Text;
+                string strProjectName = this.comboBox_projectName.Text;
 
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
                     strError = "尚未指定方案名";
-                    this.textBox_projectName.Focus();
+                    this.comboBox_projectName.Focus();
                     goto ERROR1;
                 }
 
+                int nRet = 0;
                 string strProjectLocate = "";
-                // 获得方案参数
-                // strProjectNamePath	方案名，或者路径
-                // return:
-                //		-1	error
-                //		0	not found project
-                //		1	found
-                int nRet = this.ScriptManager.GetProjectData(
-                    strProjectName,
-                    out strProjectLocate);
+                if (strProjectName.StartsWith("#") == false)
+                {
+                    // 获得方案参数
+                    // strProjectNamePath	方案名，或者路径
+                    // return:
+                    //		-1	error
+                    //		0	not found project
+                    //		1	found
+                    nRet = this.ScriptManager.GetProjectData(
+                        strProjectName,
+                        out strProjectLocate);
 
-                if (nRet == 0)
-                {
-                    strError = "方案 " + strProjectName + " 没有找到...";
-                    goto ERROR1;
-                }
-                if (nRet == -1)
-                {
-                    strError = "scriptManager.GetProjectData() error ...";
-                    goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "方案 " + strProjectName + " 没有找到...";
+                        goto ERROR1;
+                    }
+                    if (nRet == -1)
+                    {
+                        strError = "scriptManager.GetProjectData() error ...";
+                        goto ERROR1;
+                    }
                 }
 
                 // 切换到执行page
@@ -1320,7 +1343,7 @@ namespace dp2Circulation
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.scriptManager = this.ScriptManager;
-            dlg.ProjectName = this.textBox_projectName.Text;
+            dlg.ProjectName = this.comboBox_projectName.Text;
             dlg.NoneProject = false;
 
             Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
@@ -1331,7 +1354,7 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            this.textBox_projectName.Text = dlg.ProjectName;
+            this.comboBox_projectName.Text = dlg.ProjectName;
         }
 
         private void radioButton_inputStyle_barcodeFile_CheckedChanged(object sender, EventArgs e)

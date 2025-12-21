@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Xml;
-
-using DigitalPlatform;
+﻿using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Windows.Forms;
+using System.Xml;
+using static dp2Circulation.CallNumberForm;
 
 namespace dp2Circulation
 {
@@ -1288,7 +1289,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 MessageBox.Show(ForegroundWindow.Instance, $"册记录 RecordDom 处于错误状态，无法进行修改。({bookitem.ErrorInfo})");
                 return;
             }
-
             string strOldBarcode = bookitem.Barcode;
 
             using (EntityEditForm edit = new EntityEditForm())
@@ -1317,6 +1317,17 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         return;
                     }
                     edit.StartItem = null;  // 清除原始对象标记
+
+                    // TODO: 这里如何获得 EntityForm 里面已经保存的 MemoNumbers?
+                    // EditForm 关闭后，如果旧的号码已经主动取消保护，需要通知 EntityForm，移走已经不需要保护的号码
+                    // 2025/12/19
+                    // 将原先已经使用的索取号添加到 EditForm 的已经保护的列表中，
+                    // 这样当编辑修改索取号的时候，会自动把已经保护的取消保护
+                    if (string.IsNullOrEmpty(bookitem.AccessNo) == false)
+                    {
+                        edit.AddProtectedNumber(bookitem.Location,
+                            bookitem.AccessNo);
+                    }
                 }
                 finally
                 {

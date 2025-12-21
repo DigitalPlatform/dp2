@@ -7368,7 +7368,7 @@ dlg.UiState);
 
             try
             {
-                strTimeRange = GetTimeRange(dlg.ChargingHistoryDateRange);
+                strTimeRange = ChargingHistoryLoader.GetTimeRange(dlg.ChargingHistoryDateRange);
             }
             catch (Exception ex)
             {
@@ -8714,7 +8714,7 @@ dlg.UiState);
 
             try
             {
-                strTimeRange = GetTimeRange(dlg.ChargingHistoryDateRange);
+                strTimeRange = ChargingHistoryLoader.GetTimeRange(dlg.ChargingHistoryDateRange);
             }
             catch (Exception ex)
             {
@@ -8958,28 +8958,6 @@ dlg.UiState);
             return 1;
         }
 
-        // 将 20120101 - 20151231 这样的日期字符串形态转换为 SearchCharging() API 能接受的时间范围字符串形态
-        // 注意 SearchCharging() API 要的时间范围字符串，中间是一个波浪号而不是横杠
-        static string GetTimeRange(string strText)
-        {
-            string strStart = "";
-            string strEnd = "";
-            StringUtil.ParseTwoPart(strText, "-", out strStart, out strEnd);
-            strStart = strStart.Trim();
-            strEnd = strEnd.Trim();
-            if (string.IsNullOrEmpty(strStart) == false)
-            {
-                DateTime time = DateTimeUtil.Long8ToDateTime(strStart);
-                strStart = time.ToString("G");
-            }
-            if (string.IsNullOrEmpty(strEnd) == false)
-            {
-                DateTime time = DateTimeUtil.Long8ToDateTime(strEnd);
-                strEnd = time.AddDays(1).ToString("G"); // 注意 ~ 后面是 < 的意思，所以要放到第二天的零点
-            }
-
-            return strStart + "~" + strEnd;
-        }
 
         static string GetContactString(XmlDocument dom)
         {
@@ -9286,7 +9264,7 @@ ref List<int> column_max_chars)
             }
 
             // 最大字符数
-            ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, 1, (nReaderIndex + 1).ToString().Length * 2);
+            ClosedXmlUtil.SetMaxChars(column_max_chars, 1, (nReaderIndex + 1).ToString().Length * 2);
 
             // 序号的右边竖线
             {
@@ -9344,7 +9322,7 @@ ref List<int> column_max_chars)
                         string strText = subcols[line];
 
                         // 最大字符数
-                        ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, strText.Length);
+                        ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, strText.Length);
 
                         IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
                         cell.Style.Alignment.WrapText = true;
@@ -9405,7 +9383,7 @@ ref List<int> column_max_chars)
                     {
                         string strText = subcols[line];
                         // 最大字符数
-                        ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, strText.Length);
+                        ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, strText.Length);
 
                         IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
                         cell.Style.Alignment.WrapText = true;
@@ -9534,7 +9512,7 @@ ref List<int> column_max_chars)
                 foreach (string s in cols)
                 {
                     // 统计最大字符数
-                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, GetCharWidth(s));
+                    ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, s);
 
                     IXLCell cell = null;
                     if (nColIndex == 2)
@@ -9576,7 +9554,7 @@ ref List<int> column_max_chars)
                 Point point = points[i];
                 int nColIndex = point.X;
                 // 统计最大字符数
-                ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, GetCharWidth(biblio.Content));
+                ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, biblio.Content);
 
                 IXLCell cell = null;
                 cell = sheet.Cell(point.Y, nColIndex).SetValue(biblio.Content);
@@ -9721,7 +9699,7 @@ ref List<int> column_max_chars)
                 foreach (string s in cols)
                 {
                     // 统计最大字符数
-                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, GetCharWidth(s));
+                    ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, s);
 
                     IXLCell cell = null;
                     if (nColIndex == 2)
@@ -9858,7 +9836,7 @@ ref List<int> column_max_chars)
                 foreach (string s in cols)
                 {
                     // 统计最大字符数
-                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, GetCharWidth(s));
+                    ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, s);
 
                     IXLCell cell = null;
                     if (nColIndex == 2)
@@ -9890,18 +9868,6 @@ ref List<int> column_max_chars)
             strText = strText.Replace("day", "天");
 
             return strText.Replace("hour", "小时");
-        }
-
-        // 计算一个字符串的“西文字符宽度”。汉字相当于两个西文字符宽度
-        public static int GetCharWidth(string strText)
-        {
-            int result = 0;
-            foreach (char c in strText)
-            {
-                result += StringUtil.IsHanzi(c) == true ? 2 : 1;
-            }
-
-            return result;
         }
 
         static string ToLocalTime(string strRfc1123, string strFormat)

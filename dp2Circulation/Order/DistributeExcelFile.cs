@@ -144,8 +144,8 @@ namespace dp2Circulation.Order
 
                         // 最大字符数
                         ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
-                        nStartColIndex + i,
-                        ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
+                            nStartColIndex + i,
+                            cell.GetValue<string>());
                     }
 
                     i++;
@@ -516,7 +516,7 @@ out copyNumberCell);
                 // 最大字符数
                 ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
                 nOldStartColIndex + j,
-                ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
+                cell.GetValue<string>());
             }
 
             // 书目信息右边输出馆藏地列表

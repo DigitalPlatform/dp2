@@ -1363,6 +1363,7 @@
             this.Name = "EntityForm";
             this.Text = "种册";
             this.Activated += new System.EventHandler(this.EntityForm_Activated);
+            this.Deactivate += new System.EventHandler(this.EntityForm_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.EntityForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EntityForm_FormClosed);
             this.Load += new System.EventHandler(this.EntityForm_Load);

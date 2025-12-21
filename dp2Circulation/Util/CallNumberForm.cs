@@ -34,6 +34,7 @@ namespace dp2Circulation
     {
         List<MemoTailNumber> _memoMembers = new List<MemoTailNumber>();
 
+        // 注: 这是外面给出的已经记忆的号码的参考上下文。注意，不是本窗口本次打开操作起见新保护的号码
         public List<MemoTailNumber> MemoNumbers
         {
             get
@@ -551,20 +552,6 @@ namespace dp2Circulation
             bool bFast = StringUtil.IsInList("fast", strStyle);
             var use_empty_number = (Program.MainForm.CallNumberUseEmptyNumber);
 
-            /*
-            EnableControls(false);
-
-            LibraryChannel channel = this.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 5, 0);
-
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在检索同类书实体记录 ...");
-            _stop.BeginLoop();
-
-            this.Update();
-            Program.MainForm.Update();
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在检索同类书实体记录 ...",
                 "timeout:0:5:0,disableControl");
@@ -722,17 +709,6 @@ namespace dp2Circulation
             finally
             {
                 looping.Dispose();
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                _stop.HideProgress();
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-
-                EnableControls(true);
-                */
             }
 
         END1:
@@ -953,6 +929,11 @@ COLUMN_CALLNUMBER);
                 list_item.ImageIndex = TYPE_CURRENT;
                 list_item.Text = item.RecPath;
 
+                // 2025/12/3
+                ListViewUtil.ChangeItemText(list_item,
+                    COLUMN_ITEMRECPATH,
+                    "(内存)");
+
                 ListViewUtil.ChangeItemText(list_item,
                     COLUMN_STATE,
                     string.IsNullOrEmpty(item.State) == false ?
@@ -1039,7 +1020,7 @@ COLUMN_CALLNUMBER);
             strText = strText.TrimStart();
 
             StringBuilder s = new StringBuilder();
-            foreach(char ch in strText)
+            foreach (char ch in strText)
             {
                 if (ch == '-' || char.IsDigit(ch))
                 {
@@ -1636,6 +1617,7 @@ COLUMN_CALLNUMBER);
             MessageBox.Show(this, strError);
         }
 
+        // TODO: 如果当前对话框是最大化的，那么双击以后下方被遮挡的位置新开了一个种册窗，操作者感觉不到，需要提醒一下
         private async void listView_number_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_number.SelectedItems.Count == 0)
@@ -1649,6 +1631,12 @@ COLUMN_CALLNUMBER);
             if (String.IsNullOrEmpty(strItemRecPath) == true)
             {
                 MessageBox.Show(this, "实体记录路径为空");
+                return;
+            }
+
+            if (strItemRecPath == "(内存)")
+            {
+                MessageBox.Show(this, "这是种册窗中尚未保存的册信息");
                 return;
             }
 
@@ -2075,12 +2063,99 @@ COLUMN_CALLNUMBER);
             public string ArrangeGroupName { get; set; } // 排架体系名
             public string Class { get; set; } // 类号
             public string Number { get; set; }  // 区分号
+
+            public override string ToString()
+            {
+                return $"Number={Number}, Class={Class}, ArrangeGroupName={ArrangeGroupName}";
+            }
+
+            public static IEnumerable<MemoTailNumber> MatchNumber(
+                List<MemoTailNumber> list,
+                MemoTailNumber number)
+            {
+                return list
+    .Where(o => o.ArrangeGroupName == number.ArrangeGroupName
+    && o.Class == number.Class && o.Number == number.Number);
+            }
+
+            public static void AddNumber(
+    List<MemoTailNumber> list,
+    string location,
+    string access_no)
+            {
+                AddNumber(list, BuildNumber(location, access_no));
+            }
+
+            public static void AddNumber(
+                List<MemoTailNumber> list,
+                MemoTailNumber number)
+            {
+                if (list == null)
+                    throw new ArgumentNullException("list");
+                /*
+                if (this.ProtectedNumbers == null)
+                    this.ProtectedNumbers = new List<MemoTailNumber>();
+                */
+
+                // 先查重
+                var matched_item = MatchNumber(list, number);
+
+                if (matched_item.Count() > 0)
+                    return;
+                list.Add(number);
+            }
+
+
+            public static void RemoveNumber(
+                List<MemoTailNumber> list,
+                string location,
+                string access_no)
+            {
+                var number = BuildNumber(
+                    location, 
+                    access_no);
+                RemoveNumber(list, number);
+            }
+
+            public static void RemoveNumber(
+                List<MemoTailNumber> list,
+                MemoTailNumber number)
+            {
+                var matched_item = MatchNumber(list, number).ToList();
+                foreach (var item in matched_item)
+                {
+                    list.Remove(item);
+                }
+            }
+
+            public static MemoTailNumber BuildNumber(string location,
+                string access_no)
+            {
+                var arrange_name = "!" + location;
+                int ret = Program.MainForm.GetArrangementInfo(location,
+                    out ArrangementInfo current_info,
+                    out _);
+                if (ret != -1 && current_info != null)
+                    arrange_name = current_info.ArrangeGroupName;
+                var strCalss = CallNumberForm.GetClassPart(access_no);
+                var number = CallNumberForm.GetZhongcihaoPart(access_no);
+                return new MemoTailNumber
+                {
+                    ArrangeGroupName = arrange_name,
+                    Class = strCalss,
+                    Number = number,
+                };
+            }
+
         }
 
+        // parameters:
+        //      numbers 本函数执行过程中，会对这个列表进行增补
         // return:
-        //      -1  出错。如果 strError == "used"，表示这个号码已被占用(但 strOutputNumber 中返回的号码并不靠谱，不能直接用)
+        //      -1  出错。如果 strError == "!used"，表示这个号码已被占用(但 strOutputNumber 中返回的号码并不靠谱，不能直接用)
         int ProtectTailNumber(
-            string strAction,
+            // string strAction,
+            bool new_version,
             string strTestNumber,
             bool is_empty_number,
             List<MemoTailNumber> numbers,
@@ -2090,15 +2165,15 @@ COLUMN_CALLNUMBER);
             strOutputNumber = "";
             strError = "";
 
-            Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
+            string strAction = "protect";
+            if (new_version)
+                strAction = is_empty_number ? "memo" : "protect";
 
-            /*
-            EnableControls(false);
+            Debug.Assert(strAction == "protect"
+                || strAction == "unmemo"
+                || strAction == "memo",
+                $"出现了不期望的 strAction '{strAction}'");
 
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在保护尾号 ...");
-            _stop.BeginLoop();
-            */
             var looping = Looping("正在保护尾号 ...",
                 "disableControl");
             try
@@ -2128,17 +2203,48 @@ COLUMN_CALLNUMBER);
                         return -1;
                     }
                     */
-                    if (strTestNumber != strOutputNumber)
+                    if (new_version)
                     {
-                        strError = "used";
-                        return -1;
+                        // strTestNumber 已经存在
+                        if (nRet == 0)
+                        {
+                            strError = "!used";
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        // 旧版本模拟的方法，有副作用需要克服
+                        if (string.IsNullOrEmpty(strOutputNumber) == false
+                            && strTestNumber != strOutputNumber)
+                        {
+                            // 此时 dp2library 已经记忆了 strOutputNumber，这有副作用，
+                            // 所以要将 strOutputNumber 马上 unmemo
+                            {
+                                var ret = ProtectTailNumber(
+        "unmemo",
+        strArrangeGroupName,
+        strClass,
+        strOutputNumber,
+        out _,
+        out strError);
+                                if (ret == -1)
+                                {
+                                    strError = $"unmemo 请求出错: {strError}";
+                                    return -1;
+                                }
+                            }
+                            strError = "!used";
+                            return -1;
+                        }
                     }
                     strOutputNumber = strTestNumber;
                 }
 
                 if (numbers != null)
                 {
-                    if (strAction == "protect")
+                    if (strAction == "protect"
+                        || strAction == "memo"/* 2025/12/5 */)
                     {
                         MemoTailNumber number = new MemoTailNumber();
                         number.ArrangeGroupName = strArrangeGroupName;
@@ -2146,7 +2252,7 @@ COLUMN_CALLNUMBER);
                         number.Number = strOutputNumber;
                         numbers.Add(number);
                     }
-                    if (strAction == "unmemo")
+                    else if (strAction == "unmemo")
                     {
                         var found = numbers.FindAll((o) =>
                         {
@@ -2167,13 +2273,6 @@ COLUMN_CALLNUMBER);
             finally
             {
                 looping.Dispose();
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-
-                EnableControls(true);
-                */
             }
         }
 
@@ -2560,126 +2659,36 @@ COLUMN_CALLNUMBER);
             out string strNumber,
             out string strError)
         {
-            strNumber = "";
-            strError = "";
-            int nRet = 0;
-            protectedNumbers = new List<MemoTailNumber>();
-            bool is_empty_number = false;   // 是否为利用了空号
-
-
-            this.ClassNumber = strClass;
-            this.LocationString = strLocationString;
-
-            int redo_count = 0;
-        REDO:
-
-            // 仅利用书目统计最大号
-            if (style == ZhongcihaoStyle.Biblio)
+            MainForm.OutputText("begin CallNumberForm.GetZhongcihao()");
+            try
             {
-                string strOtherMaxNumber = "";
-                string strMyselfNumber = "";
-                string strSiblingNumber = "";
+                strNumber = "";
+                strError = "";
+                int nRet = 0;
+                protectedNumbers = new List<MemoTailNumber>();
+                bool is_empty_number = false;   // 是否为利用了空号
 
-                // 获得若干号
-                nRet = GetMultiNumber(
-                    "fast",
-                    out strOtherMaxNumber,
-                    out strMyselfNumber,
-                    out strSiblingNumber,
-                    out string first_blank_number,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
 
-                if (String.IsNullOrEmpty(strMyselfNumber) == false)
+                this.ClassNumber = strClass;
+                this.LocationString = strLocationString;
+
+                int redo_count = 0;
+            REDO:
+
+                // 仅利用书目统计最大号
+                if (style == ZhongcihaoStyle.Biblio)
                 {
-                    strNumber = strMyselfNumber;
-                    return 1;   // 从自身得到的号码，不需要保护
-                }
+                    string strOtherMaxNumber = "";
+                    string strMyselfNumber = "";
+                    string strSiblingNumber = "";
 
-                if (String.IsNullOrEmpty(strSiblingNumber) == false)
-                {
-                    strNumber = strSiblingNumber;
-                    return 1;   // 从相邻册得到的号码，不需要保护
-                }
-
-                // 2025/11/19
-                if (Program.MainForm.CallNumberUseEmptyNumber == true
-                    && string.IsNullOrEmpty(first_blank_number) == false)
-                {
-                    strNumber = first_blank_number;
-                    is_empty_number = true;
-                    goto PROTECT_END;   // 保护但不要增量
-                }
-
-                if (String.IsNullOrEmpty(strOtherMaxNumber) == false)
-                {
-                    nRet = StringUtil.IncreaseLeadNumber(strOtherMaxNumber,
-                        1,
-                        out strNumber,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "为数字 '" + strOtherMaxNumber + "' 增量时发生错误: " + strError;
-                        goto ERROR1;
-                    }
-
-                    goto PROTECT_END;
-                }
-
-                // 2009/2/25
-                Debug.Assert(nRet == 0, "");
-
-                string strDefaultValue = "";    // "1"
-
-                {
-
-                REDO_INPUT:
-                    // 此类从来没有过记录，当前是第一条
-                    strNumber = InputDlg.GetInput(
-                        this,
-                        null,
-                        "请输入类 '" + strClass + "' 的当前种次号最大号:",
-                        strDefaultValue,
-                        Program.MainForm.DefaultFont);
-                    if (strNumber == null)
-                        return 0;	// 放弃整个操作
-                    if (String.IsNullOrEmpty(strNumber) == true)
-                        goto REDO_INPUT;
-
-                }
-                // strNumber = "1";    // testing
-
-                goto PROTECT_END;
-            }
-
-            // 每次都利用书目统计最大号来检验、校正尾号
-            // 注: 这种方式既然用到了尾号库，那么就无法使用空号了
-            if (style == ZhongcihaoStyle.BiblioAndSeed
-                || style == ZhongcihaoStyle.SeedAndBiblio)
-            {
-                // TODO: 如果当前记录在内存中存在，就应优先用它。这样可以避免无谓的增量
-                if (style == ZhongcihaoStyle.BiblioAndSeed)
-                {
-                    /*
-                    // TODO: 如何避免重复filllist
-                    nRet = FillList(true, out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    strNumber = GetMyselfOrSiblingQufenNumber(this.listView_number);
-                    if (String.IsNullOrEmpty(strNumber) == false)
-                    {
-                        return 1;
-                    }
-                     * */
                     // 获得若干号
                     nRet = GetMultiNumber(
                         "fast",
-                        out string strOtherMaxNumber,
-                        out string strMyselfNumber,
-                        out string strSiblingNumber,
-                        out _,
+                        out strOtherMaxNumber,
+                        out strMyselfNumber,
+                        out strSiblingNumber,
+                        out string first_blank_number,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -2695,69 +2704,137 @@ COLUMN_CALLNUMBER);
                         strNumber = strSiblingNumber;
                         return 1;   // 从相邻册得到的号码，不需要保护
                     }
-                }
 
-                string strTailNumber = this.TailNumber;
+                    // 2025/11/19
+                    if (Program.MainForm.CallNumberUseEmptyNumber == true
+                        && string.IsNullOrEmpty(first_blank_number) == false)
+                    {
+                        strNumber = first_blank_number;
+                        is_empty_number = true;
+                        goto PROTECT_END;   // 保护但不要增量
+                    }
 
-                // 如果本类尚未创建种次号条目
-                if (String.IsNullOrEmpty(strTailNumber) == true)
-                {
-                    // 毕竟初始值还是利用了统计结果
-                    string strTestNumber = "";
-                    // 得到当前书目中统计出来的最大号的加1以后的号
-                    // return:
-                    //      -1  error
-                    //      0   not found
-                    //      1   succeed
-                    nRet = GetMaxNumberPlusOne(out strTestNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    if (String.IsNullOrEmpty(strOtherMaxNumber) == false)
+                    {
+                        nRet = StringUtil.IncreaseLeadNumber(strOtherMaxNumber,
+                            1,
+                            out strNumber,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "为数字 '" + strOtherMaxNumber + "' 增量时发生错误: " + strError;
+                            goto ERROR1;
+                        }
 
-                    if (nRet == 0)
-                        strTestNumber = ""; // "1"
+                        goto PROTECT_END;
+                    }
+
+                    // 2009/2/25
+                    Debug.Assert(nRet == 0, "");
+
+                    string strDefaultValue = "";    // "1"
+
+                    {
 
                     REDO_INPUT:
-                    // 此类从来没有过记录，当前是第一条
-                    strNumber = InputDlg.GetInput(
-                        this,
-                        null,
-                        "请输入类 '" + strClass + "' 的当前种次号最大号:",
-                        strTestNumber,
-                        Program.MainForm.DefaultFont);
-                    if (strNumber == null)
-                        return 0;	// 放弃整个操作
-                    if (String.IsNullOrEmpty(strNumber) == true)
-                        goto REDO_INPUT;
+                        // 此类从来没有过记录，当前是第一条
+                        strNumber = InputDlg.GetInput(
+                            this,
+                            null,
+                            "请输入类 '" + strClass + "' 的当前种次号最大号:",
+                            strDefaultValue,
+                            Program.MainForm.DefaultFont);
+                        if (strNumber == null)
+                            return 0;   // 放弃整个操作
+                        if (String.IsNullOrEmpty(strNumber) == true)
+                            goto REDO_INPUT;
 
-                    // dlg.TailNumber = strNumber;	
-
-                    nRet = PushTailNumber(strNumber,
-                        out strNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    }
+                    // strNumber = "1";    // testing
 
                     goto PROTECT_END;
                 }
-                else // 本类已经有种次号条目
-                {
-                    // 检查和统计值的关系
-                    string strTestNumber = "";
-                    // 得到当前书目中统计出来的最大号的加1以后的号
-                    // return:
-                    //      -1  error
-                    //      0   not found
-                    //      1   succeed
-                    nRet = GetMaxNumberPlusOne(out strTestNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
 
-                    if (nRet == 0)
+                // 每次都利用书目统计最大号来检验、校正尾号
+                // 注: 这种方式既然用到了尾号库，那么就无法使用空号了
+                if (style == ZhongcihaoStyle.BiblioAndSeed
+                    || style == ZhongcihaoStyle.SeedAndBiblio)
+                {
+                    // TODO: 如果当前记录在内存中存在，就应优先用它。这样可以避免无谓的增量
+                    if (style == ZhongcihaoStyle.BiblioAndSeed)
                     {
-                        // 依靠现有尾号增量即可
-                        nRet = this.IncreaseTailNumber("1",
+                        /*
+                        // TODO: 如何避免重复filllist
+                        nRet = FillList(true, out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        strNumber = GetMyselfOrSiblingQufenNumber(this.listView_number);
+                        if (String.IsNullOrEmpty(strNumber) == false)
+                        {
+                            return 1;
+                        }
+                         * */
+                        // 获得若干号
+                        nRet = GetMultiNumber(
+                            "fast",
+                            out string strOtherMaxNumber,
+                            out string strMyselfNumber,
+                            out string strSiblingNumber,
+                            out _,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        if (String.IsNullOrEmpty(strMyselfNumber) == false)
+                        {
+                            strNumber = strMyselfNumber;
+                            return 1;   // 从自身得到的号码，不需要保护
+                        }
+
+                        if (String.IsNullOrEmpty(strSiblingNumber) == false)
+                        {
+                            strNumber = strSiblingNumber;
+                            return 1;   // 从相邻册得到的号码，不需要保护
+                        }
+                    }
+
+                    string strTailNumber = this.TailNumber;
+
+                    // 如果本类尚未创建种次号条目
+                    if (String.IsNullOrEmpty(strTailNumber) == true)
+                    {
+                        // 毕竟初始值还是利用了统计结果
+                        string strTestNumber = "";
+                        // 得到当前书目中统计出来的最大号的加1以后的号
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   succeed
+                        nRet = GetMaxNumberPlusOne(out strTestNumber,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        if (nRet == 0)
+                            strTestNumber = ""; // "1"
+
+                        REDO_INPUT:
+                        // 此类从来没有过记录，当前是第一条
+                        strNumber = InputDlg.GetInput(
+                            this,
+                            null,
+                            "请输入类 '" + strClass + "' 的当前种次号最大号:",
+                            strTestNumber,
+                            Program.MainForm.DefaultFont);
+                        if (strNumber == null)
+                            return 0;   // 放弃整个操作
+                        if (String.IsNullOrEmpty(strNumber) == true)
+                            goto REDO_INPUT;
+
+                        // dlg.TailNumber = strNumber;	
+
+                        nRet = PushTailNumber(strNumber,
                             out strNumber,
                             out strError);
                         if (nRet == -1)
@@ -2765,13 +2842,38 @@ COLUMN_CALLNUMBER);
 
                         goto PROTECT_END;
                     }
+                    else // 本类已经有种次号条目
+                    {
+                        // 检查和统计值的关系
+                        string strTestNumber = "";
+                        // 得到当前书目中统计出来的最大号的加1以后的号
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   succeed
+                        nRet = GetMaxNumberPlusOne(out strTestNumber,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
 
-                    // 用统计出来的号推动当前尾号，就起到了检验的作用
-                    nRet = PushTailNumber(strTestNumber,
-                        out strNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                        if (nRet == 0)
+                        {
+                            // 依靠现有尾号增量即可
+                            nRet = this.IncreaseTailNumber("1",
+                                out strNumber,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            goto PROTECT_END;
+                        }
+
+                        // 用统计出来的号推动当前尾号，就起到了检验的作用
+                        nRet = PushTailNumber(strTestNumber,
+                            out strNumber,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
 
 #if NO
                     strTestNumber = strNumber;
@@ -2784,140 +2886,154 @@ COLUMN_CALLNUMBER);
                         goto ERROR1;
 #endif
 
-                    // 如果到这里就返回，效果为保守型增量，即如果当前记录反复取号而不保存，则尾号不盲目增量。当然缺点也是很明显的 -- 有可能多个窗口取出重号来
-                    if (style == ZhongcihaoStyle.BiblioAndSeed)
-                        goto PROTECT_END;
+                        // 如果到这里就返回，效果为保守型增量，即如果当前记录反复取号而不保存，则尾号不盲目增量。当然缺点也是很明显的 -- 有可能多个窗口取出重号来
+                        if (style == ZhongcihaoStyle.BiblioAndSeed)
+                            goto PROTECT_END;
 
-                    if (strTailNumber != strNumber)  // 如果实际发生了推动，就要这个号，不必增量了
-                        goto PROTECT_END;
+                        if (strTailNumber != strNumber)  // 如果实际发生了推动，就要这个号，不必增量了
+                            goto PROTECT_END;
 
-                    // 依靠现有尾号增量
-                    nRet = this.IncreaseTailNumber("1",
-                        out strNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    goto PROTECT_END;
-                }
-
-                // return 1;
-            }
-
-            // 仅利用(种次号库)尾号
-            if (style == ZhongcihaoStyle.Seed)
-            {
-                string strTailNumber = "";
-
-                try
-                {
-                    strTailNumber = this.TailNumber;
-                }
-                catch (Exception ex)
-                {
-                    strError = ExceptionUtil.GetAutoText(ex);
-                    goto ERROR1;
-                }
-
-                // 如果本类尚未创建种次号条目
-                if (String.IsNullOrEmpty(strTailNumber) == true)
-                {
-                    // 毕竟初始值还是利用了统计结果
-                    string strTestNumber = "";
-                    // 得到当前书目中统计出来的最大号的加1以后的号
-                    // return:
-                    //      -1  error
-                    //      0   not found
-                    //      1   succeed
-                    nRet = GetMaxNumberPlusOne(out strTestNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    if (nRet == 0)
-                        strTestNumber = ""; // "1"
-
-                    REDO_INPUT:
-                    // 此类从来没有过记录，当前是第一条
-                    strNumber = InputDlg.GetInput(
-                        this,
-                        null,
-                        "请输入类 '" + strClass + "' 的当前种次号最大号:",
-                        strTestNumber,
-                        Program.MainForm.DefaultFont);
-                    if (strNumber == null)
-                        return 0;	// 放弃整个操作
-                    if (String.IsNullOrEmpty(strNumber) == true)
-                        goto REDO_INPUT;
-
-                    // dlg.TailNumber = strNumber;	
-
-                    nRet = PushTailNumber(strNumber,
-                        out strNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    return 1;
-                }
-                else // 本类已经有种次号项目，增量即可
-                {
-                    nRet = this.IncreaseTailNumber("1",
-                        out strNumber,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                }
-
-                return 1;
-            }
-            return 1;
-        PROTECT_END:
-            {
-                // 旧版本没有防范重号功能
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
-                    return 1;
-
-                Debug.Assert(this.MemoNumbers != null, "");
-
-                int start = this.MemoNumbers.Count;
-                string strTestNumber = strNumber;
-                nRet = ProtectTailNumber(
-                    "protect",
-                    strTestNumber,
-                    is_empty_number,
-                    this.MemoNumbers,
-                    out strNumber,
-                    out strError);
-                if (nRet == -1)
-                {
-                    if (is_empty_number
-                        && strError == "used")
-                    {
-                        // 空号已被别的前端占用。需要跳过这个空号再找下一个空号或者(最大号+1)
-
-                        // 在 listView 中表示这个空号被占用
-                        _usedEmptyNumbers.Add(strTestNumber == "0" ? "0" : strTestNumber.TrimStart('0'));
-                        redo_count++;
-                        if (redo_count > 10)
-                        {
-                            strError = "遇到号码被占用并重试次数太多，放弃取号";
+                        // 依靠现有尾号增量
+                        nRet = this.IncreaseTailNumber("1",
+                            out strNumber,
+                            out strError);
+                        if (nRet == -1)
                             goto ERROR1;
-                        }
-                        goto REDO;
+
+                        goto PROTECT_END;
                     }
-                    goto ERROR1;
+
+                    // return 1;
                 }
 
-                // 返回本次保护过的号码
-                for (int i = start; i < this.MemoNumbers.Count; i++)
+                // 仅利用(种次号库)尾号
+                if (style == ZhongcihaoStyle.Seed)
                 {
-                    protectedNumbers.Add(this.MemoNumbers[i]);
+                    string strTailNumber = "";
+
+                    try
+                    {
+                        strTailNumber = this.TailNumber;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ExceptionUtil.GetAutoText(ex);
+                        goto ERROR1;
+                    }
+
+                    // 如果本类尚未创建种次号条目
+                    if (String.IsNullOrEmpty(strTailNumber) == true)
+                    {
+                        // 毕竟初始值还是利用了统计结果
+                        string strTestNumber = "";
+                        // 得到当前书目中统计出来的最大号的加1以后的号
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   succeed
+                        nRet = GetMaxNumberPlusOne(out strTestNumber,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        if (nRet == 0)
+                            strTestNumber = ""; // "1"
+
+                        REDO_INPUT:
+                        // 此类从来没有过记录，当前是第一条
+                        strNumber = InputDlg.GetInput(
+                            this,
+                            null,
+                            "请输入类 '" + strClass + "' 的当前种次号最大号:",
+                            strTestNumber,
+                            Program.MainForm.DefaultFont);
+                        if (strNumber == null)
+                            return 0;   // 放弃整个操作
+                        if (String.IsNullOrEmpty(strNumber) == true)
+                            goto REDO_INPUT;
+
+                        // dlg.TailNumber = strNumber;	
+
+                        nRet = PushTailNumber(strNumber,
+                            out strNumber,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        return 1;
+                    }
+                    else // 本类已经有种次号项目，增量即可
+                    {
+                        nRet = this.IncreaseTailNumber("1",
+                            out strNumber,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+
+                    return 1;
                 }
+                return 1;
+            PROTECT_END:
+                {
+                    // 旧版本没有防范重号功能
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
+                        return 1;
+
+                    Debug.Assert(this.MemoNumbers != null, "");
+
+                    // int start = this.MemoNumbers.Count;
+                    string strTestNumber = strNumber;
+                    nRet = ProtectTailNumber(
+                        // is_empty_number ? "memo" : "protect",
+
+                        // 3.197 开始 memo unmemo protect 动作都有了返回值 0
+                        StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.197") >= 0,
+                        strTestNumber,
+                        is_empty_number,
+                        protectedNumbers,   // this.MemoNumbers,
+                        out strNumber,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (is_empty_number
+                            && strError == "!used")
+                        {
+                            // 空号已被别的前端占用。需要跳过这个空号再找下一个空号或者(最大号+1)
+
+                            //if (this.MemoNumbers != null)
+                            //    protectedNumbers.AddRange(this.MemoNumbers);
+
+                            // 在 listView 中表示这个空号被占用
+                            _usedEmptyNumbers.Add(strTestNumber == "0" ? "0" : strTestNumber.TrimStart('0'));
+                            redo_count++;
+                            if (redo_count > 10)
+                            {
+                                strError = "遇到号码被占用并重试次数太多，放弃取号";
+                                goto ERROR1;
+                            }
+                            // TODO: 中途遇到被别人占用的号码，要在最后成功时汇报这些情况
+                            goto REDO;
+                        }
+                        goto ERROR1;
+                    }
+
+                    /*
+                    // 返回本次保护过的号码
+                    for (int i = start; i < this.MemoNumbers.Count; i++)
+                    {
+                        protectedNumbers.Add(this.MemoNumbers[i]);
+                    }
+                    */
+                }
+                return 1;
+            ERROR1:
+                return -1;
             }
-            return 1;
-        ERROR1:
-            return -1;
+            finally
+            {
+                MainForm.OutputText("end CallNumberForm.GetZhongcihao()");
+            }
         }
 
         List<string> _usedEmptyNumbers = new List<string>();

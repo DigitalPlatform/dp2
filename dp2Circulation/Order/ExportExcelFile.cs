@@ -96,7 +96,7 @@ namespace dp2Circulation.Order
                         // 最大字符数
                         ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
                         nStartColIndex + i,
-                        ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
+                        cell.GetValue<string>());
                     }
 
                     //if (col.Type == "order_copyNumber")
@@ -237,7 +237,7 @@ out copyNumberCell);
                     // 最大字符数
                     ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
                     nOldStartColIndex + j,
-                    ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
+                    cell.GetValue<string>());
                 }
 
                 // 订购记录状态不为空的行底色为灰色

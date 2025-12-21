@@ -33,8 +33,8 @@ using System.Xml;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.196.*")]
-[assembly: AssemblyFileVersion("3.196.0.0")]
+[assembly: AssemblyVersion("3.197.*")]
+[assembly: AssemblyFileVersion("3.197.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -513,5 +513,7 @@ public bool ItemCanReturn(Account account,
 //                          最新版对盘点记录增加了三个元素 newLocation newShelfNo newCurrentLocation。不过，只有当 strStyle 参数中具备 location:xxx,shelfNo:xxx,currentLocation=xxx 子参数时才会写入这几个相关的 XML 元素。
 //      3.196 (2025/11/17)  GetCallNumberSearchResult() API 返回的 CallNumberSearchResult 结构中增加了 State 成员和 Reserve 成员。
 //                          GetCallNumberSearchResult() API strBrowseInfoStyle 中增加了 "format:xxx" 子参数用法，由请求者指定需要返回哪些列。这种用法时，列信息会返回在 CallNumberSearchResult::Reserve 成员中，为 XML 格式内容。
+//      3.197 (2025/12/5)   SetOneClassTailNumber() API 的 memo unmemo protect 动作改进了返回值。以前无论如何都返回 result.Value == 1，现在改为如果没有发生实质性效果则返回 0。
+
 
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到

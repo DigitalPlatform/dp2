@@ -984,7 +984,7 @@ MessageBoxDefaultButton.Button2);
                         string value = hitcount == 0 ? "" : hitcount.ToString();
                         if (value != null)
                         {
-                            ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                            ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, value.Length);
                         }
                         IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
                         cell.Style.Alignment.WrapText = true;
@@ -1001,7 +1001,7 @@ MessageBoxDefaultButton.Button2);
                         var value = cell0.Value?.ToString();
                         if (value != null)
                         {
-                            ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                            ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, value.Length);
                         }
                         IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
                         cell.Style.Alignment.WrapText = true;
@@ -1047,7 +1047,7 @@ MessageBoxDefaultButton.Button2);
                                         if (line.Length > max_length)
                                             max_length = line.Length;
                                     }
-                                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, max_length);
+                                    ClosedXmlUtil.SetMaxChars(column_max_chars, nColIndex - 1, max_length);
                                 }
                                 IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
                                 cell.Style.Alignment.WrapText = true;
