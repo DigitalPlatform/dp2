@@ -22,7 +22,7 @@ namespace dp2Circulation
         /// <summary>
         /// 窗口关闭前，停止通道前触发的事件
         /// </summary>
-        public event EventHandler BoforeStop = null;
+        public event EventHandler BeforeStop = null;
 #endif
 
         // 2015/8/14
@@ -444,9 +444,9 @@ namespace dp2Circulation
             if (this.stop != null)
             {
 #if NO
-                if (this.BoforeStop != null)
+                if (this.BeforeStop != null)
                 {
-                    this.BoforeStop(this, new EventArgs());
+                    this.BeforeStop(this, new EventArgs());
                 }
 #endif
                 stop.DoStop(this);

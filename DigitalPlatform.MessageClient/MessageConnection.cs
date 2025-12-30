@@ -214,7 +214,7 @@ namespace DigitalPlatform.MessageClient
             {
 #if NO
                 if (task.Exception is HttpRequestException)
-                    labelStatusText.Text = "Unable to connect to server: start server bofore connection client.";
+                    labelStatusText.Text = "Unable to connect to server: start server before connection client.";
 #endif
                 AddErrorLine(GetExceptionText(task.Exception));
                 return;

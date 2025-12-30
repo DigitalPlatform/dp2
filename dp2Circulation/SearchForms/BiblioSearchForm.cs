@@ -259,7 +259,14 @@ namespace dp2Circulation
                 this._dbType + "searchform",
                 "query_lines",
                 "^^^");
-            this.dp2QueryControl1.Restore(strSaveString);
+            try
+            {
+                this.dp2QueryControl1.Restore(strSaveString);
+            }
+            catch(ObjectDisposedException)
+            {
+
+            }
 
             comboBox_matchStyle_TextChanged(null, null);
 

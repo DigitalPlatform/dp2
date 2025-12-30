@@ -12,6 +12,7 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using System.Runtime.Remoting.Metadata;
 
 namespace DigitalPlatform.Marc
 {
@@ -1763,6 +1764,281 @@ out strError);
     out strError);
         }
 
+        // 改进后版本。依原有字段顺序
+        public static int Xml2Marc(XmlDocument dom,
+Xml2MarcStyle style,
+string strMarcSyntax,
+out string strOutMarcSyntax,
+out string strMARC,
+out string strFragmentXml,
+out string strError)
+        {
+            strMARC = "";
+            strError = "";
+            strOutMarcSyntax = "";
+            strFragmentXml = "";
+
+            if (dom.DocumentElement == null)
+                return 0;
+
+            bool bWarning = (style & Xml2MarcStyle.Warning) != 0;
+            bool bOutputFragmentXml = (style & Xml2MarcStyle.OutputFragmentXml) != 0;
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
+            nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
+
+            // 取 MARC 根元素兼探测 MARC 格式类型
+            XmlNode root = null;
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+            {
+                // '//'保证了无论MARC的根在何处，都可以正常取出。
+                root = dom.DocumentElement.SelectSingleNode("//unimarc:record", nsmgr);
+                if (root == null)
+                {
+                    root = dom.DocumentElement.SelectSingleNode("//usmarc:record", nsmgr);
+                    if (root == null)
+                    {
+                        // TODO: 是否要去除所有 MARC 相关元素
+                        if (bOutputFragmentXml)
+                            strFragmentXml = dom.DocumentElement.OuterXml;
+                        return 0;
+                    }
+
+                    strMarcSyntax = "usmarc";
+                }
+                else
+                {
+                    strMarcSyntax = "unimarc";
+                }
+            }
+            else
+            {
+                // 2012/1/8
+                if (strMarcSyntax != null)
+                    strMarcSyntax = strMarcSyntax.ToLower();
+
+                if (strMarcSyntax != "unimarc"
+                    && strMarcSyntax != "usmarc")
+                {
+                    strError = "无法识别 MARC格式 '" + strMarcSyntax + "' 。目前仅支持 unimarc 和 usmarc 两种格式";
+                    return -1;
+                }
+
+                root = dom.DocumentElement.SelectSingleNode("//" + strMarcSyntax + ":record", nsmgr);
+                if (root == null)
+                {
+                    // TODO: 是否要去除所有 MARC 相关元素
+                    if (bOutputFragmentXml)
+                        strFragmentXml = dom.DocumentElement.OuterXml;
+                    return 0;
+                }
+            }
+
+            StringBuilder strMarc = new StringBuilder(4096);
+
+            strOutMarcSyntax = strMarcSyntax;
+
+            XmlNode leader = root.SelectSingleNode(strMarcSyntax + ":leader", nsmgr);
+            if (leader == null)
+            {
+                strError += "缺<" + strMarcSyntax + ":leader>元素\r\n";
+                if (bWarning == false)
+                    return -1;
+                else
+                {
+                    // strMarc.Append("012345678901234567890123");
+                    strMarc.Append(MarcDiff.GetNullHeader());   // 2023/3/24
+                }
+            }
+            else // 正常情况
+            {
+                // string strLeader = DomUtil.GetNodeText(leader);
+                // GetNodeText()会自动Trim()，会导致头标区内容末尾丢失字符
+                string strLeader = leader.InnerText;
+                if (strLeader.Length != 24)
+                {
+                    strError += "<" + strMarcSyntax + ":leader>元素内容应为24字符\r\n";
+                    if (bWarning == false)
+                        return -1;
+                    else
+                    {
+                        if (strLeader.Length < 24)
+                            strLeader = strLeader.PadRight(24, ' ');
+                        else
+                            strLeader = strLeader.Substring(0, 24);
+                    }
+                }
+
+                strMarc.Append(strLeader);
+
+                // 从 DOM 中删除 leader 元素
+                if (bOutputFragmentXml)
+                    leader.ParentNode.RemoveChild(leader);
+            }
+
+            // int i = 0;
+
+            List<string> errors = new List<string>();
+
+            try
+            {
+                // 控制字段和普通字段
+                XmlNodeList fields = root.SelectNodes(strMarcSyntax + ":controlfield | " + strMarcSyntax + ":datafield", nsmgr);
+                foreach (XmlElement field in fields)
+                {
+                    int ret = 0;
+                    if (field.LocalName == "controlfield")
+                        ret = ProcessControlField(field);
+                    else
+                        ret = ProcessDataField(field);
+                    if (ret == -1)
+                        return -1;
+                }
+
+
+                int ProcessControlField(XmlElement field)
+                {
+                    // XmlNode field = controlfields[i];
+                    string strTag = DomUtil.GetAttr(field, "tag");
+                    if (strTag.Length != 3)
+                    {
+                        errors.Add("<" + strMarcSyntax + ":controlfield>元素的tag属性值'" + strTag + "'应当为3字符");
+                        if (bWarning == false)
+                            return -1;
+                        else
+                        {
+                            if (strTag.Length < 3)
+                                strTag = strTag.PadRight(3, '*');
+                            else
+                                strTag = strTag.Substring(0, 3);
+                        }
+                    }
+
+                    string strContent = DomUtil.GetNodeText(field);
+
+                    strMarc.Append(strTag + strContent + new string(MarcUtil.FLDEND, 1));
+
+                    // 从 DOM 中删除
+                    if (bOutputFragmentXml)
+                        field.ParentNode.RemoveChild(field);
+
+                    return 0;
+                }
+
+                // 可变长字段
+                // XmlNodeList datafields = root.SelectNodes(strMarcSyntax + ":datafield", nsmgr);
+                // for (i = 0; i < datafields.Count; i++)
+                int ProcessDataField(XmlElement field)
+                {
+                    // XmlNode field = datafields[i];
+                    string strTag = DomUtil.GetAttr(field, "tag");
+                    if (strTag.Length != 3)
+                    {
+                        errors.Add("<" + strMarcSyntax + ":datafield>元素的tag属性值'" + strTag + "'应当为3字符");
+                        if (bWarning == false)
+                            return -1;
+                        else
+                        {
+                            if (strTag.Length < 3)
+                                strTag = strTag.PadRight(3, '*');
+                            else
+                                strTag = strTag.Substring(0, 3);
+                        }
+                    }
+
+                    string strInd1 = DomUtil.GetAttr(field, "ind1");
+                    if (strInd1.Length != 1)
+                    {
+                        errors.Add("<" + strMarcSyntax + ":datalfield>元素的ind1属性值'" + strInd1 + "'应当为1字符");
+                        if (bWarning == false)
+                            return -1;
+                        else
+                        {
+                            if (strInd1.Length < 1)
+                                strInd1 = '*'.ToString();
+                            else
+                                strInd1 = strInd1[0].ToString();
+                        }
+                    }
+
+                    string strInd2 = DomUtil.GetAttr(field, "ind2");
+                    if (strInd2.Length != 1)
+                    {
+                        errors.Add("<" + strMarcSyntax + ":datalfield>元素的indi2属性值'" + strInd2 + "'应当为1字符");
+                        if (bWarning == false)
+                            return -1;
+                        else
+                        {
+                            if (strInd2.Length < 1)
+                                strInd2 = '*'.ToString();
+                            else
+                                strInd2 = strInd2[0].ToString();
+                        }
+                    }
+
+                    // string strContent = DomUtil.GetNodeText(field);
+                    XmlNodeList subfields = field.SelectNodes(strMarcSyntax + ":subfield", nsmgr);
+                    StringBuilder strContent = new StringBuilder(4096);
+                    for (int j = 0; j < subfields.Count; j++)
+                    {
+                        XmlNode subfield = subfields[j];
+
+                        XmlAttribute attr = subfield.Attributes["code"];
+                        if (attr == null)
+                        {
+                            // 前导纯文本
+                            strContent.Append(DomUtil.GetNodeText(subfield));
+                            continue;   //  goto CONTINUE; BUG!!!
+                        }
+
+                        string strCode = attr.Value;
+                        if (strCode.Length != 1)
+                        {
+                            errors.Add( "<" + strMarcSyntax + ":subfield>元素的 code 属性值 '" + strCode + "' 应当为1字符");
+                            if (bWarning == false)
+                                return -1;
+                            else
+                            {
+                                if (strCode.Length < 1)
+                                    strCode = "";   // '*'.ToString();
+                                else
+                                    strCode = strCode[0].ToString();
+                            }
+                        }
+
+                        string strSubfieldContent = DomUtil.GetNodeText(subfield);
+                        strContent.Append(new string(MarcUtil.SUBFLD, 1) + strCode + strSubfieldContent);
+                    }
+
+                    strMarc.Append(strTag + strInd1 + strInd2 + strContent + new string(MarcUtil.FLDEND, 1));
+
+                    /*
+                CONTINUE:
+                    // 从 DOM 中删除
+                    if (bOutputFragmentXml)
+                        field.ParentNode.RemoveChild(field);
+                    */
+
+                    return 0;
+                }
+
+                strMARC = strMarc.ToString();
+                if (bOutputFragmentXml)
+                    strFragmentXml = dom.DocumentElement.OuterXml;
+
+                return 0;
+            }
+            finally
+            {
+                if (errors.Count > 0)
+                    strError += StringUtil.MakePathList(errors, "\r\n");
+            }
+        }
+
+
+#if OLD_VERSION
+        // TODO: 目前版本变换为 MARC 时，会把 005 等 Control Field 写到普通字段的前面。需要改造为不改变原有顺序
         public static int Xml2Marc(XmlDocument dom,
     Xml2MarcStyle style,
     string strMarcSyntax,
@@ -2025,7 +2301,7 @@ out strError);
 
             return 0;
         }
-
+#endif
 
         // https://www.loc.gov/standards/iso25577/
         // 将marcxchange格式转化为机内使用的marcxml格式

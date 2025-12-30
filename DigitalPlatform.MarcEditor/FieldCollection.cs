@@ -284,12 +284,19 @@ namespace DigitalPlatform.Marc
         }
 
         // 获得当前输入焦点所在的字段
+        // TODO: 在最后一个字段之后如何表达?
         public Field GetFocusedField()
         {
+            var index = _domRecord.GetControl().CaretFieldIndex;
+            if (index >= _domRecord.FieldCount)
+                return null;
+            return this[index];
+            /*
             var field = _domRecord.LocateField(_domRecord.CaretOffset);
             if (field == null)
                 return null;
             return new Field(this, field);
+            */
         }
 
         //--------------------------追加字段-------------------
@@ -539,10 +546,18 @@ namespace DigitalPlatform.Marc
                 strIndicator,
                 strValue);
 
-            this.InsertAfter(nIndex,
-                field);
-
-            return this[nIndex+1];
+            // 2025/12/23 保护
+            if (nIndex >= this.Count)
+            {
+                this.Insert(nIndex, field);
+                return this[nIndex];
+            }
+            else
+            {
+                this.InsertAfter(nIndex,
+                    field);
+                return this[nIndex + 1];
+            }
         }
 
         // 后插字段

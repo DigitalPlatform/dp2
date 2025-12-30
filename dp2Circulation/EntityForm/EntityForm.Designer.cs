@@ -523,7 +523,7 @@
             this.m_marcEditor.AutoScroll = true;
             this.m_marcEditor.AutoScrollMinSize = new System.Drawing.Size(2082, 84);
             this.m_marcEditor.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.m_marcEditor.CaptionFont = new System.Drawing.Font("楷体", 9F);
+            this.m_marcEditor.CaptionFont = new System.Drawing.Font("宋体", 9F);
             this.m_marcEditor.ClientBoundsWidth = 0;
             this.m_marcEditor.ContentBackColor = System.Drawing.SystemColors.Window;
             this.m_marcEditor.ContentTextColor = System.Drawing.SystemColors.WindowText;
@@ -551,7 +551,6 @@
             this.m_marcEditor.SelectedTextColor = System.Drawing.SystemColors.HighlightText;
             this.m_marcEditor.Size = new System.Drawing.Size(2086, 341);
             this.m_marcEditor.TabIndex = 0;
-            this.m_marcEditor.UiState = "{\"FieldNameCaptionWidth\":100}";
             this.m_marcEditor.VertGridColor = System.Drawing.Color.LightGray;
             this.m_marcEditor.GetTemplateDef += new DigitalPlatform.Marc.GetTemplateDefEventHandler(this.MarcEditor_GetTemplateDef);
             this.m_marcEditor.SelectedFieldChanged += new System.EventHandler(this.MarcEditor_SelectedFieldChanged);

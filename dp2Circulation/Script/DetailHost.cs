@@ -681,11 +681,13 @@ namespace dp2Circulation
                 }
             }
 
-            this.DetailForm.MarcEditor.Enabled = false;
+            //this.DetailForm.MarcEditor.Enabled = false;
 
             Hashtable old_selected = (bUseCache == true) ? this.DetailForm.GetSelectedPinyin() : new Hashtable();
             Hashtable new_selected = new Hashtable();
 
+            // 2025/12/25
+            DetailForm?.MarcEditor?.BeginUpdate();
             try
             {
                 // PinyinStyle style = PinyinStyle.None;	// 在这里修改拼音大小写风格
@@ -915,7 +917,8 @@ namespace dp2Circulation
             }
             finally
             {
-                this.DetailForm.MarcEditor.Enabled = true;
+                // this.DetailForm.MarcEditor.Enabled = true;
+                DetailForm?.MarcEditor?.EndUpdate();
                 this.DetailForm.MarcEditor.Focus();
             }
             return 0;
@@ -959,8 +962,8 @@ namespace dp2Circulation
                 }
             }
 
-            this.DetailForm.MarcEditor.Enabled = false;
-
+            //this.DetailForm.MarcEditor.Enabled = false;
+            this.DetailForm?.MarcEditor?.BeginUpdate();
             try
             {
                 for (int i = 0; i < DetailForm.MarcEditor.Record.Fields.Count; i++)
@@ -1104,7 +1107,8 @@ namespace dp2Circulation
             }
             finally
             {
-                this.DetailForm.MarcEditor.Enabled = true;
+                // this.DetailForm.MarcEditor.Enabled = true;
+                this.DetailForm?.MarcEditor?.EndUpdate();
                 this.DetailForm.MarcEditor.Focus();
             }
             return;

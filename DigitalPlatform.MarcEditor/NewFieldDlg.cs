@@ -207,6 +207,12 @@ namespace DigitalPlatform.Marc
                 return true;
             }
 
+            if (keyData == (Keys.Enter | Keys.Control))
+            {
+                button_OK_Click(null, null);
+                return true;
+            }
+
             if (keyData == Keys.Insert)
             {
                 button_OK_Click(null, null);

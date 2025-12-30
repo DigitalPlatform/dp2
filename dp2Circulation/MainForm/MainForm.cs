@@ -4309,40 +4309,47 @@ string style = null)
         /// <param name="comboBox_from">ComboBox 对象</param>
         public void FillBiblioFromList(ComboBox comboBox_from)
         {
-            bool include_style = comboBox_from is TabComboBox;
-
-            // 保存当前的 Text 值
-            string strOldText = comboBox_from.Text;
-
-            comboBox_from.Items.Clear();
-
-            comboBox_from.Items.Add("<全部>");
-
-            if (this.BiblioDbFromInfos == null)
-                return;
-
-            Debug.Assert(this.BiblioDbFromInfos != null);
-
-            string strFirstItem = "";
-            // 装入检索途径
-            for (int i = 0; i < this.BiblioDbFromInfos.Length; i++)
+            try
             {
-                BiblioDbFromInfo info = this.BiblioDbFromInfos[i];
+                bool include_style = comboBox_from is TabComboBox;
 
-                if (include_style)
-                    comboBox_from.Items.Add(info.Caption + "\t" + info.Style);
-                else
-                    comboBox_from.Items.Add(info.Caption/* + "(" + infos[i].Style+ ")"*/);
+                // 保存当前的 Text 值
+                string strOldText = comboBox_from.Text;
 
-                if (i == 0)
-                    strFirstItem = info.Caption;
+                comboBox_from.Items.Clear();
+
+                comboBox_from.Items.Add("<全部>");
+
+                if (this.BiblioDbFromInfos == null)
+                    return;
+
+                Debug.Assert(this.BiblioDbFromInfos != null);
+
+                string strFirstItem = "";
+                // 装入检索途径
+                for (int i = 0; i < this.BiblioDbFromInfos.Length; i++)
+                {
+                    BiblioDbFromInfo info = this.BiblioDbFromInfos[i];
+
+                    if (include_style)
+                        comboBox_from.Items.Add(info.Caption + "\t" + info.Style);
+                    else
+                        comboBox_from.Items.Add(info.Caption/* + "(" + infos[i].Style+ ")"*/);
+
+                    if (i == 0)
+                        strFirstItem = info.Caption;
+                }
+
+                comboBox_from.Text = strFirstItem;
+
+                // 2014/5/20
+                if (string.IsNullOrEmpty(strOldText) == false)
+                    comboBox_from.Text = strOldText;
             }
+            catch(ObjectDisposedException)
+            {
 
-            comboBox_from.Text = strFirstItem;
-
-            // 2014/5/20
-            if (string.IsNullOrEmpty(strOldText) == false)
-                comboBox_from.Text = strOldText;
+            }
         }
 
 #if NO

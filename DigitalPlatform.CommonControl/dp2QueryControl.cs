@@ -478,6 +478,10 @@ namespace DigitalPlatform.CommonControl
                 this.Lines.Add(line);
                 line.RefreshState();
             }
+            catch(ObjectDisposedException)
+            {
+
+            }
             finally
             {
                 this.EnableUpdate();

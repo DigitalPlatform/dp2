@@ -21,6 +21,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
 using LibraryStudio.Forms;
+using System.Runtime.Remoting.Messaging;
 
 namespace DigitalPlatform.Marc
 {
@@ -87,11 +88,11 @@ namespace DigitalPlatform.Marc
         /// </summary>
         public int RightBlank = 1;
 
+        /*
         // 文档坐标
-        /*public*/
         int m_nDocumentOrgX = 0;
-        /*public*/
         int m_nDocumentOrgY = 0;
+        */
 
 #if BORDER
         // 控件边框
@@ -107,6 +108,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 竖线条的颜色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color VertGridColor
         {
             get
@@ -134,6 +138,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 横线条的颜色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color HorzGridColor
         {
             get
@@ -153,6 +160,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 字段名提示的文字色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color NameCaptionTextColor
         {
             get
@@ -169,6 +179,9 @@ namespace DigitalPlatform.Marc
         // 2024/7/5
         internal Color defaultSelectedBackColor = SystemColors.Highlight;   // Color.FromArgb(90, 90, 255);
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color SelectedBackColor
         {
             get
@@ -185,6 +198,9 @@ namespace DigitalPlatform.Marc
         // 2024/7/5
         internal Color defaultSelectedTextColor = SystemColors.HighlightText;   // Color.FromArgb(255, 255, 255); 
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color SelectedTextColor
         {
             get
@@ -204,6 +220,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 字段名提示的背景色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color NameCaptionBackColor
         {
             get
@@ -223,6 +242,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 字段名的文字色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color NameTextColor
         {
             get
@@ -242,6 +264,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 字段名的背景色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color NameBackColor
         {
             get
@@ -261,6 +286,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 指示符的文字色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color IndicatorTextColor
         {
             get
@@ -280,6 +308,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 指示符的背景色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color IndicatorBackColor
         {
             get
@@ -299,6 +330,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 不能编辑的指示符背景颜色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color IndicatorBackColorDisabled
         {
             get
@@ -322,6 +356,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 内容的文字色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color ContentTextColor
         {
             get
@@ -341,6 +378,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 内容的背景色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Color ContentBackColor
         {
             get
@@ -365,6 +405,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 当前输入法状态
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ImeMode CurrentImeMode
         {
             get
@@ -390,6 +433,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 当前选中的字段下标数组
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ReadOnlyCollection<int> SelectedFieldIndices
         {
             get
@@ -443,6 +489,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 当前界面语言代码
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public string Lang
         {
             get
@@ -473,6 +522,9 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 存储了 MARC 结构定义的 XmlDocument 对象
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public XmlDocument MarcDefDom
         {
             get
@@ -512,6 +564,7 @@ namespace DigitalPlatform.Marc
             }
             set
             {
+                this._labelCache.Clear();
                 this.m_strMarcDomError = "";
                 this.m_domMarcDef = value;
             }
@@ -596,6 +649,9 @@ namespace DigitalPlatform.Marc
         /// </summary>
         public MarcEditor()
         {
+            this.PadWhileEditing = true;
+            this.DeleteKeyStyle = DeleteKeyStyle.DeleteKeyAsDeleteField;
+
             this.record = new Record(this);
             // this.DoubleBuffered = true;
 
@@ -608,7 +664,7 @@ namespace DigitalPlatform.Marc
             {
                 if (field.IsHeader)
                     return $"头标区";
-                return GetLabel(field.FieldName);
+                return GetCachedLabel(field.FieldName);
             };
             int caret_field_index = -1;
             this.CaretMoved += (sender, e) =>
@@ -1058,10 +1114,13 @@ GraphicsUnit.Point);
                 if (this.DesignMode)
                     return 100;
 
+                return this.CaptionPixelWidth;
+                /*
                 if (this.record == null)
                     return 100;
 
                 return this.record.NameCaptionPureWidth;
+                */
             }
             set
             {
@@ -1071,6 +1130,10 @@ GraphicsUnit.Point);
                 if (this.record == null)
                     return;
 
+                if (value < 0)
+                    value = 0;
+                this.CaptionPixelWidth = value;
+#if REMOVED
                 this.record.NameCaptionPureWidth = value;
 
                 /*
@@ -1085,6 +1148,7 @@ GraphicsUnit.Point);
                 // this.record.CalculateFieldsHeight(0, -1, true);
 
                 // this.DocumentOrgX = this.DocumentOrgX;
+#endif
             }
         }
 
@@ -1104,7 +1168,8 @@ GraphicsUnit.Point);
         // 繁体到简体
         void menuItem_t2s(object sender, EventArgs e)
         {
-            T2S();
+            if (T2S() == false)
+                Console.Beep();
         }
 
         public bool T2S()
@@ -1119,7 +1184,8 @@ GraphicsUnit.Point);
 
         void menuItem_s2t(object sender, EventArgs e)
         {
-            S2T();
+            if (S2T() == false)
+                Console.Beep();
         }
 
         public bool S2T()
@@ -1281,6 +1347,7 @@ GraphicsUnit.Point);
             MessageBox.Show(this, strError);
         }
 
+#if REMOVED
         internal void menuItem_sortFields(object sender, EventArgs e)
         {
             // TODO: 将所有字段变为字符串，然后对字符串排序，最后重新创建内容
@@ -1303,6 +1370,7 @@ GraphicsUnit.Point);
             this.Select(0, 0, 0);
             // this.FireTextChanged();
         }
+#endif
 
         void Menu_r2l(object sender, EventArgs e)
         {
@@ -1350,10 +1418,14 @@ GraphicsUnit.Point);
 
         #region 公共的属性 函数
 
-        // 当前获得焦点的字段
+        // 为兼容以前脚本代码保留
+        // 当前具有输入焦点的字段
         /// <summary>
         /// 当前具有输入焦点的字段对象
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public Field FocusedField
         {
             get
@@ -1390,6 +1462,9 @@ GraphicsUnit.Point);
         /// <summary>
         /// 当前具有输入焦点字段(在全部字段集合中的)下标
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public int FocusedFieldIndex
         {
             get
@@ -1397,7 +1472,12 @@ GraphicsUnit.Point);
                 if (this.DesignMode)
                     return 0;
 
-                return FocusedField?.Index ?? -1;
+                // return FocusedField?.Index ?? -1;
+                var index = this.CaretFieldIndex;
+                // TODO: 可否直接表达 CaretFieldIndex 的在最后一个字段以后 index?
+                if (index >= this.GetDomRecord().FieldCount)
+                    return -1;
+                return index;
             }
             set
             {
@@ -1950,6 +2030,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         /// <summary>
         /// 当前文档横向编移量
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public int DocumentOrgX
         {
             get
@@ -2017,6 +2100,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         /// <summary>
         /// 文档纵向偏移量
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public int DocumentOrgY
         {
             get
@@ -2141,6 +2227,25 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             this.OnTextChanged(e);
         }
 #endif
+        Hashtable _labelCache = new Hashtable();
+
+        string GetCachedLabel(string field_name)
+        {
+            if ((field_name?.Length ?? 0) != 3)
+                return "";
+            var value = _labelCache[field_name] as string;
+            if (value == null)
+            {
+                value = GetLabel(field_name);
+                if (value == null)
+                    value = "";
+                if (_labelCache.Count > 2000)
+                    _labelCache.Clear();
+                _labelCache[field_name] = value;
+            }
+
+            return value;
+        }
 
         // 从配置信息中得到一个字段的指定语言版本的标签名称
         // parameters:
@@ -3048,9 +3153,11 @@ SYS	011528318
         private void InsertBeforeFieldNoDlg(object sender,
             System.EventArgs e)
         {
-            Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'前插'时，SelectedFieldIndices数量必须为1");
+            // Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'前插'时，SelectedFieldIndices数量必须为1");
 
-            if (this.FocusedField.IsHeader)
+            var index = this.CaretFieldIndex;
+
+            if (index == 0/*this.FocusedField?.IsHeader ?? false*/)
             {
                 MessageBox.Show(this, "在头标区前不能插入字段。");
                 return;
@@ -3062,7 +3169,7 @@ SYS	011528318
                 strDefaultValue = new string((char)31, 1) + "a";
 
 
-            this.InsertField(this.FocusedFieldIndex,
+            this.InsertField(index, // this.FocusedFieldIndex,
                 this.DefaultFieldName,
                 "  ", //" " strIndicator
                 strDefaultValue);
@@ -3071,7 +3178,9 @@ SYS	011528318
         // 给当前字段的后面新增一个字段
         internal void InsertAfterFieldWithoutDlg()
         {
-            Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'后插'时，SelectedFieldIndices数量必须为1");
+            // Debug.Assert(this.SelectedFieldIndices.Count == 1, "在'后插'时，SelectedFieldIndices数量必须为1");
+
+            var index = this.CaretFieldIndex;
 
             bool bControlField = Record.IsControlFieldName(this.DefaultFieldName);
             string strDefaultValue = "";
@@ -3079,10 +3188,14 @@ SYS	011528318
                 strDefaultValue = new string((char)31, 1) + "a";
 
             // 调InsertAfterField，把界面也管了
-            this.InsertFieldAfter(this.FocusedFieldIndex,
+            this.InsertFieldAfter(index,
                 this.DefaultFieldName,
                 "  ",
                 strDefaultValue);
+
+            // 将 caret 定位刚插入的内容的最后一个字符以右。注意，要在字段结束符以左。
+            var caret_offs = this.BlockEndOffset - 1;
+            this.Select(caret_offs, caret_offs, caret_offs);
             this.EnsureVisible();
         }
 
@@ -3096,6 +3209,7 @@ SYS	011528318
         // 插入字段(有对话框提示)
         private void InsertField(object sender, EventArgs e)
         {
+#if OLD
             if (this.SelectedFieldIndices.Count > 1)
             {
                 MessageBox.Show(this, "多选字段的状态下不能插入新字段");
@@ -3104,6 +3218,8 @@ SYS	011528318
             // parameters:
             //      nAutoComplate   0: false; 1: true; -1:保持当前记忆状态
             InsertField(this.FocusedFieldIndex, -1, -1);  // true, false
+#endif
+            InsertField(this.CaretFieldIndex, -1, -1);  // true, false
         }
 
         // 插入字段
@@ -3113,18 +3229,18 @@ SYS	011528318
         /// <summary>
         /// 插入新字段
         /// </summary>
-        /// <param name="nFieldIndex">字段位置下标</param>
-        /// <param name="nInsertBofore">是否为插入到 nFieldIndex 位置的前面? 0: 否; 1: 是; -1:保持当前记忆状态</param>
+        /// <param name="nFieldIndex">字段插入位置下标</param>
+        /// <param name="nInsertBefore">是否为插入到 nFieldIndex 位置的前面? 0: 否; 1: 是; -1:保持当前记忆状态</param>
         /// <param name="nAutoComplete">是否自动完成? 0: 否; 1: 是; -1:保持当前记忆状态</param>
         /// <returns>false: 放弃插入新字段; true: 成功</returns>
         public bool InsertField(int nFieldIndex,
-            int nInsertBofore,
+            int nInsertBefore,
             int nAutoComplete)
         {
             NewFieldDlg dlg = new NewFieldDlg();
             GuiUtil.AutoSetDefaultFont(dlg);
 
-            if (nInsertBofore == -1)
+            if (nInsertBefore == -1)
             {
                 if (this.AppInfo == null)
                     dlg.InsertBefore = this.m_bInsertBefore;
@@ -3134,7 +3250,7 @@ SYS	011528318
                         false);
             }
             else
-                dlg.InsertBefore = (nInsertBofore == 1 ? true : false);
+                dlg.InsertBefore = (nInsertBefore == 1 ? true : false);
 
             // dlg.InsertBefore = bInsertBefore;
             if (nAutoComplete == -1)
@@ -3154,7 +3270,18 @@ SYS	011528318
             if (nFieldIndex == 0)
                 start_field_name = "001";
             else
-                start_field_name = this.Record.Fields[nFieldIndex].Name;
+                start_field_name = GetRefFieldName();
+
+            string GetRefFieldName()
+            {
+                if (nFieldIndex >= this.Record.Fields.Count)
+                {
+                    if (this.Record.Fields.Count <= 1)
+                        return this.DefaultFieldName;
+                    return this.Record.Fields[this.Record.Fields.Count - 1].Name;
+                }
+                return this.Record.Fields[nFieldIndex].Name;
+            }
 
             dlg.FieldName = start_field_name; //  this.DefaultFieldName;
             dlg.MarcDefDom = this.MarcDefDom;
@@ -3186,7 +3313,7 @@ SYS	011528318
                         dlg.AutoComplete);
             }
 
-            if (nInsertBofore == -1)
+            if (nInsertBefore == -1)
             {
                 if (this.AppInfo == null)
                     this.m_bInsertBefore = dlg.InsertBefore;
@@ -3201,9 +3328,9 @@ SYS	011528318
             string strIndicator = "  ";
             if (bControlField == false)
                 strDefaultValue = new string((char)31, 1) + "a";
+            else
+                strIndicator = "";
 
-            List<string> results = null;
-            string strError = "";
             // 获得宏值
             // parameters:
             //      strSubFieldName 子字段名。特殊地，如果为"#indicator"，表示想获取该字段的指示符缺省值
@@ -3215,8 +3342,8 @@ SYS	011528318
                 0,  // index,
                 dlg.FieldName,
                 "",
-                out results,
-                out strError);
+                out List<string> results,
+                out string strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
@@ -3230,7 +3357,8 @@ SYS	011528318
                         out strDefaultValue);
             }
 
-            if (dlg.InsertBefore == true)
+            if (dlg.InsertBefore == true
+                || nFieldIndex >= this.Record.Fields.Count)
             {
                 if (nFieldIndex == 0)
                 {
@@ -3251,8 +3379,10 @@ SYS	011528318
                     strDefaultValue);
             }
 
+            // 将 caret 定位刚插入的内容的最后一个字符以右。注意，要在字段结束符以左。
+            var caret_offs = this.BlockEndOffset - 1;
+            this.Select(caret_offs, caret_offs, caret_offs);
             this.EnsureVisible();
-
             return true;
         }
 
@@ -3315,7 +3445,6 @@ SYS	011528318
                 false);
 
             this.EnsureVisible();
-
         }
 
         #region 对外 API
@@ -3395,6 +3524,43 @@ SYS	011528318
 
         #endregion
 
+
+        // return:
+        //      false   放弃
+        //      true    已经处理
+        internal bool DeleteFieldWithDlg(bool show_dialog = true)
+        {
+            // Debug.Assert(this.SelectedFieldIndices.Count > 0, "在'删除'时，SelectedFieldIndices个数必须大于0");
+
+            List<int> indices = new List<int>();
+
+            var dom = this.GetDomRecord();
+            if (this.HasBlock() == false)
+            {
+                indices.Add(this.CaretFieldIndex);
+            }
+            else
+            {
+                var ret = dom.LocateFields(dom.SelectionStart,
+    dom.SelectionEnd,
+    out int field_index,
+    out int count);
+                if (ret == false)
+                {
+                    MessageBox.Show(this, "尚未选择要删除的字段");
+                    return false;
+                }
+                for (int i = 0; i < count; i++)
+                {
+                    indices.Add(field_index + i);
+                }
+            }
+
+            return this.DeleteFields(indices, show_dialog);
+        }
+
+
+#if OLD_VERSION
         // 带对话框的删除字段
         // 注: 能走到这里调用本函数，selection 内文字已经被清除了?
         // return:
@@ -3443,6 +3609,7 @@ out int count);
             dom.DeleteField(field_index, count);
             return true;
         }
+#endif
 
         // 删除字段
         internal void DeleteFieldWithDlg(object sender,
@@ -3530,8 +3697,8 @@ out int count);
                 return -1;
             Debug.Assert(this.FocusedField != null, "FocusedField不可能为null");
 
-            string strFieldName = this.FocusedField.Name;
-            string strFieldValue = this.FocusedField.Value;
+            string strFieldName = this.FocusedField?.Name;
+            string strFieldValue = this.FocusedField?.Value;
 
             string strSubfieldName = "";
             string strSubfieldValue = "";
@@ -3637,8 +3804,8 @@ out int count);
 
             Debug.Assert(this.FocusedField != null, "FocusedField不可能为null");
 
-            string strFieldName = this.FocusedField.Name;
-            string strFieldValue = this.FocusedField.Value;
+            string strFieldName = this.FocusedField?.Name;
+            string strFieldValue = this.FocusedField?.Value;
 
             string strSubfieldName = "";
             string strSubfieldValue = "";
@@ -4106,10 +4273,13 @@ out int count);
         /// </summary>
         public void GetValueFromValueList()
         {
+            if (this.FocusedField == null)
+                return;
+
             Debug.Assert(this.FocusedField != null, "在GetSubFieldValueWithDlg()时，FocusedField不可能为null");
 
-            string strFieldName = this.FocusedField.Name;
-            string strFieldValue = this.FocusedField.Value;
+            string strFieldName = this.FocusedField?.Name;
+            string strFieldValue = this.FocusedField?.Value;
 
             string strSubfieldName = "";
             string strSubfieldValue = "";
@@ -4189,6 +4359,9 @@ out int count);
         /// </summary>
         public void GetValueFromTemplate()
         {
+            if (this.FocusedField == null)
+                return;
+
             Debug.Assert(this.FocusedField != null, "在GetSubFieldValueWithDlg()时，FocusedField不可能为null");
 
             string strFieldName = this.FocusedField.Name;
@@ -4446,8 +4619,14 @@ out int count);
         {
             // 字段名区域像素宽度
             public int FieldNameCaptionWidth { get; set; }
+
+            // 2025/12/26
+            public char HighlightBlankChar { get; set; } = ' ';
         }
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public string UiState
         {
             get
@@ -4455,6 +4634,7 @@ out int count);
                 MarcEditorState state = new MarcEditorState
                 {
                     FieldNameCaptionWidth = this.FieldNameCaptionWidth,
+                    HighlightBlankChar = this.HighlightBlankChar,
                 };
                 return JsonConvert.SerializeObject(state);
             }
@@ -4463,7 +4643,16 @@ out int count);
                 MarcEditorState state = JsonConvert.DeserializeObject<MarcEditorState>(value);
                 if (state != null)
                 {
-                    this.FieldNameCaptionWidth = state.FieldNameCaptionWidth;
+                    this.BeginUpdate();
+                    try
+                    {
+                        this.FieldNameCaptionWidth = state.FieldNameCaptionWidth;
+                        this.HighlightBlankChar = state.HighlightBlankChar == 0 ? ' ' : state.HighlightBlankChar;
+                    }
+                    finally
+                    {
+                        this.EndUpdate();
+                    }
                 }
             }
         }
@@ -4488,6 +4677,47 @@ out int count);
         public int SelectionStart { get; set; }
 
         #endregion
+
+        // 阻止在字段末尾删除一个字符
+        public override bool ProcessDeleteChar(HitInfo info,
+            DeleteKeyStyle style,
+            bool delay)
+        {
+            // 让 Shift+Delete 执行原有 MarcControl 删除字符功能
+            if ((Control.ModifierKeys & Keys.Shift) != 0)
+                return base.ProcessDeleteChar(info, style, delay);
+
+            // 基类本来就是这个行为
+            if (style.HasFlag(DeleteKeyStyle.DeleteFieldTerminator) == false)
+                return base.ProcessDeleteChar(info, style, delay);
+
+            // 否则这里打补丁实现
+            var index = info.ChildIndex;
+            if (index >= this.MarcRecord.FieldCount)
+                return false;
+
+            var field = this.MarcRecord.GetField(index);
+            if (field == null)
+                return base.ProcessDeleteChar(info, style, delay);
+
+            if (index == 0)
+            {
+                if (info.Offs >= field.PureTextLength)
+                    return false;
+            }
+
+            Debug.Assert(index > 0);
+
+            this.MarcRecord.GetFieldOffsRange(index,
+                out int start,
+                out int end);
+
+            // 阻止在字段最后一个字符以右进行删除操作。原操作是把下一个字段拉上来连接到一起
+            if (info.Offs >= end - 1)
+                return false;
+
+            return base.ProcessDeleteChar(info, style, delay);
+        }
     }
 
     internal class InvalidateRect

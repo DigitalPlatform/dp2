@@ -260,6 +260,7 @@ namespace DigitalPlatform.Marc
 
         /// <summary>
         /// 获取或设置本字段的 MARC 字符串 (机内格式)
+        /// 注意，不包含字段结束符
         /// </summary>
         public string Text
         {

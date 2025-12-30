@@ -340,11 +340,16 @@ namespace DigitalPlatform.Marc
                     CanExecute=()=> this.CanPaste(),
                 },
 
+                new CommandItem() { Caption="-" },
+
                 new CommandItem()
                 {
-                    Caption="删除当前子字段",
-                    KeyData=Keys.Shift | Keys.Delete,
-                    Handler=(s,e) => this.DeleteCaretSubfield(),
+                    Caption="全选(&A)",
+                    KeyData=Keys.None,
+                    Handler=(s,e) => {
+                        this.SelectAll();
+                        this.FireSelectedFieldChanged();
+                    },
                     CanExecute=()=> true,
                 },
 
@@ -352,14 +357,47 @@ namespace DigitalPlatform.Marc
 
                 new CommandItem()
                 {
-                    Caption="全选(&A)",
-                    KeyData=Keys.None,
-                    Handler=(s,e) => { 
-                        this.SelectAll();
-                        this.FireSelectedFieldChanged();
+                    Caption="选择子字段",
+                    KeyData=Keys.Control | Keys.B,
+                    Handler=(s,e) => {
+                        this.SelectCaretSubfield();
                     },
                     CanExecute=()=> true,
                 },
+
+                new CommandItem()
+                {
+                    Caption="删除当前子字段",
+                    KeyData=Keys.Shift | Keys.Delete,
+                    Handler=(s,e) => {
+                        var ret = this.DeleteCaretSubfield() != null;
+                        TriggerEvenArgs.SetHandled(e, ret);
+                        },
+                    CanExecute=()=> true,
+                },
+
+                new CommandItem()
+                {
+                    Caption="到下一个字段",
+                    KeyData=Keys.Enter,
+                    Handler=(s,e) => this.ToNextField(),
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="折行",
+                    KeyData=Keys.Shift | Keys.Enter,
+                    Handler=(s,e) => this.BreakText(),
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="插入新字段",
+                    KeyData=Keys.Control | Keys.Enter,
+                    Handler=(s,e) => InsertField(this.CaretFieldIndex, 0, 1),
+                    CanExecute=()=> true,
+                },
+
 
                 new CommandItem() { Caption="-" },
 
@@ -369,7 +407,7 @@ namespace DigitalPlatform.Marc
                     // 这两行不能少。否则击键会捕捉不到，因为击键探测时为了提高速度是不会触发 .Refresh 的
                     KeyData = Keys.Control | Keys.M,
                     Handler = (s,e) => this.GetValueFromTemplate(),
-                    
+
                     Refresh = (cmd) =>
                     {
                         var enabled = this.HasTemplateOrValueListDef(
@@ -402,10 +440,70 @@ namespace DigitalPlatform.Marc
 
                 new CommandItem()
                 {
+                    Caption="插入子字段符号",
+                    KeyData=Keys.Control | Keys.I,
+                    Handler=(s,e) => this.InsertSubfieldChar(),
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="校验 MARC",
+                    KeyData=Keys.Control | Keys.U,
+                    Handler = (s,e)=>{
+                        var ea = new GenerateDataEventArgs();
+                        this.OnVerifyData(ea);
+                    },
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="加拼音",
+                    KeyData=Keys.Control | Keys.S,
+                    Handler = (s,e)=>{
+                        var e1 = new GenerateDataEventArgs(){
+                        ScriptEntry = "AddPinyin",
+                        FocusedControl = this,
+                        };
+                        this.OnGenerateData(e1);
+                    },
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="删除拼音",
+                    KeyData=Keys.Control | Keys.D,
+                    Handler = (s,e)=>{
+                        var e1 = new GenerateDataEventArgs(){
+                        ScriptEntry = "RemovePinyin",
+                        FocusedControl = this,
+                        };
+                        this.OnGenerateData(e1);
+                    },
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
                     Caption="插入新字段(询问字段名)",
                     Handler= this.InsertField,
                 },
-
+                new CommandItem()
+                {
+                    KeyData = Keys.Insert,
+                    Handler= (s,e)=>{
+                        // 头标区，或者其它字段的字段名和指示符区域，可以触发本功能
+                        var region = this.CaretFieldRegion;
+                        if (this.CaretFieldIndex == 0
+                            || region == FieldRegion.Name
+                            || region == FieldRegion.Indicator)
+                        {
+                            this.InsertField(s, e);
+                        }
+                        else
+                        {
+                            TriggerEvenArgs.SetHandled(e, false);
+                        }
+                    },
+                },
                 new CommandItem()
                 {
                     Caption="插入新字段 ...",
@@ -415,7 +513,7 @@ namespace DigitalPlatform.Marc
                         {
                             Caption="前插",
                             Handler= this.InsertBeforeFieldNoDlg,
-                            CanExecute=()=> this.FocusedField.Name != "###",
+                            CanExecute=()=> this.FocusedField?.Name != "###",
                         },
                         new CommandItem()
                         {
@@ -490,6 +588,21 @@ namespace DigitalPlatform.Marc
 
                 new CommandItem()
                 {
+                    Refresh = (o)=>{
+                        o.Checked = this.HighlightBlankChar != ' ';
+                        return null;
+                    },
+                    Caption="突出显示空格",
+                    Handler= (s, e)=>{
+                        if (this.HighlightBlankChar == ' ')
+                            this.HighlightBlankChar = '·';
+                        else
+                            this.HighlightBlankChar =' ';
+                    },
+                },
+
+                new CommandItem()
+                {
                     Caption="属性",
                     Handler= this.Property_menu,
                 },
@@ -522,9 +635,10 @@ namespace DigitalPlatform.Marc
                 new CommandItem()
                 {
                     Caption="字段重新排序(&S)",
-                    Handler= this.menuItem_sortFields,
-                },
-                
+                    KeyData=Keys.Control | Keys.Q,
+                    Handler=(s,e) => this.SortFields(),
+                    CanExecute=()=> true,                },
+
                 new CommandItem() { Caption="-" },
 
                 new CommandItem()
@@ -580,7 +694,7 @@ namespace DigitalPlatform.Marc
                     CanExecute=()=>this.HasBlock(),
                 },
 
-                                new CommandItem() { Caption="-" },
+                new CommandItem() { Caption="-" },
 
                 new CommandItem()
                 {

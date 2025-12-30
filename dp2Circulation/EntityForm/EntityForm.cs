@@ -1,22 +1,5 @@
 ﻿// #define _TEST_PINYIN
 
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.CommonDialog;
-using DigitalPlatform.Drawing;
-using DigitalPlatform.GUI;
-using DigitalPlatform.IO;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Marc;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.MessageClient;
-using DigitalPlatform.Script;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using DigitalPlatform.Z3950;
-using dp2Circulation.Script;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,6 +17,25 @@ using System.Windows.Forms;
 using System.Xml;
 using UcsUpload;
 using static dp2Circulation.CallNumberForm;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.CommonDialog;
+using DigitalPlatform.Drawing;
+using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Marc;
+using DigitalPlatform.MarcDom;
+using DigitalPlatform.MessageClient;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DigitalPlatform.Z3950;
+using dp2Circulation.Script;
+// using LibraryStudio.Forms;
 
 namespace dp2Circulation
 {
@@ -846,8 +848,16 @@ namespace dp2Circulation
 
                 this.binaryResControl1.TempDir = Program.MainForm.UserTempDir;
 
-                LoadFontToMarcEditor();
-                LoadMarcEditorParam();
+                this.MarcEditor.BeginUpdate();
+                try
+                {
+                    LoadFontToMarcEditor();
+                    LoadMarcEditorParam();
+                }
+                finally
+                {
+                    this.MarcEditor.EndUpdate();
+                }
 
                 this.m_marcEditor.AppInfo = Program.MainForm.AppInfo;    // 2009/9/18 
             }
@@ -2811,6 +2821,8 @@ true);
                 this._genData.SynchronizeMarcEvent -= _genData_SynchronizeMarcEvent;
                 this._genData.Close();
             }
+
+            _gen_refresh_trigger?.Dispose();
 
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
@@ -13322,10 +13334,16 @@ out strError);
         // 2022/1/11
         void LoadMarcEditorParam()
         {
+            /*
             this.m_marcEditor.FieldNameCaptionWidth = MainForm.AppInfo.GetInt(
                 "marceditor",
                 "name_width",
                 100);
+            */
+            this.m_marcEditor.UiState = MainForm.AppInfo.GetString(
+                "marceditor",
+                "uiState",
+                "");
         }
 
         void LoadFontToMarcEditor()
@@ -13362,10 +13380,17 @@ out strError);
         // 2022/1/11
         void SaveMarcEditorParam()
         {
+            /*
             MainForm.AppInfo.SetInt(
     "marceditor",
     "name_width",
     this.m_marcEditor.FieldNameCaptionWidth);
+            */
+            MainForm.AppInfo.SetString(
+"marceditor",
+"uiState",
+this.m_marcEditor.UiState);
+
         }
 
         void SaveFontForMarcEditor()
@@ -13460,6 +13485,7 @@ out strError);
         /// </summary>
         public void SetMarcEditFont()
         {
+            // TODO: “微软雅黑 light”字体为何在打开的 FontDialog 中不能正确定位字体名
             FontDialog dlg = new FontDialog();
             dlg.ShowColor = true;
             dlg.Color = this.m_marcEditor.ContentTextColor;
@@ -15425,9 +15451,15 @@ out strError);
              * */
         }
 
+        // 触发数据加工菜单延迟刷新
+        LibraryStudio.Forms.DelayTrigger _gen_refresh_trigger = new LibraryStudio.Forms.DelayTrigger(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));
+
         private void MarcEditor_SelectedFieldChanged(object sender, EventArgs e)
         {
-            this._genData?.RefreshViewerState();
+            _gen_refresh_trigger.Schedule(() => {
+                this._genData?.RefreshViewerState();
+            });
+            // this._genData?.RefreshViewerState();
         }
 
         private void binaryResControl1_Enter(object sender, EventArgs e)

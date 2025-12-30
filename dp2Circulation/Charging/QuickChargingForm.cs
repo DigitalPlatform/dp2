@@ -1508,9 +1508,9 @@ dlg.UiState);
         internal void AddItemSummaryTask(string strItemBarcode,
             string strConfirmItemRecPath,
             ChargingTask charging_task,
-            bool bClearBofore = true)
+            bool bClearBefore = true)
         {
-            if (bClearBofore)
+            if (bClearBefore)
             {
                 // 如果以前有摘要，要先清除。这样操作者在等待过程中能清楚当前处在什么状态
                 charging_task.ItemSummary = "正在获取书目摘要 ...";

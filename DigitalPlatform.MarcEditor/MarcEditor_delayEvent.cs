@@ -53,7 +53,7 @@ namespace DigitalPlatform.Marc
             //}
 
             // 检查和触发
-            var field = GetDomRecord().GetField(this.CaretFieldIndex);
+            var field = GetDomRecord().GetField(this.CaretFieldIndex, false);
             if (field == null)
                 return;
 
