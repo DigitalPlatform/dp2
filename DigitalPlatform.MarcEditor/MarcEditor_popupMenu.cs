@@ -601,6 +601,17 @@ namespace DigitalPlatform.Marc
                     },
                 },
 
+                /*
+                // testing SplitField()
+                new CommandItem()
+                {
+                    Caption="SplitField()",
+                    KeyData=Keys.None,
+                    Handler=(s,e) => this.SplitField(-1, "prev"),
+                    CanExecute=()=> true,
+                },
+                */
+
                 new CommandItem()
                 {
                     Caption="属性",

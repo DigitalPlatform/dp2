@@ -1,27 +1,25 @@
-﻿using System;
+﻿using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using LibraryStudio.Forms;
+using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using System.Collections.ObjectModel;
-
-using Newtonsoft.Json;
-
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-
-using LibraryStudio.Forms;
-using System.Runtime.Remoting.Messaging;
+using static LibraryStudio.Forms.MarcField;
 
 namespace DigitalPlatform.Marc
 {
@@ -1548,28 +1546,123 @@ GraphicsUnit.Point);
         //      caret_offs_in_end_level   [out] 返回在最后一级 level 的全文(包括字段名部分)中的插入符偏移
         public string GetCurrentLocationString(out int caret_offs_in_end_level)
         {
-#if REMOVED
             caret_offs_in_end_level = 0;
-            if (this.curEdit == null)
-                throw new Exception("this.curEdit 为 null，无法执行 GetCurrentLocationString()");
-            if (this.curEdit.Visible == false)
-                return "";
+            //if (this.curEdit == null)
+            //    throw new Exception("this.curEdit 为 null，无法执行 GetCurrentLocationString()");
+            //if (this.curEdit.Visible == false)
+            //    return "";
 
             // 当前插入符所在位置
-            int current_offs = this.curEdit.SelectionStart;
+            //int current_offs = this.curEdit.SelectionStart;
             // 探测点取中间位置
-            if (this.curEdit.SelectionLength > 0)
-                current_offs += this.curEdit.SelectionLength / 2;
+            //if (this.curEdit.SelectionLength > 0)
+            //    current_offs += this.curEdit.SelectionLength / 2;
 
-            return this.Record.GetSubfieldLocationString(
-                this.FocusedFieldIndex,
-                current_offs,
+            return GetSubfieldLocationString(
+                this.CaretOffset,
                 out caret_offs_in_end_level);
-#endif
             // 简化处理。直接用全剧 offs
-            caret_offs_in_end_level = 0;
-            return Math.Min(this.BlockStartOffset, this.BlockEndOffset).ToString();
+            //caret_offs_in_end_level = 0;
+            //return Math.Min(this.BlockStartOffset, this.BlockEndOffset).ToString();
         }
+
+
+        /*
+        // 获得子字段周边信息，扩展版本，能获得 offs 所在的、不是子字段的区域的信息
+        // parameters:
+        //      offs        在当前字段内的 offs 偏移量
+        //      right_most    当插入符处在内容末端时，是否认为命中最后一个子字段
+        public SubfieldBound GetSubfieldBoundsEx(
+    int offs,
+    bool right_most = false)         * 
+         * */
+
+        // TODO: 准备单元测试
+        // parameters:
+        //      field_index 字段下标
+        //      caret_offs  当前插入符在字段内容中的下标
+        //      caret_offs_in_end_level   [out] 返回在最后一级 level 的全文(包括字段名部分)中的插入符偏移
+        public string GetSubfieldLocationString(
+            //int field_index,
+            //int caret_offs,
+            int global_offs,
+            out int caret_offs_in_end_level)
+        {
+            caret_offs_in_end_level = 0;
+
+            int field_index = this.CaretFieldIndex;
+            if (field_index >= this.MarcRecord.FieldCount)
+                return "";
+
+            var field = this.Record.Fields[field_index];
+            var field_location = this.Record.GetFieldLocationString(field_index);
+
+            var content_text = field.Value;
+
+            this.MarcRecord.GetFieldOffsRange(field_index,
+                out int start,
+                out int end);
+            int offs_in_field = this.CaretOffset - start;
+            var m_field = this.MarcRecord.GetField(field_index);
+            var info = m_field.GetSubfieldBoundsEx(
+    offs_in_field,
+    true);
+            if (info.Name == "!name" || info.Name == "!indicator")
+                return field_location;
+
+            /*
+            // return:
+            //      0   不在子字段上
+            //      1   在子字段上
+            var ret = MyEdit.GetCurrentSubfieldCaretInfo(
+                content_text,
+                caret_offs,
+                out string strSubfieldName,
+                out string strSufieldContent,
+                out int nStart,
+                out int nContentStart,
+                out int nContentLength,
+                out bool forbidden);
+            if (ret == 0)
+            {
+                // TODO
+                return field_location;
+            }
+            */
+            int name_indicator_length = field.Name.Length + field.Indicator.Length;
+            int offs_in_content = offs_in_field - name_indicator_length;
+
+            int nContentStart = info.ContentStartOffs - name_indicator_length;
+            int nStart = info.StartOffs - name_indicator_length;
+            string strSubfieldName = info.Name;
+
+            DigitalPlatform.Marc.MarcField marc_field = new MarcField(field.Name,
+                field.Indicator,
+                content_text);
+
+            int name_count = -1; // 相同字段名的计数
+            int offs = marc_field.Leading.Length;
+            foreach (MarcSubfield subfield in marc_field.select("subfield"))
+            {
+                if (offs >= nContentStart
+                    || offs >= nStart)
+                {
+                    caret_offs_in_end_level = offs_in_content - offs;
+                    if (name_count <= 0)
+                        return field_location + "/" + strSubfieldName;
+                    return field_location + "/" + strSubfieldName + ":" + name_count.ToString();
+                }
+                if (subfield.Name == strSubfieldName)
+                    name_count++;
+                offs += subfield.Text.Length;
+            }
+
+            if (name_count > 0)
+                return field_location + "/" + strSubfieldName + ":" + name_count.ToString();    // 2024/8/12
+            else
+                return field_location + "/" + strSubfieldName;
+        }
+
 
 #if REMOVED
         internal void Test()
@@ -1715,7 +1808,11 @@ GraphicsUnit.Point);
                     if (this.DesignMode && this.record == null)
                         return;
 
-                    base.Content = value;
+                    // 兼容原来的效果: 设置 Changed 为 true; 不清除编辑历史
+                    base.SetContent(value, 
+                        set_changed: true,
+                        clear_history: false);
+
                     // 删除大量内容(字段)后，窗口原点偏移量可能处在不合适的位置，令操作者看不到上面显示的内容
                     // 这时需要改变原点偏移量
                     // AdjustOriginY();
@@ -1788,7 +1885,6 @@ GraphicsUnit.Point);
         public bool SetActiveField(string locationString,
             bool set_focus)
         {
-#if REMOVED
             // 把 locationString 转换为 field_index col
             this.Record.GetLocation(locationString,
                 out int field_index,
@@ -1798,6 +1894,23 @@ GraphicsUnit.Point);
                 return false;
             if (col == -1)
                 col = 3;
+
+            var field = this.Record.Fields[field_index];
+            int name_indicator_length = 0;
+            if (col == 2)
+                name_indicator_length = field.Name.Length;
+            else if (col == 3)
+                name_indicator_length = field.Name.Length + field.Indicator.Length;
+            if (this.MarcRecord.GetFieldOffsRange(field_index,
+                out int start,
+                out int end) == false)
+            {
+                this.SetActiveField(field_index, col, set_focus);
+                return false;
+            }
+            int offs = start + name_indicator_length + caret_pos;
+            this.Select(offs, offs, offs);
+            /*
             this.SetActiveField(field_index, col, set_focus);
             if (this.curEdit != null
                 && this.curEdit.Visible)
@@ -1807,8 +1920,9 @@ GraphicsUnit.Point);
                 this.curEdit.SelectionStart = caret_pos;
                 this.curEdit.SelectionLength = 0;
             }
+            */
             return true;
-#endif
+            /*
             // 简化。直接定位全局 offs
             if (Int32.TryParse(locationString, out int value) == false)
             {
@@ -1818,6 +1932,7 @@ GraphicsUnit.Point);
 
             this.Select(value, value, value);
             return true;
+            */
         }
 
         // 包装版本
@@ -3221,6 +3336,70 @@ SYS	011528318
 #endif
             InsertField(this.CaretFieldIndex, -1, -1);  // true, false
         }
+
+        // 兼容以前脚本，保留此函数
+        // 2025/1/10
+        // 从当前插入符位置把字段内容一劈为二。
+        // 当前字段内容只留下一劈为二的左侧部分。
+        // 下方新增一个字段，内容为一劈为二的右侧部分。
+        // parameters:
+        //      nFieldIndex 字段 index。如果为 -1，表示为当前插入符所在的字段
+        //      right_prev_text 分割后，要自动在右边一段文字头部增加的内容。增加后一起算作右侧内容
+        public bool SplitField(int nFieldIndex = -1,
+            string right_prev_text = "")
+        {
+            if (nFieldIndex == -1)
+                nFieldIndex = this.CaretFieldIndex;
+
+            if (nFieldIndex == -1)
+                return false;
+
+            if (this.CaretFieldRegion != FieldRegion.Content)
+                return false;
+            //if (this._focusCol != 3)
+            //    return false;
+
+            if (this.GetDomRecord().LocateField(this.CaretOffset,
+                out int field_index,
+                out int offs_in_field) == false)
+                return false;
+
+
+            var current_field = this.Record.Fields[nFieldIndex];
+            var start_field_name = "000";
+            if (nFieldIndex == 0)   // 头标区不允许切割
+                return false;
+            else
+                start_field_name = current_field.Name;
+
+            var indicator = current_field.Indicator;
+
+            int name_indicator_length = current_field.Name.Length + current_field.Indicator.Length;
+            string left = current_field.Value.Substring(0, offs_in_field - name_indicator_length);
+            string right = current_field.Value.Substring(offs_in_field - name_indicator_length);
+            //this.curEdit.GetLeftRight(out string left,
+            //    out string right);
+
+            if (string.IsNullOrEmpty(right_prev_text) == false)
+                right = right_prev_text + right;
+
+            current_field.Value = left;
+            //this.curEdit.TextWithHeight = left;
+            //this.Flush();    // 促使通知外界
+
+            var new_field = this.InsertFieldAfter(nFieldIndex,
+                start_field_name,
+                current_field.Indicator,
+                right);
+
+            // 设焦点位置
+            if (new_field != null)
+                this.SetActiveField(new_field, 3);
+
+            this.EnsureVisible();
+            return true;
+        }
+
 
         // 插入字段
         // parameters:

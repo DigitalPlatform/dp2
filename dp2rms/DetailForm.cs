@@ -2585,7 +2585,9 @@ namespace dp2rms
 									Environment.CurrentDirectory + "\\digitalplatform.rms.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.library.dll",

@@ -1108,6 +1108,7 @@ namespace dp2Circulation
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
+                                    Environment.CurrentDirectory + "\\marccontrol.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
