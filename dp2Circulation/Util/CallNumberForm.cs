@@ -1077,8 +1077,9 @@ COLUMN_CALLNUMBER);
         // 按照'.'等切割符号，从左到右逐段规范化为彼此等长
         static void CanonicalZhongcihaoString(ref string s1, ref string s2)
         {
-            string[] a1 = s1.Split(new char[] { '.', ',', '=', '-' });
-            string[] a2 = s2.Split(new char[] { '.', ',', '=', '-' });
+            // 2025/12/31 增加了冒号
+            string[] a1 = s1.Split(new char[] { '.', ',', '=', '-', ':' });
+            string[] a2 = s2.Split(new char[] { '.', ',', '=', '-', ':' });
 
             string result1 = "";
             string result2 = "";
@@ -1231,7 +1232,7 @@ COLUMN_CALLNUMBER);
                         throw new ArgumentException($"范围中的号码 '{numbers[1]}' 不合法。应为整数");
                     }
                     if (start > end)
-                        throw new ArgumentException($"范围 '{range}' 不合法。后一个数字不应该大于前一个数字");
+                        throw new ArgumentException($"范围 '{range}' 不合法。后一个数字不应该小于前一个数字");
                     for (int i = start; i <= end; i++)
                     {
                         if (usedEmptyNumbers.Contains(i.ToString()) == false)
@@ -2112,7 +2113,7 @@ COLUMN_CALLNUMBER);
                 string access_no)
             {
                 var number = BuildNumber(
-                    location, 
+                    location,
                     access_no);
                 RemoveNumber(list, number);
             }
