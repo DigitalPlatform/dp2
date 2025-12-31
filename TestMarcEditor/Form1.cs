@@ -68,7 +68,7 @@ namespace TestMarcEditor
             this.marcEditor1.Content = MarcRecord.BuildContent(
                 @"012345678901234567890123
 001ABCDEFG
-2001 $aAAA$bBBB
+2001 $a验证中文$Ayan zheng zhong wen$bBBB
 801  $aCN$bBBB$cCCC"
 );
 

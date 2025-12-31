@@ -2013,12 +2013,10 @@ out string strError)
 
                     strMarc.Append(strTag + strInd1 + strInd2 + strContent + new string(MarcUtil.FLDEND, 1));
 
-                    /*
                 CONTINUE:
                     // 从 DOM 中删除
                     if (bOutputFragmentXml)
                         field.ParentNode.RemoveChild(field);
-                    */
 
                     return 0;
                 }
