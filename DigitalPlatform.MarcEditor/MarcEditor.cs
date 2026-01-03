@@ -438,7 +438,7 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                // 根据 block start~end 横跨的若干连续字段的 index 设置
+                // 根据 selection start~end 横跨的若干连续字段的 index 设置
                 var dom = this.GetDomRecord();
                 var ret = dom.LocateFields(dom.SelectionStart,
                     dom.SelectionEnd,
@@ -1301,6 +1301,7 @@ GraphicsUnit.Point);
         // 复制机内格式的完整记录到剪贴板
         void CopyJineiToClipboard(object sender, EventArgs e)
         {
+            /*
             string strText = "";
             for (int i = 0; i < this.record.Fields.Count; i++)
             {
@@ -1308,14 +1309,14 @@ GraphicsUnit.Point);
                 strText += field.GetFieldMarc(true);
             }
             MarcEditor.TextToClipboardFormat(strText);
+            */
+            MarcEditor.TextToClipboardFormat(this.Content);
         }
 
         // 复制工作单格式的完整记录到剪贴板
         void CopyWorksheetToClipboard(object sender, EventArgs e)
         {
             bool bControl = Control.ModifierKeys == Keys.Control;
-            string strError = "";
-            List<string> lines = null;
 
             // 将机内格式变换为工作单格式
             // return:
@@ -1324,8 +1325,8 @@ GraphicsUnit.Point);
             int nRet = MarcUtil.CvtJineiToWorksheet(
                 this.Marc,
                 -1,
-                out lines,
-                out strError);
+                out List<string> lines,
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -1337,7 +1338,7 @@ GraphicsUnit.Point);
 
             // 按住 Ctrl 键，则功能变为把子字段符号变化为 '$'，便于写书什么的
             if (bControl)
-                strText = strText.Replace("ǂ", "$");
+                strText = strText.Replace((char)31/*"ǂ"*/, '$');
 
             MarcEditor.TextToClipboard(strText);
             return;
@@ -2607,6 +2608,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
         }
 
+        // 将文本变换为更为通俗的格式，连同原先的机内格式，作为两种格式一并进入 Windows 剪贴板
         internal static void TextToClipboardFormat(string strText)
         {
             // Make a DataObject.
@@ -2644,6 +2646,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             return result;
         }
 
+        // 检查 Windows 剪贴板中的数据，优先选用 MarcEditorData 类型的数据。
+        // 如果不存在 MarcEditorData 类型的数据，则观察普通格式的数据中是否具备回车换行符号，针对性加以变换处理
         internal static string ClipboardToTextFormat(bool replace = true)
         {
             string result = "";
@@ -3309,7 +3313,7 @@ SYS	011528318
                 strDefaultValue);
 
             // 将 caret 定位刚插入的内容的最后一个字符以右。注意，要在字段结束符以左。
-            var caret_offs = this.BlockEndOffset - 1;
+            var caret_offs = this.SelectionEnd - 1;
             this.Select(caret_offs, caret_offs, caret_offs);
             this.EnsureVisible();
         }
@@ -3559,7 +3563,7 @@ SYS	011528318
             }
 
             // 将 caret 定位刚插入的内容的最后一个字符以右。注意，要在字段结束符以左。
-            var caret_offs = this.BlockEndOffset - 1;
+            var caret_offs = this.SelectionEnd - 1;
             this.Select(caret_offs, caret_offs, caret_offs);
             this.EnsureVisible();
             return true;
@@ -3714,7 +3718,7 @@ SYS	011528318
             List<int> indices = new List<int>();
 
             var dom = this.GetDomRecord();
-            if (this.HasBlock() == false)
+            if (this.HasSelection() == false)
             {
                 indices.Add(this.CaretFieldIndex);
             }
@@ -4862,13 +4866,9 @@ out int count);
             DeleteKeyStyle style,
             bool delay)
         {
-            // 让 Shift+Delete 执行原有 MarcControl 删除字符功能
+            // 让 Shift+Delete 执行原有 MarcControl 删除字符功能(包含能删除字段结束符)
             if ((Control.ModifierKeys & Keys.Shift) != 0)
-                return base.ProcessDeleteChar(info, style, delay);
-
-            // 基类本来就是这个行为
-            if (style.HasFlag(DeleteKeyStyle.DeleteFieldTerminator) == false)
-                return base.ProcessDeleteChar(info, style, delay);
+                return base.ProcessDeleteChar(info, DeleteKeyStyle.DeleteFieldTerminator, delay);
 
             // 否则这里打补丁实现
             var index = info.ChildIndex;

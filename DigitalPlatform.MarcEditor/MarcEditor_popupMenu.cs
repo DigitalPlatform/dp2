@@ -16,6 +16,74 @@ namespace DigitalPlatform.Marc
     /// </summary>
     public partial class MarcEditor : MarcControl
     {
+        public override bool RawCut()
+        {
+            if (this.ReadOnly)
+                return false;
+
+            if (HasSelection() == false)
+                return false;
+            var start = Math.Min(this.SelectionStart, this.SelectionEnd);
+            var length = Math.Abs(this.SelectionEnd - this.SelectionStart);
+            var text = this.Content.Substring(start, length);
+            TextToClipboardFormat(text);
+            RawRemoveBolckText();
+            return true;
+        }
+
+        public override bool SoftlyCut()
+        {
+            if (this.ReadOnly)
+                return false;
+
+            if (HasSelection() == false)
+                return false;
+
+            TextToClipboardFormat(GetSelectedContent());
+            SoftlyRemoveSelectionText();
+            return true;
+        }
+
+
+        public override bool Copy()
+        {
+            if (HasSelection() == false)
+                return false;
+
+            TextToClipboardFormat(GetSelectedContent());
+            return true;
+        }
+
+        public override bool SoftlyPaste(string text = null)
+        {
+            if (text == null)
+            {
+                text = MarcEditor.ClipboardToTextFormat();
+                // 去掉回车换行符号
+                text = text.Replace("\r\n", "\r");
+                text = text.Replace("\r", "*");
+                text = text.Replace("\n", "*");
+                text = text.Replace("\t", "*");
+            }
+
+            return base.SoftlyPaste(text);
+        }
+
+        public override bool RawPaste(string text = null)
+        {
+            if (text == null)
+            {
+                text = MarcEditor.ClipboardToTextFormat();
+                // 去掉回车换行符号
+                text = text.Replace("\r\n", "\r");
+                text = text.Replace("\r", "*");
+                text = text.Replace("\n", "*");
+                text = text.Replace("\t", "*");
+            }
+
+            return base.RawPaste(text);
+        }
+
         void PopupCtrlAMenu()
         {
             // 有时数据加工菜单来不及更新状态，这里补充触发一次
@@ -315,7 +383,7 @@ namespace DigitalPlatform.Marc
                     Caption="复制(&C)",
                     KeyData=Keys.Control | Keys.C,
                     Handler=(s,e) => this.Copy(),
-                    CanExecute=()=> this.HasBlock(),
+                    CanExecute=()=> this.HasSelection(),
                 },
                 new CommandItem()
                 {
@@ -331,7 +399,7 @@ namespace DigitalPlatform.Marc
                     Caption="原始剪切",
                     // 不设置快捷键（若需要可添加）
                     Handler=(s,e) => this.RawCut(),
-                    CanExecute=()=> this.HasBlock(),
+                    CanExecute=()=> this.HasSelection(),
                 },
                 new CommandItem()
                 {
@@ -430,7 +498,7 @@ namespace DigitalPlatform.Marc
                         "valuelist",
                         out string name) == 1;
 
-                        cmd.GetCaption= ()=> "值列表 " + name;
+                        cmd.GetCaption= ()=> "值列表 " + name + " ...";
                         cmd.Handler = (s,e) => this.GetValueFromValueList();
                         cmd.CanExecute= ()=> enabled;
 
@@ -483,7 +551,7 @@ namespace DigitalPlatform.Marc
                 },
                 new CommandItem()
                 {
-                    Caption="插入新字段(询问字段名)",
+                    Caption="插入新字段(询问字段名) ...",
                     Handler= this.InsertField,
                 },
                 new CommandItem()
@@ -506,7 +574,7 @@ namespace DigitalPlatform.Marc
                 },
                 new CommandItem()
                 {
-                    Caption="插入新字段 ...",
+                    Caption="插入新字段以",
                     SubCommands = new List<CommandItem>()
                     {
                         new CommandItem()
@@ -530,62 +598,25 @@ namespace DigitalPlatform.Marc
 
                 new CommandItem()
                 {
-                    Caption="从特定格式粘贴 ...",
-                    SubCommands = new List<CommandItem>()
-                    {
-                        new CommandItem()
-                        {
-                            Caption="从 dp2OPAC 粘贴整个记录",
-                            Handler= this.menuItem_PasteFromDp2OPAC,
-                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
-                        },
-                        new CommandItem()
-                        {
-                            Caption="从 NLC 粘贴整个记录",
-                            Handler= this.menuItem_PasteFromNlcMarc,
-                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
-                        },
-                        new CommandItem()
-                        {
-                            Caption="从 tcmarc 粘贴整个记录",
-                            Handler= this.menuItem_PasteFromTcMarc,
-                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
-                        },
-                        new CommandItem()
-                        {
-                            Caption="从 MARCXML 粘贴整个记录",
-                            Handler= this.menuItem_PasteFromMarcXml,
-                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
-                        },
-                        new CommandItem()
-                        {
-                            Caption="从 工作单 粘贴整个记录",
-                            Handler= this.menuItem_PasteFromWorksheet,
-                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
-                        },
-                        new CommandItem()
-                        {
-                            Caption="从 机内格式 粘贴整个记录",
-                            Handler= this.menuItem_PasteFromJinei,
-                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
-                        },
-                    },
-                },
-
-                new CommandItem() { Caption="-" },
-
-                OrganizeCommand(),
-
-                new CommandItem()
-                {
                     Caption="删除字段",
                     KeyData=Keys.None,
                     Handler=(s,e) => this.DeleteFieldWithDlg(),
                     CanExecute=()=> true,
                 },
 
-                CopyPasteWholeMarc(),
+                new CommandItem() { Caption="-" },
 
+                CopyWholeMarc(),
+
+                PasteWHoleMarc(),
+
+                new CommandItem() { Caption="-" },
+
+                OrganizeCommand(),
+
+
+
+                // 突出显示空格
                 new CommandItem()
                 {
                     Refresh = (o)=>{
@@ -624,7 +655,7 @@ namespace DigitalPlatform.Marc
         {
             return new CommandItem()
             {
-                Caption = "整理 ...",
+                Caption = "整理",
                 SubCommands = new List<CommandItem>()
                 {
                 new CommandItem()
@@ -633,7 +664,7 @@ namespace DigitalPlatform.Marc
                     KeyData=Keys.Control | Keys.K,
                     KeyData2=Keys.Control | Keys.L,
                     Handler= this.menuItem_s2t,
-                    CanExecute=()=>this.HasBlock(),
+                    CanExecute=()=>this.HasSelection(),
                 },
                 new CommandItem()
                 {
@@ -641,7 +672,7 @@ namespace DigitalPlatform.Marc
                     KeyData=Keys.Control | Keys.K,
                     KeyData2=Keys.Control | Keys.J,
                     Handler= this.menuItem_t2s,
-                    CanExecute=()=>this.HasBlock(),
+                    CanExecute=()=>this.HasSelection(),
                 },
                 new CommandItem()
                 {
@@ -685,41 +716,76 @@ namespace DigitalPlatform.Marc
             };
         }
 
-        CommandItem CopyPasteWholeMarc()
+        CommandItem PasteWHoleMarc()
         {
             return new CommandItem()
             {
-                Caption = "复制粘贴整条记录 ...",
+                Caption = "粘贴完整记录来自",
+                SubCommands = new List<CommandItem>()
+                    {
+                        new CommandItem()
+                        {
+                            Caption="机内格式",
+                            Handler= this.menuItem_PasteFromJinei,
+                            CanExecute= ()=> this.CanPaste(),
+                        },
+
+                        new CommandItem()
+                        {
+                            Caption="工作单格式",
+                            Handler= this.menuItem_PasteFromWorksheet,
+                            CanExecute= ()=> this.CanPaste(),
+                        },
+                        new CommandItem()
+                        {
+                            Caption="dp2OPAC 页面",
+                            Handler= this.menuItem_PasteFromDp2OPAC,
+                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
+                        },
+
+                        new CommandItem() { Caption="-" },
+
+                        new CommandItem()
+                        {
+                            Caption="来自 NLC 页面",
+                            Handler= this.menuItem_PasteFromNlcMarc,
+                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
+                        },
+                        new CommandItem()
+                        {
+                            Caption="来自 tcmarc",
+                            Handler= this.menuItem_PasteFromTcMarc,
+                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
+                        },
+                        new CommandItem()
+                        {
+                            Caption="来自 MARCXML",
+                            Handler= this.menuItem_PasteFromMarcXml,
+                            CanExecute=()=> this.CanPaste() && this.ReadOnly == false,
+                        },
+                    },
+            };
+        }
+
+        CommandItem CopyWholeMarc()
+        {
+            return new CommandItem()
+            {
+                Caption = "复制完整记录为",
                 SubCommands = new List<CommandItem>()
                 {
-                new CommandItem()
-                {
-                    Caption="复制整个记录(机内格式)",
-                    Handler= this.CopyJineiToClipboard,
-                    CanExecute=()=>this.HasBlock(),
-                },
-                new CommandItem()
-                {
-                    Caption="复制整个记录(工作单格式)",
-                    Handler= this.CopyWorksheetToClipboard,
-                    CanExecute=()=>this.HasBlock(),
-                },
-
-                new CommandItem() { Caption="-" },
-
-                new CommandItem()
-                {
-                    Caption="粘贴整个记录(机内格式)",
-                    Handler= this.menuItem_PasteFromJinei,
-                    CanExecute= ()=> this.CanPaste() && this.ReadOnly == false,
-                },
-
-                new CommandItem()
-                {
-                    Caption="粘贴整个记录(工作单格式)",
-                    Handler= this.menuItem_PasteFromWorksheet,
-                    CanExecute= ()=> this.CanPaste() && this.ReadOnly == false,
-                },
+                    new CommandItem()
+                    {
+                        Caption="机内格式",
+                        Handler= this.CopyJineiToClipboard,
+                        CanExecute=()=>true,
+                    },
+                    new CommandItem()
+                    {
+                        Caption="工作单格式",
+                        Handler= this.CopyWorksheetToClipboard,
+                        CanExecute=()=>true,
+                    },
                 },
             };
         }
