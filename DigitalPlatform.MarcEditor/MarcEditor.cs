@@ -565,6 +565,8 @@ namespace DigitalPlatform.Marc
                 this._labelCache.Clear();
                 this.m_strMarcDomError = "";
                 this.m_domMarcDef = value;
+
+                InvalidateCaptionArea();
             }
         }
 
@@ -661,7 +663,11 @@ namespace DigitalPlatform.Marc
             this.GetFieldCaption = (field) =>
             {
                 if (field.IsHeader)
-                    return $"头标区";
+                {
+                    if (this.Lang.StartsWith("zh"))
+                        return $"头标区";
+                    return "Header";
+                }
                 return GetCachedLabel(field.FieldName);
             };
             int caret_field_index = -1;
@@ -1079,7 +1085,11 @@ GraphicsUnit.Point);
         /// </summary>
         public void RefreshNameCaption()
         {
-            // 处于兼容性保留函数
+            // 出于兼容性保留函数
+
+            // 清除缓存，确保可以重新获得提示文字
+            this.ClearLabelCache();
+            InvalidateCaptionArea();
 
             /*
             if (this.record != null)
@@ -1810,7 +1820,7 @@ GraphicsUnit.Point);
                         return;
 
                     // 兼容原来的效果: 设置 Changed 为 true; 不清除编辑历史
-                    base.SetContent(value, 
+                    base.SetContent(value,
                         set_changed: true,
                         clear_history: false);
 
@@ -2345,6 +2355,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 #endif
         Hashtable _labelCache = new Hashtable();
 
+        public void ClearLabelCache()
+        {
+            _labelCache?.Clear();
+        }
+
         string GetCachedLabel(string field_name)
         {
             if ((field_name?.Length ?? 0) != 3)
@@ -2728,19 +2743,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             System.EventArgs e)
         {
             /*
-        // 测试用
+            // 测试用
 			//string strMessage = "SelectedFieldIndices.Count=" + Convert.ToString(this.SelectedFieldIndices.Count) + "\r\n";
 			//strMessage += "nStartFieldIndex=" + Convert.ToString(this.nStartFieldIndex)+ "\r\n";
 
             if (this.FocusedField != null)
 			    MessageBox.Show(this,this.FocusedField.m_strValue);
-             */
+            */
 
-            PropertyDlg dlg = new PropertyDlg();
-            GuiUtil.AutoSetDefaultFont(dlg);
-            dlg.MarcEditor = this;
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+            using (PropertyDlg dlg = new PropertyDlg())
+            {
+                GuiUtil.AutoSetDefaultFont(dlg);
+                dlg.MarcEditor = this;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+            }
         }
 
         void menuItem_Undo(object sender, EventArgs e)
@@ -4805,6 +4822,10 @@ out int count);
 
             // 2025/12/26
             public char HighlightBlankChar { get; set; } = ' ';
+
+            public string ColorThemeName { get; set; }
+
+            public string Font { get; set; }
         }
 
         [Browsable(false)]
@@ -4818,6 +4839,8 @@ out int count);
                 {
                     FieldNameCaptionWidth = this.FieldNameCaptionWidth,
                     HighlightBlankChar = this.HighlightBlankChar,
+                    ColorThemeName = this.ColorThemeName,
+                    Font = GetFontString(this.Font),
                 };
                 return JsonConvert.SerializeObject(state);
             }
@@ -4831,6 +4854,10 @@ out int count);
                     {
                         this.FieldNameCaptionWidth = state.FieldNameCaptionWidth;
                         this.HighlightBlankChar = state.HighlightBlankChar == 0 ? ' ' : state.HighlightBlankChar;
+                        this.ColorThemeName = state.ColorThemeName;
+                        var font = GetFont(state.Font);
+                        if (font != null)
+                            this.Font = font;
                     }
                     finally
                     {
@@ -4838,6 +4865,24 @@ out int count);
                     }
                 }
             }
+        }
+
+        public static Font GetFont(string strFontString)
+        {
+            if (String.IsNullOrEmpty(strFontString) == false)
+            {
+                var converter = TypeDescriptor.GetConverter(typeof(Font));
+
+                return (Font)converter.ConvertFromString(strFontString);
+            }
+
+            return null;
+        }
+
+        public static string GetFontString(Font font)
+        {
+            var converter = TypeDescriptor.GetConverter(typeof(Font));
+            return converter.ConvertToString(font);
         }
 
         public int CalcuTextLineHeight(Graphics g_param)

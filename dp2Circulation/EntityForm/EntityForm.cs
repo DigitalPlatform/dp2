@@ -1,4 +1,5 @@
 ﻿// #define _TEST_PINYIN
+#define MARCEDITOR_UISTATE_FONT
 
 using System;
 using System.Collections;
@@ -16,7 +17,6 @@ using System.Web;
 using System.Windows.Forms;
 using System.Xml;
 using UcsUpload;
-using static dp2Circulation.CallNumberForm;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -35,7 +35,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Z3950;
 using dp2Circulation.Script;
-// using LibraryStudio.Forms;
+using static dp2Circulation.CallNumberForm;
 
 namespace dp2Circulation
 {
@@ -380,11 +380,13 @@ namespace dp2Circulation
 
         // 设置当前窗口的 MARC 字符串
         // 本功能会设置两个编辑器的 MARC 字符串
-        public void SetMarc(string strMarc)
+        public void SetMarc(string strMarc, bool clear_history = false)
         {
             this.TryInvoke(() =>
             {
                 this.m_marcEditor.Marc = strMarc;
+                if (clear_history)
+                    this.m_marcEditor.ClearHistory();
                 this.easyMarcControl1.SetMarc(strMarc);
                 this._marcEditorVersion = 0;
                 this._templateVersion = 0;
@@ -446,9 +448,22 @@ namespace dp2Circulation
 
             this.MemoNumbers = new List<CallNumberForm.MemoTailNumber>();
 
+            /*
             this.m_marcEditor.LostFocus += (o, e) =>
             {
                 Debug.WriteLine("MarcEditor LostFocus");
+            };
+            */
+
+            this.m_marcEditor.KeyTrigger += (s, e) =>
+            {
+                // 当 floatingMessage 层有文字内容的时候，按回车键可以清除浮动层的文字
+                if (e.KeyData == Keys.Return
+                    && string.IsNullOrEmpty(_floatingMessage.Text) == false)
+                {
+                    _floatingMessage.Text = "";
+                    e.Handled = true;
+                }
             };
 
             _worker = new BackgroundWorker();
@@ -1225,7 +1240,7 @@ true);
                 goto ERROR1;
             // this.m_marcEditor.Marc = strMARC;
             // this.m_marcEditor.Changed = true;
-            this.SetMarc(strMARC);
+            this.SetMarc(strMARC, false);
             this.SetMarcChanged(true);
             return;
         ERROR1:
@@ -2298,7 +2313,7 @@ true);
             else if (strSyntax == "marc" || strSyntax == "unimarc" || strSyntax == "usmarc")
             {
                 // this.m_marcEditor.Marc = strRecord;
-                this.SetMarc(strRecord);
+                this.SetMarc(strRecord, false);
             }
 
             if (nRet == -1)
@@ -3840,7 +3855,7 @@ out string strErrorCode)
 
                         // 清空MARC窗，避免误会
                         // this.m_marcEditor.Marc = "012345678901234567890123";
-                        this.SetMarc("012345678901234567890123");
+                        this.SetMarc("012345678901234567890123", true);
                         bMarcEditorContentChanged = true;
 
                         // 如果书目记录不存在，则沿用strBiblioRecPath的路径
@@ -3975,7 +3990,7 @@ out string strErrorCode)
                     if (bMarcEditorContentChanged == false)
                     {
                         this.m_marcEditor.Marc = "012345678901234567890123";
-                        this.SetMarc("012345678901234567890123");
+                        this.SetMarc("012345678901234567890123", true);
                         bMarcEditorContentChanged = true;
                     }
 
@@ -4843,7 +4858,7 @@ out string strErrorCode)
             {
                 strMarc = "012345678901234567890123";
                 // this.m_marcEditor.Marc = strMarc;
-                this.SetMarc(strMarc);
+                this.SetMarc(strMarc, true);
                 this.MarcSyntax = "";
                 return 0;
             }
@@ -4866,7 +4881,7 @@ out string strErrorCode)
                 this.MarcSyntax = strOutMarcSyntax;
                 if (func_replace != null)
                     strMarc = func_replace(strMarc);
-                this.SetMarc(strMarc);
+                this.SetMarc(strMarc, true);
                 return 1;
             }
         }
@@ -4875,7 +4890,7 @@ out string strErrorCode)
         void ClearBiblio()
         {
             // this.m_marcEditor.Marc = "012345678901234567890123";
-            this.SetMarc("012345678901234567890123");
+            this.SetMarc("012345678901234567890123", false);
             this.BiblioChanged = false;
 
             this.MarcSyntax = "";   // 2015/8/12
@@ -11394,7 +11409,7 @@ out strError);
                                 if (dlg.DialogResult == DialogResult.OK)
                                 {
                                     if (this.IsHandleCreated/* 避免 EntityForm 释放后再访问*/)
-                                        this.SetMarc(hostObj.VerifyResult.ChangedMarc);
+                                        this.SetMarc(hostObj.VerifyResult.ChangedMarc, false);
                                 }
                             };
                             dlg.Show(this);
@@ -11439,7 +11454,7 @@ out strError);
 
                                     {
                                         if (new_entity_form.IsHandleCreated/* 避免 EntityForm 释放后再访问*/)
-                                            new_entity_form.SetMarc(newMarc);
+                                            new_entity_form.SetMarc(newMarc, false);
                                     }
                                 }
                             };
@@ -13354,6 +13369,9 @@ out strError);
 
         void LoadFontToMarcEditor()
         {
+#if MARCEDITOR_UISTATE_FONT
+            return;
+#endif
             string strFontString = MainForm.AppInfo.GetString(
                 "marceditor",
                 "fontstring",
@@ -13399,8 +13417,12 @@ this.m_marcEditor.UiState);
 
         }
 
+        // TODO: 改为利用 MarcEditor.UiState 来存储
         void SaveFontForMarcEditor()
         {
+#if MARCEDITOR_UISTATE_FONT
+            return;
+#endif
             {
                 // Create the FontConverter.
                 System.ComponentModel.TypeConverter converter =
@@ -13430,6 +13452,9 @@ this.m_marcEditor.UiState);
 
         void ClearFontForMarcEditor()
         {
+#if MARCEDITOR_UISTATE_FONT
+            return;
+#endif
             {
                 MainForm.AppInfo.SetString(
                     "marceditor",
@@ -13472,6 +13497,11 @@ this.m_marcEditor.UiState);
             }
         }
 
+        public bool SettingVisualStyle()
+        {
+            return this.m_marcEditor.SettingVisualStyle();
+        }
+
         // 
         /// <summary>
         /// 设置字体
@@ -13491,6 +13521,10 @@ this.m_marcEditor.UiState);
         /// </summary>
         public void SetMarcEditFont()
         {
+#if MARCEDITOR_UISTATE_FONT
+            this.m_marcEditor.SettingFont();
+            return;
+#else
             // TODO: “微软雅黑 light”字体为何在打开的 FontDialog 中不能正确定位字体名
             FontDialog dlg = new FontDialog();
             dlg.ShowColor = true;
@@ -13510,6 +13544,7 @@ this.m_marcEditor.UiState);
 
             // 保存到配置文件
             SaveFontForMarcEditor();
+#endif
         }
 
         void dlgMarcEditFont_Apply(object sender, EventArgs e)
@@ -14955,6 +14990,45 @@ this.m_marcEditor.UiState);
                 return true;
             }
 
+            {
+                // 因为被 TriggerCommand() 拦截，Key.Return 无法被这里感知到
+                /*
+                // 当 floatingMessage 层有文字内容的时候，按回车键可以清除浮动层的文字
+                if (keyData == Keys.Return
+                    && string.IsNullOrEmpty(_floatingMessage.Text) == false)
+                {
+                    _floatingMessage.Text = "";
+                    return true;
+                }
+                */
+
+                // 去掉Control/Shift/Alt 以后的纯净的键码
+                Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
+
+                if (keyData == Keys.Escape)
+                {
+                    this.DialogResult = DialogResult.Cancel;
+                    this.Close();
+                    return true;
+                }
+
+                if (keyData == Keys.F2/*
+                || keyData == (Keys.Control | Keys.Shift | Keys.S)*/)
+                {
+                    // 注: Ctrl+S 被用作创建拼音
+                    bool marcedit_has_focus = this.MarcEditor.Focused;
+                    // this.DoSaveAll();
+                    _ = Task.Run(async () =>
+                    {
+                        await DoSaveAllAsync();
+                        if (marcedit_has_focus)
+                            SwitchFocus(MARC_EDITOR);
+                    });
+                    return true;
+                }
+
+            }
+
             return base.ProcessCmdKey(ref m, keyData);
         }
 
@@ -14963,6 +15037,7 @@ this.m_marcEditor.UiState);
             FocusTo(this.textBox_queryWord);
         }
 
+#if OLD
         /// <summary>
         /// 处理对话框键
         /// </summary>
@@ -15085,6 +15160,7 @@ this.m_marcEditor.UiState);
             // return false;
             return base.ProcessDialogKey(keyData);
         }
+#endif
 
         // string m_strVerifyResult = "";
 
@@ -15462,7 +15538,8 @@ this.m_marcEditor.UiState);
 
         private void MarcEditor_SelectedFieldChanged(object sender, EventArgs e)
         {
-            _gen_refresh_trigger.Schedule(() => {
+            _gen_refresh_trigger.Schedule(() =>
+            {
                 this._genData?.RefreshViewerState();
             });
             // this._genData?.RefreshViewerState();
@@ -16229,7 +16306,7 @@ this.m_marcEditor.UiState);
                     if (this.GetMarc() /*this.m_marcEditor.Marc*/ != strOldMarc)
                     {
                         // this.m_marcEditor.Marc = strOldMarc;
-                        this.SetMarc(strOldMarc);
+                        this.SetMarc(strOldMarc, false);
                     }
                     if (this.GetMarcChanged() /*this.m_marcEditor.Changed*/ != bOldChanged)
                     {
@@ -17478,7 +17555,7 @@ this.m_marcEditor.UiState);
             }
 
             if (bChanged == true)
-                this.SetMarc(record.Text);
+                this.SetMarc(record.Text, false);
             else
                 this.MessageBoxShow("没有发现封面图像的 856 字段");
         }
@@ -17766,7 +17843,8 @@ UCS_UPLOAD_CACHE_KEY,
 script_code,
 "",
 record,
-(h) => {
+(h) =>
+{
     h.ClearParameter();
     h.Table = new Hashtable();
     h.Table["recpath"] = this.BiblioRecPath;

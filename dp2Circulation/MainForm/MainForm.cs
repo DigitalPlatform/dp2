@@ -11206,6 +11206,14 @@ this.UserTempDir,
         {
             this.Size = new Size(1024, 768);
         }
+
+        private void MenuItem_visualStyle_Click(object sender, EventArgs e)
+        {
+            if (this.ActiveMdiChild is EntityForm)
+            {
+                ((EntityForm)this.ActiveMdiChild).SettingVisualStyle();
+            }
+        }
     }
 
     /// <summary>

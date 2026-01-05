@@ -448,8 +448,10 @@ namespace DigitalPlatform.Marc
                 {
                     Caption="到下一个字段",
                     KeyData=Keys.Enter,
-                    Handler=(s,e) => this.ToNextField(),
-                    CanExecute=()=> true,
+                    Handler=(s,e) => {
+                        this.ToNextField();
+                    },
+                    CanExecute=()=> true,  
                 },
                 new CommandItem()
                 {
@@ -645,7 +647,17 @@ namespace DigitalPlatform.Marc
 
                 new CommandItem()
                 {
-                    Caption="属性",
+                    Caption="视觉风格 ...",
+                    Handler= (s, e) => this.SettingVisualStyle(),
+                },
+                new CommandItem()
+                {
+                    Caption="字体 ...",
+                    Handler= (s, e) => this.SettingFont(),
+                },
+                new CommandItem()
+                {
+                    Caption="属性 ...",
                     Handler= this.Property_menu,
                 },
             };
