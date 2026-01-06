@@ -196,7 +196,7 @@ TaskScheduler.Default);
             stop?.SetMessage("正在列出全部馆藏地 ...");
             try
             {
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 1/*2*/; i++)
                 {
                     // 注: 两次检索的时间都可能较长，要提供中断的机会
                     long lRet = channel.SearchItem(
