@@ -4825,6 +4825,9 @@ out int count);
 
             public string ColorThemeName { get; set; }
 
+
+            public string CustomColorThemeJson { get; set; }
+
             public string Font { get; set; }
         }
 
@@ -4840,6 +4843,7 @@ out int count);
                     FieldNameCaptionWidth = this.FieldNameCaptionWidth,
                     HighlightBlankChar = this.HighlightBlankChar,
                     ColorThemeName = this.ColorThemeName,
+                    CustomColorThemeJson = this.IsCustomColorTheme() ? (this.GetCustomColorTheme()?.ToJson() ?? string.Empty) : string.Empty,
                     Font = GetFontString(this.Font),
                 };
                 return JsonConvert.SerializeObject(state);
@@ -4854,7 +4858,22 @@ out int count);
                     {
                         this.FieldNameCaptionWidth = state.FieldNameCaptionWidth;
                         this.HighlightBlankChar = state.HighlightBlankChar == 0 ? ' ' : state.HighlightBlankChar;
-                        this.ColorThemeName = state.ColorThemeName;
+                        if (state.ColorThemeName == MarcControl.CUSTOM_THEME_CAPTION)
+                        {
+                            try
+                            {
+                                var theme = ColorTheme.FromJson(state.CustomColorThemeJson);
+                                this.SetCustomColorTheme(theme);
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                        else
+                        {
+                            this.ColorThemeName = state.ColorThemeName;
+                        }
                         var font = GetFont(state.Font);
                         if (font != null)
                             this.Font = font;

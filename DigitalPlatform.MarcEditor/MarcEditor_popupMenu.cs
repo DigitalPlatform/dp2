@@ -50,6 +50,11 @@ namespace DigitalPlatform.Marc
             if (HasSelection() == false)
                 return false;
 
+            if ((Control.ModifierKeys & Keys.Control) != 0)
+            {
+                return base.Copy();
+            }
+
             TextToClipboardFormat(GetSelectedContent());
             return true;
         }
