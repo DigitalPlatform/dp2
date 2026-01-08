@@ -678,7 +678,7 @@ namespace DigitalPlatform.Marc
                 // TODO: 当 caret_field_index 所在的字段改变字段名时也应触发本事件
 
                 var current_index = this.CaretFieldIndex;
-                Debug.WriteLine($"field_index={current_index}");
+                // Debug.WriteLine($"field_index={current_index}");
                 if (current_index != caret_field_index)
                 {
                     caret_field_index = current_index;
@@ -4815,6 +4815,21 @@ out int count);
         }
         #endregion
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public string UiState
+        {
+            get
+            {
+                return base.UiStateJson;
+            }
+            set
+            {
+                base.UiStateJson = value;
+            }
+        }
+#if OLD
         class MarcEditorState
         {
             // 字段名区域像素宽度
@@ -4885,6 +4900,8 @@ out int count);
                 }
             }
         }
+
+#endif
 
         public static Font GetFont(string strFontString)
         {
