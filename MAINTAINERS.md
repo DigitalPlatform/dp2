@@ -4,7 +4,7 @@ MAINTAINERS
 
 
 
-\- 名称: 谢涛 (Xie Tao)
+\- 姓名: 谢涛 (Xie Tao)
 
 \- GitHub: DigitalPlatform
 
