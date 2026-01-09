@@ -15027,6 +15027,41 @@ this.m_marcEditor.UiState);
                     return true;
                 }
 
+                // 复制到(另存)
+                if (keyData == Keys.F3)
+                {
+                    this.toolStripButton1_marcEditor_saveTo_Click(this, null);
+                    return true;
+                }
+
+                if (keyData == Keys.F4)
+                {
+                    this.toolStrip_marcEditor.Enabled = false;
+                    try
+                    {
+                        LoadBiblioTemplate("auto_save");
+                    }
+                    finally
+                    {
+                        this.toolStrip_marcEditor.Enabled = true;
+                    }
+                    return true;
+                }
+
+                // 刷新
+                if (keyData == Keys.F5)
+                {
+                    _ = this.Reload();
+                    return true;
+                }
+
+                // 移动到
+                // 2024/7/8
+                if (keyData == Keys.F7)
+                {
+                    this.toolStripButton_marcEditor_moveTo_Click(this, null);
+                    return true;
+                }
             }
 
             return base.ProcessCmdKey(ref m, keyData);
