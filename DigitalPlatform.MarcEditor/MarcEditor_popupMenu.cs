@@ -693,6 +693,13 @@ namespace DigitalPlatform.Marc
                 },
                 new CommandItem()
                 {
+                    Caption="归一化(&N)",
+                    KeyData=Keys.Control | Keys.N,
+                    Handler=(s,e) => this.NormalizeSelectedText(),
+                    CanExecute=()=> this.HasSelection(),
+                },
+                new CommandItem()
+                {
                     Caption="字段重新排序(&S)",
                     KeyData=Keys.Control | Keys.Q,
                     Handler=(s,e) => this.SortFields(),
