@@ -279,7 +279,6 @@ namespace dp2rms
             this.MarcEditor.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
             this.MarcEditor.NameTextColor = System.Drawing.Color.Blue;
             this.MarcEditor.ReadOnly = false;
-            this.MarcEditor.SelectionStart = -1;
             this.MarcEditor.Size = new System.Drawing.Size(548, 175);
             this.MarcEditor.TabIndex = 0;
             this.MarcEditor.VertGridColor = System.Drawing.Color.LightGray;

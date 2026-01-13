@@ -3172,7 +3172,7 @@ SYS	011528318
                 string strFieldsMarc = MarcEditor.ClipboardToText();
                 strFieldsMarc = ConvertMarcXmlString(strFieldsMarc);
 
-                this.SoftlyPaste(strFieldsMarc);
+                this.Marc = (strFieldsMarc);
 
             }
             catch (Exception ex)
@@ -3198,8 +3198,7 @@ SYS	011528318
             string strFieldsMarc = MarcEditor.ClipboardToText();
             strFieldsMarc = ConvertWorksheetMarcString(strFieldsMarc);
 
-            this.SoftlyPaste(strFieldsMarc);
-
+            this.Marc = strFieldsMarc;
         }
 
         // 从 NLC 粘贴整个记录
@@ -3212,7 +3211,7 @@ SYS	011528318
             string strFieldsMarc = MarcEditor.ClipboardToText();
             strFieldsMarc = ConvertNlcMarcString(strFieldsMarc);
 
-            this.SoftlyPaste(strFieldsMarc);
+            this.Marc = (strFieldsMarc);
         }
 
 
@@ -3225,7 +3224,7 @@ SYS	011528318
             string strFieldsMarc = MarcEditor.ClipboardToText();
             strFieldsMarc = ConvertTcmarcMarcString(strFieldsMarc);
 
-            this.SoftlyPaste(strFieldsMarc);
+            this.Marc = (strFieldsMarc);
         }
 
         // 从dp2OPAC Web粘贴整个记录
@@ -3235,7 +3234,7 @@ SYS	011528318
             string strFieldsMarc = MarcEditor.ClipboardToText();
             strFieldsMarc = ConvertWebMarcString(strFieldsMarc);
 
-            this.SoftlyPaste(strFieldsMarc);
+            this.Marc = (strFieldsMarc);
         }
 
         static string ConvertWebMarcString(string strMARC)
@@ -3580,7 +3579,10 @@ SYS	011528318
             }
 
             // 将 caret 定位刚插入的内容的最后一个字符以右。注意，要在字段结束符以左。
-            var caret_offs = this.SelectionEnd - 1;
+            // var caret_offs = this.SelectionEnd - 1;
+
+            // 在指示符第一字符，或者控制字段的内容第一字符
+            var caret_offs = this.SelectionStart + 3;
             this.Select(caret_offs, caret_offs, caret_offs);
             this.EnsureVisible();
             return true;
@@ -4938,7 +4940,7 @@ out int count);
 
         #region 为了兼容
 
-        public int SelectionStart { get; set; }
+        // public int SelectionStart { get; set; }
 
         #endregion
 
