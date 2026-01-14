@@ -3170,10 +3170,12 @@ SYS	011528318
                 // bool bHasFocus = this.Focused;
 
                 string strFieldsMarc = MarcEditor.ClipboardToText();
+                if (strFieldsMarc == null)
+                    return;
                 strFieldsMarc = ConvertMarcXmlString(strFieldsMarc);
-
+                if (strFieldsMarc == null)
+                    return;
                 this.Marc = (strFieldsMarc);
-
             }
             catch (Exception ex)
             {
@@ -3186,7 +3188,8 @@ SYS	011528318
         void menuItem_PasteFromJinei(object sender, EventArgs e)
         {
             string strFieldsMarc = MarcEditor.ClipboardToTextFormat();
-            this.Marc = strFieldsMarc;
+            if (strFieldsMarc != null)
+                this.Marc = strFieldsMarc;
         }
 
         // 从 工作单 粘贴整个记录
@@ -3196,7 +3199,12 @@ SYS	011528318
             // bool bHasFocus = this.Focused;
 
             string strFieldsMarc = MarcEditor.ClipboardToText();
+            if (strFieldsMarc == null)
+                return;
+
             strFieldsMarc = ConvertWorksheetMarcString(strFieldsMarc);
+            if (strFieldsMarc == null)
+                return;
 
             this.Marc = strFieldsMarc;
         }
@@ -3209,8 +3217,11 @@ SYS	011528318
 
             // 先删除所有字段
             string strFieldsMarc = MarcEditor.ClipboardToText();
+            if (strFieldsMarc == null)
+                return;
             strFieldsMarc = ConvertNlcMarcString(strFieldsMarc);
-
+            if (strFieldsMarc == null)
+                return;
             this.Marc = (strFieldsMarc);
         }
 
@@ -3222,8 +3233,11 @@ SYS	011528318
             bool bHasFocus = this.Focused;
 
             string strFieldsMarc = MarcEditor.ClipboardToText();
+            if (strFieldsMarc == null)
+                return;
             strFieldsMarc = ConvertTcmarcMarcString(strFieldsMarc);
-
+            if (strFieldsMarc == null)
+                return;
             this.Marc = (strFieldsMarc);
         }
 
@@ -3232,8 +3246,11 @@ SYS	011528318
             System.EventArgs e)
         {
             string strFieldsMarc = MarcEditor.ClipboardToText();
+            if (strFieldsMarc == null)
+                return;
             strFieldsMarc = ConvertWebMarcString(strFieldsMarc);
-
+            if (strFieldsMarc == null)
+                return;
             this.Marc = (strFieldsMarc);
         }
 
@@ -3256,7 +3273,8 @@ SYS	011528318
             EventArgs e)
         {
             string strFieldsMarc = MarcEditor.ClipboardToTextFormat();
-            this.SoftlyPaste(strFieldsMarc);
+            if (strFieldsMarc != null)
+                this.SoftlyPaste(strFieldsMarc);
         }
 
         List<Field> GetFields(IEnumerable<int> indices)

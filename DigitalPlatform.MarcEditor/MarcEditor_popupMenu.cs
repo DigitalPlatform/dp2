@@ -64,6 +64,8 @@ namespace DigitalPlatform.Marc
             if (text == null)
             {
                 text = MarcEditor.ClipboardToTextFormat();
+                if (text == null)
+                    return false;
                 // 去掉回车换行符号
                 text = text.Replace("\r\n", "\r");
                 text = text.Replace("\r", "*");
@@ -79,6 +81,8 @@ namespace DigitalPlatform.Marc
             if (text == null)
             {
                 text = MarcEditor.ClipboardToTextFormat();
+                if (text == null)
+                    return false;
                 // 去掉回车换行符号
                 text = text.Replace("\r\n", "\r");
                 text = text.Replace("\r", "*");
@@ -456,7 +460,7 @@ namespace DigitalPlatform.Marc
                     Handler=(s,e) => {
                         this.ToNextField();
                     },
-                    CanExecute=()=> true,  
+                    CanExecute=()=> true,
                 },
                 new CommandItem()
                 {
@@ -513,49 +517,6 @@ namespace DigitalPlatform.Marc
                     },
                 },
 
-                new CommandItem()
-                {
-                    Caption="插入子字段符号",
-                    KeyData=Keys.Control | Keys.I,
-                    Handler=(s,e) => this.InsertSubfieldChar(),
-                    CanExecute=()=> true,
-                },
-                new CommandItem()
-                {
-                    Caption="校验 MARC",
-                    KeyData=Keys.Control | Keys.U,
-                    Handler = (s,e)=>{
-                        var ea = new GenerateDataEventArgs();
-                        this.OnVerifyData(ea);
-                    },
-                    CanExecute=()=> true,
-                },
-                new CommandItem()
-                {
-                    Caption="加拼音",
-                    KeyData=Keys.Control | Keys.S,
-                    Handler = (s,e)=>{
-                        var e1 = new GenerateDataEventArgs(){
-                        ScriptEntry = "AddPinyin",
-                        FocusedControl = this,
-                        };
-                        this.OnGenerateData(e1);
-                    },
-                    CanExecute=()=> true,
-                },
-                new CommandItem()
-                {
-                    Caption="删除拼音",
-                    KeyData=Keys.Control | Keys.D,
-                    Handler = (s,e)=>{
-                        var e1 = new GenerateDataEventArgs(){
-                        ScriptEntry = "RemovePinyin",
-                        FocusedControl = this,
-                        };
-                        this.OnGenerateData(e1);
-                    },
-                    CanExecute=()=> true,
-                },
                 new CommandItem()
                 {
                     Caption="插入新字段(询问字段名) ...",
@@ -621,7 +582,7 @@ namespace DigitalPlatform.Marc
 
                 OrganizeCommand(),
 
-
+                MiscCommand(),
 
                 // 突出显示空格
                 new CommandItem()
@@ -655,17 +616,81 @@ namespace DigitalPlatform.Marc
                     Caption="视觉风格 ...",
                     Handler= (s, e) => this.SettingVisualStyle(),
                 },
+                /*
                 new CommandItem()
                 {
                     Caption="字体 ...",
                     Handler= (s, e) => this.SettingFont(),
                 },
+                */
                 new CommandItem()
                 {
                     Caption="属性 ...",
                     Handler= this.Property_menu,
                 },
             };
+        }
+
+        CommandItem MiscCommand()
+        {
+            return new CommandItem()
+            {
+                Caption = "杂项",
+                SubCommands = new List<CommandItem>()
+                {
+                new CommandItem()
+                {
+                    Caption="插入子字段符号",
+                    KeyData=Keys.Control | Keys.I,
+                    Handler=(s,e) => this.InsertSubfieldChar(),
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="校验 MARC",
+                    KeyData=Keys.Control | Keys.U,
+                    Handler = (s,e)=>{
+                        var ea = new GenerateDataEventArgs();
+                        this.OnVerifyData(ea);
+                    },
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="加拼音",
+                    KeyData=Keys.Control | Keys.S,
+                    Handler = (s,e)=>{
+                        var e1 = new GenerateDataEventArgs(){
+                        ScriptEntry = "AddPinyin",
+                        FocusedControl = this,
+                        };
+                        this.OnGenerateData(e1);
+                    },
+                    CanExecute=()=> true,
+                },
+                new CommandItem()
+                {
+                    Caption="删除拼音",
+                    KeyData=Keys.Control | Keys.D,
+                    Handler = (s,e)=>{
+                        var e1 = new GenerateDataEventArgs(){
+                        ScriptEntry = "RemovePinyin",
+                        FocusedControl = this,
+                        };
+                        this.OnGenerateData(e1);
+                    },
+                    CanExecute=()=> true,
+                },
+
+                new CommandItem()
+                {
+                    Caption="显示十六进制",
+                    Handler=(s,e) => this.DisplayHex(),
+                    CanExecute=()=> this.HasSelection(),
+                },
+                },
+            };
+
         }
 
         CommandItem OrganizeCommand()
