@@ -1039,3 +1039,6 @@ Authenticode timestamping is used by older versions of SignTool (using the "/t" 
 
 ~~~
 快捷出纳窗显示借阅动作的方块，当内容太多时，看不完全部文字。需要能飞出一个 tips 显示全部文字。
+
+~~~
+盘点窗的盘点集列表，要增加点列标题可以排序的功能。

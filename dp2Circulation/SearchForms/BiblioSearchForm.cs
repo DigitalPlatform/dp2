@@ -14012,7 +14012,7 @@ public class MyVerifyHost : VerifyHost
 
             if (bExist == true)
             {
-                if (fileType == "wor" || fileType == "iso")
+                if (fileType == "wor" || fileType == "iso" || fileType == "compact")
                 {
                     DialogResult result = MessageBox.Show(this,
             "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
@@ -14473,7 +14473,7 @@ out string error);
                             targetEncoding,
                             unimarc_modify_100 ? modify_100_style : "",
                             out string changed_marc);
-
+                        
                         changed_marc = changed_marc.Replace(dollar, subfieldDelemeter);
 
                         nRet = MarcUtil.CvtJineiToWorksheet(changed_marc,
@@ -14493,6 +14493,18 @@ out string error);
                         }
                         // bytes.AddRange(targetEncoding.GetBytes("***\r\n"));
                         baTarget = bytes.ToArray();
+                    }
+                    else if (fileType == "compact")
+                    {
+                        // 根据 unimarc_modify_100 先加工 record.Text
+                        ModifyOutputMARC(record.Text,
+                            strMarcSyntax,
+                            targetEncoding,
+                            unimarc_modify_100 ? modify_100_style : "",
+                            out string changed_marc);
+                        if (changed_marc.LastOrDefault() != (char)29)
+                            changed_marc += (char)29;
+                        baTarget = targetEncoding.GetBytes(changed_marc);
                     }
                     else if (fileType == "iso")
                     {

@@ -591,6 +591,7 @@ namespace DigitalPlatform.Marc
         static string[] _filters = new string[] {
             "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc",
             "工作单文件 (*.wor)|*.wor",
+            "紧凑文件 (*.compact)|*.compact",
             "MARCXML文件 (*.marcxml)|*.marcxml",
             "MarcXChange文件 (*.marcxchange)|*.marcxchange",
             "dp2 MARCXML文件 (*.dp2marcxml)|*.dp2marcxml",
@@ -670,7 +671,7 @@ namespace DigitalPlatform.Marc
         }
 
         // 2025.8.21
-        // 文件类型。"iso" "wor" 之一
+        // 文件类型。"iso" "wor" "compact" 之一
         public string FileType
         {
             get
@@ -694,6 +695,8 @@ namespace DigitalPlatform.Marc
                 return "marcxchange";
             if (ext.ToLower() == ".dp2marcxml")
                 return "dp2marcxml";
+            if (ext.ToLower() == ".compact")
+                return "compact";
 
             return "iso";
         }

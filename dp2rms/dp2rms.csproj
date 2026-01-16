@@ -270,24 +270,36 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CopyrightDlg.cs" />
-    <Compile Include="DetailForm.cs" />
+    <Compile Include="CopyrightDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Host.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IsbnHyphenDlg.cs" />
+    <Compile Include="IsbnHyphenDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="IsbnHyphenDlg.Designer.cs">
       <DependentUpon>IsbnHyphenDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="OverwriteOrAppendBackupFileDlg.cs" />
+    <Compile Include="OverwriteOrAppendBackupFileDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OverwriteOrAppendBackupFileDlg.Designer.cs">
       <DependentUpon>OverwriteOrAppendBackupFileDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="PreferenceDlg.cs" />
+    <Compile Include="PreferenceDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -295,16 +307,30 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="QuickPinyin.cs" />
-    <Compile Include="RecordPropertiesDlg.cs" />
-    <Compile Include="ResFileList.cs" />
+    <Compile Include="RecordPropertiesDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResFileList.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ScriptActionCollection.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ScriptActionMenuDlg.cs" />
-    <Compile Include="SearchForm.cs" />
-    <Compile Include="SearchPropertyDlg.cs" />
-    <Compile Include="SelPinyinDlg.cs" />
-    <Compile Include="TestDlg.cs" />
+    <Compile Include="ScriptActionMenuDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchPropertyDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelPinyinDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <EmbeddedResource Include="CopyrightDlg.resx">
       <DependentUpon>CopyrightDlg.cs</DependentUpon>
       <SubType>Designer</SubType>

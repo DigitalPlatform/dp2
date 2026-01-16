@@ -3917,6 +3917,16 @@ MessageBoxDefaultButton.Button1);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("装入实体查询窗 [" + this.listView_inventoryList_records.SelectedItems.Count.ToString() + "] (&E)");
+            menuItem.Click += new System.EventHandler(this.menu_loadSelectedToItemSearchForm_Click);
+            if (this.listView_inventoryList_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("移除事项 [" + this.listView_inventoryList_records.SelectedItems.Count.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedInventoryItems_Click);
             if (this.listView_inventoryList_records.SelectedItems.Count == 0)
@@ -3937,6 +3947,47 @@ MessageBoxDefaultButton.Button1);
             this.listView_inventoryList_records.SelectedIndexChanged -= new System.EventHandler(this.listView_inventoryList_SelectedIndexChanged);
             ListViewUtil.SelectAllLines(this.listView_inventoryList_records);
             this.listView_inventoryList_records.SelectedIndexChanged += new System.EventHandler(this.listView_inventoryList_SelectedIndexChanged);
+        }
+
+        async void menu_loadSelectedToItemSearchForm_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            ItemSearchForm form = null;
+            this.TryInvoke(() =>
+            {
+                form = Program.MainForm.OpenItemSearchForm("item");
+            });
+
+            var barcodes = new List<string>();
+            var items = ListViewUtil.GetSelectedItems(this.listView_inventoryList_records);
+            foreach(var item in items)
+            {
+                nRet = GetItemBarcode(
+item,
+true,
+out string barcode,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                barcodes.Add(barcode);
+            }
+
+            // 往列表中追加若干册条码号
+            // return:
+            //      -1  出错
+            //      0   成功
+            //      1   成功，但有警告，警告在 strError 中返回
+            nRet = form.AppendBarcodes(barcodes, out strError);
+            if (nRet == -1 || nRet == 1)
+            {
+                goto ERROR1;
+            }
+
+            return;
+        ERROR1:
+            form.ShowMessage(strError, "red", true);
         }
 
         void menu_removeSelectedInventoryItems_Click(object sender, EventArgs e)

@@ -287,113 +287,165 @@
     <Compile Include="AdvertiseForm.Designer.cs">
       <DependentUpon>AdvertiseForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Amazon\AmazonQueryControl.cs" />
+    <Compile Include="Amazon\AmazonQueryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Amazon\AmazonQueryControl.Designer.cs">
       <DependentUpon>AmazonQueryControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Amazon\AmazonSearchForm.cs" />
+    <Compile Include="Amazon\AmazonSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Amazon\AmazonSearchForm.Designer.cs">
       <DependentUpon>AmazonSearchForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Amazon\AmazonSearchParametersControl.cs" />
+    <Compile Include="Amazon\AmazonSearchParametersControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Amazon\AmazonSearchParametersControl.Designer.cs">
       <DependentUpon>AmazonSearchParametersControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Amazon\AmazonSimpleQueryControl.cs" />
+    <Compile Include="Amazon\AmazonSimpleQueryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Amazon\AmazonSimpleQueryControl.Designer.cs">
       <DependentUpon>AmazonSimpleQueryControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="BerDebugForm.cs" />
+    <Compile Include="BerDebugForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="BerDebugForm.Designer.cs">
       <DependentUpon>BerDebugForm.cs</DependentUpon>
     </Compile>
     <Compile Include="CharsetTable.cs" />
-    <Compile Include="CopyrightDlg.cs" />
+    <Compile Include="CopyrightDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="DC\DcDetailHost.cs" />
-    <Compile Include="DC\DcForm.cs" />
+    <Compile Include="DC\DcForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="DC\DcForm.Designer.cs">
       <DependentUpon>DcForm.cs</DependentUpon>
     </Compile>
     <Compile Include="dp2\BiblioLoader.cs" />
-    <Compile Include="dp2\BiblioViewerForm.cs" />
+    <Compile Include="dp2\BiblioViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dp2\BiblioViewerForm.Designer.cs">
       <DependentUpon>BiblioViewerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="dp2\BrowseLoader.cs" />
-    <Compile Include="dp2\ChangePasswordForm.cs" />
+    <Compile Include="dp2\ChangePasswordForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dp2\ChangePasswordForm.Designer.cs">
       <DependentUpon>ChangePasswordForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="dp2\DbSelectListDialog.cs" />
+    <Compile Include="dp2\DbSelectListDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dp2\DbSelectListDialog.Designer.cs">
       <DependentUpon>DbSelectListDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="dp2\dp2SearchForm.cs" />
+    <Compile Include="dp2\dp2SearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dp2\dp2SearchForm.Designer.cs">
       <DependentUpon>dp2SearchForm.cs</DependentUpon>
     </Compile>
     <Compile Include="dp2\dp2ServerInfo.cs" />
-    <Compile Include="dp2\DupForm.cs" />
+    <Compile Include="dp2\DupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dp2\DupForm.Designer.cs">
       <DependentUpon>DupForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="dp2\SelectMarcXmlDialog.cs" />
+    <Compile Include="dp2\SelectMarcXmlDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dp2\SelectMarcXmlDialog.Designer.cs">
       <DependentUpon>SelectMarcXmlDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="DTLP\DtlpLogForm.cs" />
+    <Compile Include="DTLP\DtlpLogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="DTLP\DtlpLogForm.Designer.cs">
       <DependentUpon>DtlpLogForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DTLP\DtlpSearchForm.cs" />
+    <Compile Include="DTLP\DtlpSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="DTLP\DtlpSearchForm.Designer.cs">
       <DependentUpon>DtlpSearchForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DTLP\GenerateBatchFileDialog.cs" />
+    <Compile Include="DTLP\GenerateBatchFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="DTLP\GenerateBatchFileDialog.Designer.cs">
       <DependentUpon>GenerateBatchFileDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="IZSearchForm.cs" />
-    <Compile Include="MainForm\FirstRunDialog.cs" />
+    <Compile Include="MainForm\FirstRunDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm\FirstRunDialog.designer.cs">
       <DependentUpon>FirstRunDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Marc8Encoding.cs" />
-    <Compile Include="EaccForm.cs" />
+    <Compile Include="EaccForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="EaccForm.Designer.cs">
       <DependentUpon>EaccForm.cs</DependentUpon>
     </Compile>
     <Compile Include="FilterHost.cs" />
-    <Compile Include="GetEncodingForm.cs" />
+    <Compile Include="GetEncodingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="GetEncodingForm.Designer.cs">
       <DependentUpon>GetEncodingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ISearchForm.cs" />
-    <Compile Include="MainForm\MainForm.cs" />
+    <Compile Include="MainForm\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MarcDetailForm.cs" />
+    <Compile Include="MarcDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MarcDetailForm.Designer.cs">
       <DependentUpon>MarcDetailForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MARC\LinkMarcFile.cs" />
     <Compile Include="MARC\MarcDetailHost.cs" />
-    <Compile Include="MARC\TwoBiblioDialog.cs" />
+    <Compile Include="MARC\TwoBiblioDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MARC\TwoBiblioDialog.designer.cs">
       <DependentUpon>TwoBiblioDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="MdiForm\MyForm.cs" />
-    <Compile Include="OAI\OaiSearchForm.cs" />
+    <Compile Include="MdiForm\MyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OAI\OaiSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OAI\OaiSearchForm.Designer.cs">
       <DependentUpon>OaiSearchForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="OAI\OaiServerPropertyForm.cs" />
+    <Compile Include="OAI\OaiServerPropertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OAI\OaiServerPropertyForm.Designer.cs">
       <DependentUpon>OaiServerPropertyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="OAI\OaiTargeControl.cs" />
+    <Compile Include="OAI\OaiTargeControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="OAI\OaiTargeControl.Designer.cs">
       <DependentUpon>OaiTargeControl.cs</DependentUpon>
     </Compile>
@@ -652,64 +704,94 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="SaveRecordDlg.cs" />
+    <Compile Include="SaveRecordDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SaveRecordDlg.Designer.cs">
       <DependentUpon>SaveRecordDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="Script\MarcQueryHost.cs" />
-    <Compile Include="Script\ZhongcihaoForm.cs" />
+    <Compile Include="Script\ZhongcihaoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Script\ZhongcihaoForm.designer.cs">
       <DependentUpon>ZhongcihaoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SelectProtocolDialog.cs" />
+    <Compile Include="SelectProtocolDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SelectProtocolDialog.Designer.cs">
       <DependentUpon>SelectProtocolDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SRU\SruConfig.cs" />
-    <Compile Include="SRU\SruSearchForm.cs" />
+    <Compile Include="SRU\SruSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SRU\SruSearchForm.Designer.cs">
       <DependentUpon>SruSearchForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SRU\WebClientEx.cs" />
-    <Compile Include="SystemCfgForm.cs" />
+    <Compile Include="SRU\WebClientEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SystemCfgForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SystemCfgForm.Designer.cs">
       <DependentUpon>SystemCfgForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="TestForm.cs" />
+    <Compile Include="TestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="TestForm.Designer.cs">
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
     <Compile Include="VirtualItemCollection.cs" />
-    <Compile Include="XmlDetailForm.cs" />
+    <Compile Include="XmlDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="XmlDetailForm.Designer.cs">
       <DependentUpon>XmlDetailForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="XmlViewerForm.cs" />
+    <Compile Include="XmlViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="XmlViewerForm.Designer.cs">
       <DependentUpon>XmlViewerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Z39.50\SelectLogRecordDlg.cs" />
+    <Compile Include="Z39.50\SelectLogRecordDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Z39.50\SelectLogRecordDlg.Designer.cs">
       <DependentUpon>SelectLogRecordDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="Z39.50\ZBatchSearchForm.cs" />
+    <Compile Include="Z39.50\ZBatchSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Z39.50\ZBatchSearchForm.Designer.cs">
       <DependentUpon>ZBatchSearchForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Z39.50\ZConnection.cs" />
-    <Compile Include="Z39.50\ZDirPopertyForm.cs" />
+    <Compile Include="Z39.50\ZDirPopertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Z39.50\ZDirPopertyForm.Designer.cs">
       <DependentUpon>ZDirPopertyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Z39.50\ZQueryControl.cs" />
+    <Compile Include="Z39.50\ZQueryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Z39.50\ZQueryControl.Designer.cs">
       <DependentUpon>ZQueryControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Z39.50\ZSearchForm.cs" />
+    <Compile Include="Z39.50\ZSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Z39.50\ZSearchForm.Designer.cs">
       <DependentUpon>ZSearchForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Z39.50\ZTargetControl.cs" />
+    <Compile Include="Z39.50\ZTargetControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Z39.50\ZTargetControl.Designer.cs">
       <DependentUpon>ZTargetControl.cs</DependentUpon>
     </Compile>

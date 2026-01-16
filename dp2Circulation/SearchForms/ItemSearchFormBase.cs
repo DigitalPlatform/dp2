@@ -80,7 +80,7 @@ namespace dp2Circulation
         /// <param name="bWarning">当需要时，是否出现警告对话框</param>
         /// <param name="strBarcode">返回册条码号</param>
         /// <param name="strError">返回出错信息</param>
-        /// <returns>01: 出错; 0: 成功</returns>
+        /// <returns>-1: 出错; 0: 成功</returns>
         public int GetItemBarcode(
             ListViewItem item,
             bool bWarning,
