@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using static LibraryStudio.Forms.MarcField;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace DigitalPlatform.Marc
 {
@@ -660,6 +661,7 @@ namespace DigitalPlatform.Marc
             // 该调用是 Windows.Forms 窗体设计器所必需的。
             InitializeComponent();
 
+            /*
             this.GetFieldCaption = (field) =>
             {
                 if (field.IsHeader)
@@ -670,6 +672,13 @@ namespace DigitalPlatform.Marc
                 }
                 return GetCachedLabel(field.FieldName);
             };
+            */
+
+            this.GetStructure = (parent, name, level) =>
+            {
+                return GetUnitInfo(parent, name, level);
+            };
+
             int caret_field_index = -1;
             this.CaretMoved += (sender, e) =>
             {
@@ -2407,6 +2416,103 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
 
             return strValue;
+        }
+
+        UnitInfo BuildUnitInfo(XmlElement e, int level)
+        {
+            if (level <= 0)
+                throw new ArgumentException("level 不应小于等于 0");
+
+            var name = e.GetAttribute("name");
+            var nodeProperty = e.SelectSingleNode("Property") as XmlElement;
+            string caption = "";
+            if (nodeProperty != null)
+            {
+                caption = DomUtil.GetXmlLangedNodeText(
+            this.Lang,
+            nodeProperty,
+            "Label",
+            true);
+                if (String.IsNullOrEmpty(caption) == true)
+                    caption = "???";
+            }
+
+            UnitType type = UnitType.Unkown;
+            int length = 0;
+            var element_name = e.Name;
+            if (element_name == "Field")
+                type = UnitType.Field;
+            else if (element_name == "Subfield")
+                type = UnitType.Subfield;
+            if (element_name == "Char")
+                type = UnitType.Chars;
+
+            if (Int32.TryParse(e.GetAttribute("length"), out length) == false)
+            {
+                length = 0;
+                if (name.Contains("/"))
+                {
+                    var parts = StringUtil.ParseTwoPart(name, "/");
+                    var number = parts[1];
+                    if (Int32.TryParse(number, out length) == false)
+                    {
+                        length = 0;
+                    }
+                }
+            }
+
+            var result = new UnitInfo
+            {
+                Caption = caption,
+                Name = name,
+                Length = length,
+                Type = type
+            };
+
+            if (level > 1)
+            {
+                result.SubUnits = new List<UnitInfo>();
+                var nodes = e.SelectNodes("*");
+                foreach(XmlElement child in nodes)
+                {
+                    if (child.Name == "Property")
+                        continue;
+                    var info = BuildUnitInfo(child, level - 1);
+                    if (info != null)
+                        result.SubUnits.Add(info);
+                }
+            }
+
+            return result;
+        }
+
+        UnitInfo GetUnitInfo(IBox parent, string name, int level)
+        {
+            if (this.MarcDefDom == null
+                || this.MarcDefDom.DocumentElement == null)
+                return null;
+            string xpath = "";
+            if (parent is LibraryStudio.Forms.MarcRecord)
+            {
+                if (name == null)
+                    name = "###";
+                xpath = $"Field[@name='{name}']";
+
+            }
+            else if (parent is LibraryStudio.Forms.MarcField)
+            {
+                // 当前为子字段
+                var field = parent as LibraryStudio.Forms.MarcField;
+                var parent_name = field.FieldName;
+                xpath = $"Field[@name='{parent_name}']/Subfield[@name='{name}']";
+            }
+            else
+                return null;
+
+            var e = this.MarcDefDom.DocumentElement.SelectSingleNode(xpath) as XmlElement;
+            if (e == null)
+                return null;
+            return BuildUnitInfo(e, level);
         }
 
 #if NO

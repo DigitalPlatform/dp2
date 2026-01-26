@@ -47,110 +47,108 @@
             this.MenuItem_file});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(16, 5, 0, 5);
-            this.menuStrip1.Size = new System.Drawing.Size(2133, 72);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(13, 4, 0, 4);
+            this.menuStrip1.Size = new System.Drawing.Size(1778, 60);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // MenuItem_file
             // 
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(120, 50);
+            this.MenuItem_file.Size = new System.Drawing.Size(101, 52);
             this.MenuItem_file.Text = "文件";
             // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 72);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 60);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(2133, 75);
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 7, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(1778, 62);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.statusStrip1.Location = new System.Drawing.Point(0, 1178);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 978);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(3, 0, 37, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(2133, 22);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 31, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(1778, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(1339, 552);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(840, 903);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(260, 62);
+            this.textBox1.Size = new System.Drawing.Size(217, 53);
             this.textBox1.TabIndex = 4;
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(1413, 357);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
+            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox2.Location = new System.Drawing.Point(590, 903);
+            this.textBox2.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(260, 62);
+            this.textBox2.Size = new System.Drawing.Size(217, 53);
             this.textBox2.TabIndex = 8;
             // 
             // marcEditor1
             // 
+            this.marcEditor1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.marcEditor1.AutoScroll = true;
-            this.marcEditor1.AutoScrollMinSize = new System.Drawing.Size(1099, 86);
+            this.marcEditor1.AutoScrollMinSize = new System.Drawing.Size(1753, 70);
             this.marcEditor1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.marcEditor1.CaptionFont = new System.Drawing.Font("宋体", 9F);
             this.marcEditor1.ClientBoundsWidth = 0;
-            this.marcEditor1.Content = "????????????????????????";
-            this.marcEditor1.ContentBackColor = System.Drawing.SystemColors.Window;
-            this.marcEditor1.ContentTextColor = System.Drawing.SystemColors.WindowText;
-            this.marcEditor1.CurrentImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.marcEditor1.FocusedField = null;
-            this.marcEditor1.FocusedFieldIndex = 0;
+            this.marcEditor1.ColorThemeName = null;
+            this.marcEditor1.DeleteKeyStyle = LibraryStudio.Forms.DeleteKeyStyle.DeleteKeyAsDeleteField;
+            this.marcEditor1.FixedSizeFont = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Bold);
             this.marcEditor1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.marcEditor1.HorzGridColor = System.Drawing.Color.LightGray;
-            this.marcEditor1.IndicatorBackColor = System.Drawing.SystemColors.Window;
-            this.marcEditor1.IndicatorBackColorDisabled = System.Drawing.SystemColors.Control;
-            this.marcEditor1.IndicatorTextColor = System.Drawing.Color.Green;
-            this.marcEditor1.Lang = "zh";
-            this.marcEditor1.Location = new System.Drawing.Point(0, 152);
+            this.marcEditor1.HighlightBlankChar = ' ';
+            this.marcEditor1.Location = new System.Drawing.Point(0, 127);
             this.marcEditor1.Marc = "????????????????????????";
-            this.marcEditor1.MarcDefDom = null;
-            this.marcEditor1.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
+            this.marcEditor1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
             this.marcEditor1.Name = "marcEditor1";
-            this.marcEditor1.NameBackColor = System.Drawing.SystemColors.Window;
-            this.marcEditor1.NameCaptionBackColor = System.Drawing.SystemColors.Info;
-            this.marcEditor1.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
-            this.marcEditor1.NameTextColor = System.Drawing.Color.Blue;
+            this.marcEditor1.PaddingChar = ' ';
+            this.marcEditor1.PadWhileEditing = true;
             this.marcEditor1.ReadOnly = false;
-            this.marcEditor1.SelectedBackColor = System.Drawing.SystemColors.Highlight;
-            this.marcEditor1.SelectedTextColor = System.Drawing.SystemColors.HighlightText;
-            this.marcEditor1.Size = new System.Drawing.Size(1099, 896);
+            this.marcEditor1.Size = new System.Drawing.Size(1762, 732);
             this.marcEditor1.TabIndex = 3;
-            this.marcEditor1.UiState = "{\"FieldNameCaptionWidth\":100}";
-            this.marcEditor1.VertGridColor = System.Drawing.Color.LightGray;
             this.marcEditor1.GetConfigFile += new DigitalPlatform.Marc.GetConfigFileEventHandle(this.marcEditor1_GetConfigFile);
             this.marcEditor1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.marcEditor1_GetConfigDom);
             // 
             // marcControl1
             // 
+            this.marcControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.marcControl1.AutoScroll = true;
-            this.marcControl1.AutoScrollMinSize = new System.Drawing.Size(744, 55);
+            this.marcControl1.AutoScrollMinSize = new System.Drawing.Size(611, 34);
             this.marcControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.marcControl1.Changed = false;
+            this.marcControl1.CaptionFont = new System.Drawing.Font("宋体", 12F);
             this.marcControl1.ClientBoundsWidth = 0;
+            this.marcControl1.ColorThemeName = null;
             this.marcControl1.Content = "";
-            this.marcControl1.Location = new System.Drawing.Point(1316, 741);
-            this.marcControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.marcControl1.DeleteKeyStyle = LibraryStudio.Forms.DeleteKeyStyle.DeleteFieldTerminator;
+            this.marcControl1.FixedSizeFont = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Bold);
+            this.marcControl1.HighlightBlankChar = ' ';
+            this.marcControl1.Location = new System.Drawing.Point(1097, 869);
             this.marcControl1.Name = "marcControl1";
+            this.marcControl1.PaddingChar = ' ';
+            this.marcControl1.PadWhileEditing = false;
             this.marcControl1.ReadOnly = false;
-            this.marcControl1.Size = new System.Drawing.Size(744, 406);
+            this.marcControl1.Size = new System.Drawing.Size(620, 87);
             this.marcControl1.TabIndex = 9;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(288F, 288F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(240F, 240F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(2133, 1200);
+            this.ClientSize = new System.Drawing.Size(1778, 1000);
             this.Controls.Add(this.marcControl1);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
@@ -160,7 +158,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
+            this.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);

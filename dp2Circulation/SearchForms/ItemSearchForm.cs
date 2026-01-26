@@ -9051,13 +9051,21 @@ TaskScheduler.Default);
                     // return:
                     //      false   出现错误
                     //      true    成功
-                    if (FillLineByBarcode(looping.Progress, channel, strBarcode, item) == true)
+                    if (FillLineByBarcode(looping.Progress,
+                        channel, 
+                        strBarcode,
+                        item,
+                        2) == true)
                     {
                         this.listView_records.Items.Add(item);
                         items.Add(item);
                     }
                     else
-                        errors.Add(item.SubItems[2].Text);
+                    {
+                        var error = ListViewUtil.GetItemText(item, 
+                            2);
+                        errors.Add(error/*item.SubItems[2].Text*/);
+                    }
 
                     i++;
                 }

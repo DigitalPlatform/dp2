@@ -2248,7 +2248,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
             return 1;
         }
 
-        const int COLUMN_ERRORINFO = 0;
+        // public const int COLUMN_ERRORINFO = 0;
 
         // return:
         //      false   出现错误
@@ -2257,7 +2257,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
             Stop stop,
             LibraryChannel channel,
             string strBarcode,
-            ListViewItem item)
+            ListViewItem item,
+            int COLUMN_ERRORINFO = 0)
         {
             string strError = "";
             string strBiblioRecPath = "";
