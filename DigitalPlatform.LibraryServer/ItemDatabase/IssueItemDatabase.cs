@@ -419,7 +419,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (changed == false)
             {
-                if (outof_range)
+                if (outof_range || bChangePartDeniedParam)
                 {
                     strError = "全部修改都没有兑现";
                     if (string.IsNullOrEmpty(strWarning) == false)

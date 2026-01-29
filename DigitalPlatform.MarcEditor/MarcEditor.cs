@@ -3,7 +3,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using LibraryStudio.Forms;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -19,8 +19,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using static LibraryStudio.Forms.MarcField;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace DigitalPlatform.Marc
 {
@@ -674,9 +672,14 @@ namespace DigitalPlatform.Marc
             };
             */
 
-            this.GetStructure = (parent, name, level) =>
+            this.GetStructure = (path, level) =>
             {
-                return GetUnitInfo(parent, name, level);
+                return GetUnitInfo(path, level);
+            };
+
+            this.GetValueList = (path) =>
+            {
+                return GetValues(path);
             };
 
             int caret_field_index = -1;
@@ -2437,7 +2440,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     caption = "???";
             }
 
-            UnitType type = UnitType.Unkown;
+            UnitType type = UnitType.Unknown;
             int length = 0;
             var element_name = e.Name;
             if (element_name == "Field")
@@ -2473,7 +2476,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 result.SubUnits = new List<UnitInfo>();
                 var nodes = e.SelectNodes("*");
-                foreach(XmlElement child in nodes)
+                foreach (XmlElement child in nodes)
                 {
                     if (child.Name == "Property")
                         continue;
@@ -2486,11 +2489,150 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             return result;
         }
 
-        UnitInfo GetUnitInfo(IBox parent, string name, int level)
+        IEnumerable<LibraryStudio.Forms.ValueItem> GetValues(UnitNode[] path)
+        {
+            if (this.MarcDefDom == null
+    || this.MarcDefDom.DocumentElement == null)
+                yield break;
+            if (path == null || path.Length == 0)
+                yield break;
+
+            var xpath = BuildXPath(path) + "/Property/ValueList";
+            var nodes = this.MarcDefDom.DocumentElement.SelectNodes(xpath);
+            if (nodes.Count == 0)
+                yield break;
+            var ret = GetValueListNodes(nodes.Cast<XmlElement>(),
+    out List<XmlNode> valueListNodes,
+    out string strError);
+            if (ret == -1)
+                throw new Exception(strError);
+
+            foreach (XmlNode valueListNode in valueListNodes)
+            {
+                XmlNodeList itemList = valueListNode.SelectNodes("Item");
+                foreach (XmlNode itemNode in itemList)
+                {
+                    string strItemLable = "";
+
+                    // 从一个元素的下级的多个<strElementName>元素中, 提取语言符合的XmlNode的InnerText
+                    // parameters:
+                    //      bReturnFirstNode    如果找不到相关语言的，是否返回第一个<strElementName>
+                    strItemLable = DomUtil.GetXmlLangedNodeText(
+                this.Lang,
+                itemNode,
+                "Label",
+                true);
+                    if (string.IsNullOrEmpty(strItemLable) == true)
+                        strItemLable = "????????";
+
+                    XmlNode itemValueNode = itemNode.SelectSingleNode("Value");
+                    string strItemValue = DomUtil.GetNodeText(itemValueNode);
+
+                    yield return new LibraryStudio.Forms.ValueItem
+                    {
+                        Value = strItemValue,
+                        Comment = strItemLable
+                    };
+                }
+            }
+        }
+
+        // return:
+        //		-1	出错
+        //		0	未找到对应的ValueList
+        //		1	找到
+        int GetValueListNodes(IEnumerable<XmlElement> nodes,
+            out List<XmlNode> valueListNodes,
+            out string strError)
+        {
+            valueListNodes = new List<XmlNode>();
+            strError = "";
+
+            if (nodes == null || nodes.Any() == false)
+                return 0;
+
+            foreach (XmlNode node in nodes)
+            {
+                valueListNodes.Add(node);
+            }
+
+            //string strXPath = "Field[@name='" + strFieldName + "']/Subfield[@name='" + strSubfieldName + "']/Property/ValueList";
+            //XmlNodeList nodes = this.MarcDefDom.DocumentElement.SelectNodes(strXPath);
+            //if (nodes.Count == 0)
+            //    return 0;
+
+            while (true)
+            {
+                bool bFoundRef = false;
+
+                for (int i = 0; i < valueListNodes.Count; i++)
+                {
+                    XmlNode node = valueListNodes[i];
+                    //找ref
+                    string strRef = DomUtil.GetAttr(node, "ref");
+                    if (string.IsNullOrEmpty(strRef) == true)
+                        continue;
+
+                    bFoundRef = true;
+
+                    // 未挂接事件
+                    if (this.GetConfigDom == null)
+                        return 0;
+
+                    GetConfigDomEventArgs e = new GetConfigDomEventArgs();
+                    e.Path = strRef;
+                    e.XmlDocument = null;
+
+                    this.GetConfigDom(this, e);
+                    if (e.ErrorInfo != "")
+                    {
+                        strError = $"获取 '{node.OuterXml}' 对应的ValueList出错，原因:{e.ErrorInfo}";
+                        return -1;
+                    }
+                    if (e.XmlDocument == null)
+                        return 0;
+
+                    int nIndex = strRef.IndexOf('#');
+                    string strSource = "";
+                    string strValueListName = "";
+                    if (nIndex != -1)
+                    {
+                        strSource = strRef.Substring(0, nIndex);
+                        strValueListName = strRef.Substring(nIndex + 1);
+                    }
+                    else
+                    {
+                        strValueListName = strRef;
+                    }
+
+                    // 把原有的node从数组中删除
+                    valueListNodes.Remove(node);
+                    i--;
+
+                    XmlNode node_valuelist = e.XmlDocument.SelectSingleNode("//ValueList[@name='" + strValueListName + "']");
+                    if (node_valuelist == null)
+                    {
+                        strError = "未找到路径为'" + strRef + "'的节点。";
+                        return -1;
+                    }
+                    valueListNodes.Add(node_valuelist);
+                }
+
+                if (bFoundRef == false)
+                    break;
+            }
+            return 1;
+        }
+
+
+        UnitInfo GetUnitInfo(UnitNode[] path, int level)
         {
             if (this.MarcDefDom == null
                 || this.MarcDefDom.DocumentElement == null)
                 return null;
+            if (path == null || path.Length == 0)
+                return null;
+            /*
             string xpath = "";
             if (parent is LibraryStudio.Forms.MarcRecord)
             {
@@ -2508,11 +2650,39 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
             else
                 return null;
+            */
+            var xpath = BuildXPath(path);
 
             var e = this.MarcDefDom.DocumentElement.SelectSingleNode(xpath) as XmlElement;
             if (e == null)
                 return null;
             return BuildUnitInfo(e, level);
+        }
+
+        static string BuildXPath(UnitNode[] path)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (var node in path)
+            {
+                if (node.Type == UnitType.Record)
+                    continue;
+                if (text.Length > 0)
+                    text.Append("/");
+                text.Append($"{ElementName(node.Type)}[@name='{node.Name}']");
+            }
+
+            return text.ToString();
+        }
+
+        static string ElementName(UnitType type)
+        {
+            if (type == UnitType.Field)
+                return "Field";
+            else if (type == UnitType.Subfield)
+                return "Subfield";
+            else if (type == UnitType.Subfield)
+                return "Char";
+            return "*";
         }
 
 #if NO

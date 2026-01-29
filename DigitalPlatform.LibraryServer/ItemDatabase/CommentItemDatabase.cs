@@ -299,7 +299,7 @@ unprocessed_element_names.Except(_auto_maintain_comment_element_names)));
 
             if (changed == false)
             {
-                if (outof_range)
+                if (outof_range || bChangePartDeniedParam)
                 {
                     strError = "全部修改都没有兑现";
                     if (string.IsNullOrEmpty(strWarning) == false)

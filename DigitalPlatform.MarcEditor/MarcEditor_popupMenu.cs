@@ -458,7 +458,10 @@ namespace DigitalPlatform.Marc
                     Caption="到下一个字段",
                     KeyData=Keys.Enter,
                     Handler=(s,e) => {
-                        this.ToNextField();
+                        if (this.ValueListWindowOpened())
+                            TriggerEvenArgs.SetHandled(e, false);
+                        else
+                            this.ToNextField();
                     },
                     CanExecute=()=> true,
                 },
@@ -583,6 +586,19 @@ namespace DigitalPlatform.Marc
                 OrganizeCommand(),
 
                 MiscCommand(),
+
+                // 值列表小窗口浮动
+                new CommandItem()
+                {
+                    Refresh = (o)=>{
+                        o.Checked = this.ValueListFloating;
+                        return null;
+                    },
+                    Caption="值列表浮动显示",
+                    Handler= (s, e)=>{
+                        this.ValueListFloating = !this.ValueListFloating;
+                    },
+                },
 
                 // 突出显示空格
                 new CommandItem()
