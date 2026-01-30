@@ -48,23 +48,23 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(13, 4, 0, 4);
-            this.menuStrip1.Size = new System.Drawing.Size(1778, 60);
+            this.menuStrip1.Size = new System.Drawing.Size(1778, 51);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // MenuItem_file
             // 
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(101, 52);
+            this.MenuItem_file.Size = new System.Drawing.Size(101, 43);
             this.MenuItem_file.Text = "文件";
             // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 60);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 51);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 7, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(1778, 62);
+            this.toolStrip1.Size = new System.Drawing.Size(1778, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -82,7 +82,7 @@
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.Location = new System.Drawing.Point(840, 903);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(7);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(217, 53);
             this.textBox1.TabIndex = 4;
@@ -91,7 +91,7 @@
             // 
             this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox2.Location = new System.Drawing.Point(590, 903);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.textBox2.Margin = new System.Windows.Forms.Padding(7);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(217, 53);
             this.textBox2.TabIndex = 8;
@@ -113,13 +113,14 @@
             this.marcEditor1.HighlightBlankChar = ' ';
             this.marcEditor1.Location = new System.Drawing.Point(0, 127);
             this.marcEditor1.Marc = "????????????????????????";
-            this.marcEditor1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.marcEditor1.Margin = new System.Windows.Forms.Padding(7);
             this.marcEditor1.Name = "marcEditor1";
             this.marcEditor1.PaddingChar = ' ';
             this.marcEditor1.PadWhileEditing = true;
             this.marcEditor1.ReadOnly = false;
             this.marcEditor1.Size = new System.Drawing.Size(1762, 732);
             this.marcEditor1.TabIndex = 3;
+            this.marcEditor1.ValueListFloating = false;
             this.marcEditor1.GetConfigFile += new DigitalPlatform.Marc.GetConfigFileEventHandle(this.marcEditor1_GetConfigFile);
             this.marcEditor1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.marcEditor1_GetConfigDom);
             // 
@@ -143,6 +144,7 @@
             this.marcControl1.ReadOnly = false;
             this.marcControl1.Size = new System.Drawing.Size(620, 87);
             this.marcControl1.TabIndex = 9;
+            this.marcControl1.ValueListFloating = false;
             // 
             // Form1
             // 
@@ -158,9 +160,10 @@
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.Margin = new System.Windows.Forms.Padding(7);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

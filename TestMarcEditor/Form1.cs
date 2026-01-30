@@ -73,6 +73,16 @@ namespace TestMarcEditor
 );
 
             this.marcControl1.Content = "012345678901234567890123";
+
+            AppUtility.LoadState(this.marcEditor1);
+            AppUtility.LoadMarc(this.marcEditor1);
+
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            AppUtility.SaveMarc(this.marcEditor1);
+            AppUtility.SaveState(this.marcEditor1);
         }
     }
 }

@@ -2528,6 +2528,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     XmlNode itemValueNode = itemNode.SelectSingleNode("Value");
                     string strItemValue = DomUtil.GetNodeText(itemValueNode);
 
+                    strItemValue = strItemValue?.Replace('_', ' ');
+
                     yield return new LibraryStudio.Forms.ValueItem
                     {
                         Value = strItemValue,
