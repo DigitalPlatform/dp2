@@ -2663,6 +2663,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
         static string BuildXPath(UnitNode[] path)
         {
+            AdjustPath();
+
             StringBuilder text = new StringBuilder();
             foreach (var node in path)
             {
@@ -2674,6 +2676,26 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
 
             return text.ToString();
+
+            // 去掉路径中除了最后一个 Field 以外的其它 Field
+            void AdjustPath()
+            {
+                if (path.Count(o => o.Type == UnitType.Field) > 1)
+                {
+                    var last = path.Last(o => o.Type == UnitType.Field);
+                    var results = new List<UnitNode>();
+                    foreach (var node in path)
+                    {
+                        if (node.Type == UnitType.Field && node != last)
+                        {
+
+                        }
+                        else
+                            results.Add(node);
+                    }
+                    path = results.ToArray();
+                }
+            }
         }
 
         static string ElementName(UnitType type)

@@ -44,11 +44,13 @@ namespace TestMarcEditor
             // 这个事件暂时用不到
         }
 
+        public string MarcSyntax = "usmarc";   // unimarc usmarc 之一
+
         private void marcEditor1_GetConfigDom(object sender, DigitalPlatform.Marc.GetConfigDomEventArgs e)
         {
             // e.Path 中可能是 "marcdef" 或 "marcvaluelist"
             string filename = Path.Combine(Environment.CurrentDirectory,
-                e.Path);
+                this.MarcSyntax + "_" + e.Path);
             if (filename.Contains("#"))
             {
                 StringUtil.ParseTwoPart(filename,
