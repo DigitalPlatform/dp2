@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
@@ -674,12 +675,14 @@ namespace DigitalPlatform.Marc
 
             this.GetStructure = (path, level) =>
             {
-                return GetUnitInfo(path, level);
+                // 可能抛出异常
+                return GetUnitInfo(path, level, dlg_GetTemplateDef);
             };
 
             this.GetValueList = (path) =>
             {
-                return GetValues(path);
+                // 可能抛出异常
+                return GetValues(path, dlg_GetTemplateDef);
             };
 
             int caret_field_index = -1;
@@ -2464,12 +2467,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 }
             }
 
+            bool sensitive = nodeProperty?.SelectSingleNode("sensitive") != null;
+
             var result = new UnitInfo
             {
                 Caption = caption,
                 Name = name,
                 Length = length,
-                Type = type
+                Type = type,
+                Sensitive = sensitive,
             };
 
             if (level > 1)
@@ -2484,12 +2490,20 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     if (info != null)
                         result.SubUnits.Add(info);
                 }
+
+                // 2026/2/7
+                // 兼容旧的 (usmarc) marcdef 配置文件。它们的 chars 的上级 field 或 subfield 没有标注 sensitive
+                // 汇总 sensitive。只有当 result 是 Chars 直接上级对象时才这样汇总
+                if (result.Sensitive == false
+                    && result.SubUnits.Where(o => o.Type == UnitType.Chars && o.Sensitive).Any())
+                    result.Sensitive = true;
             }
 
             return result;
         }
 
-        IEnumerable<LibraryStudio.Forms.ValueItem> GetValues(UnitNode[] path)
+        IEnumerable<LibraryStudio.Forms.ValueItem> GetValues(UnitNode[] path,
+            GetTemplateDefFunc func_getDef)
         {
             if (this.MarcDefDom == null
     || this.MarcDefDom.DocumentElement == null)
@@ -2497,8 +2511,16 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             if (path == null || path.Length == 0)
                 yield break;
 
-            var xpath = BuildXPath(path) + "/Property/ValueList";
-            var nodes = this.MarcDefDom.DocumentElement.SelectNodes(xpath);
+            //var xpath = BuildXPath(path) + "/Property/ValueList";
+            //var nodes = this.MarcDefDom.DocumentElement.SelectNodes(xpath);
+
+            var levels = BuildXPath(path);
+            var e = FindElement(levels,
+func_getDef);
+            if (e == null)
+                yield break;
+
+            var nodes = e.SelectNodes("Property/ValueList");
             if (nodes.Count == 0)
                 yield break;
             var ret = GetValueListNodes(nodes.Cast<XmlElement>(),
@@ -2627,7 +2649,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         }
 
 
-        UnitInfo GetUnitInfo(UnitNode[] path, int level)
+        UnitInfo GetUnitInfo(UnitNode[] path,
+            int level,
+            GetTemplateDefFunc func_getDef)
         {
             if (this.MarcDefDom == null
                 || this.MarcDefDom.DocumentElement == null)
@@ -2653,14 +2677,133 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             else
                 return null;
             */
-            var xpath = BuildXPath(path);
 
-            var e = this.MarcDefDom.DocumentElement.SelectSingleNode(xpath) as XmlElement;
+            // 每一级的 Path 要单独 select 出来，如果出现重复要进行过滤
+            var levels = BuildXPath(path);
+
+            //var e = this.MarcDefDom.DocumentElement.SelectSingleNode(xpath) as XmlElement;
+            //if (e == null)
+            //    return null;
+
+            var e = FindElement(levels,
+    func_getDef);
             if (e == null)
                 return null;
             return BuildUnitInfo(e, level);
         }
 
+        public delegate void GetTemplateDefFunc(object sender, GetTemplateDefEventArgs e);
+
+        // 可能抛出异常
+        XmlElement FindElement(LevelInfo[] levels,
+            GetTemplateDefFunc func_getDef)
+        {
+            XmlElement current = this.MarcDefDom.DocumentElement;
+            int i = 0;
+            foreach (var level in levels)
+            {
+                var nodes = current.SelectNodes(level.XPath);
+                if (nodes.Count == 0)
+                    return null;
+                if (nodes.Count > 1 && func_getDef != null)
+                {
+                    var field_name = "";
+                    var subfield_name = "";
+
+                    if (level.Node.Type == UnitType.Field)
+                    {
+                        field_name = level.Node.Name;
+                    }
+                    else if (level.Node.Type == UnitType.Subfield)
+                    {
+                        if (i <= 0)
+                            throw new ArgumentException($"当前层 index ({i}) 应该大于等于 1。否则无法获取它的上级对象");
+                        field_name = levels[i - 1].Node.Name;
+                        subfield_name = level.Node.Name;
+                    }
+                    else
+                    {
+                        current = nodes[0] as XmlElement;
+                        goto CONTINUE;
+                    }
+
+                    var arg = new GetTemplateDefEventArgs
+                    {
+                        FieldName = field_name,
+                        SubfieldName = subfield_name,
+                        Value = level.Node.GetContent(level.Node.Box),
+                    };
+                    func_getDef.Invoke(this, arg);
+                    if (arg.Canceled)
+                        current = nodes[0] as XmlElement;
+                    else
+                    {
+                        if (string.IsNullOrEmpty(arg.ErrorInfo) == false)
+                            throw new ArgumentException(arg.ErrorInfo);
+                        current = arg.DefNode as XmlElement;
+                        Debug.Assert(current != null);
+                    }
+                }
+                else
+                {
+                    current = nodes[0] as XmlElement;
+                }
+
+            CONTINUE:
+                i++;
+            }
+
+            return current;
+        }
+
+        class LevelInfo
+        {
+            public string XPath { get; set; }
+            public UnitNode Node { get; set; }
+        }
+
+        // 为每一级对象生成一个 XPath，便于逐级搜索
+        static LevelInfo[] BuildXPath(UnitNode[] path)
+        {
+            AdjustPath();
+
+            var levels = new List<LevelInfo>();
+            foreach (var node in path)
+            {
+                if (node.Type == UnitType.Record)
+                    continue;
+                levels.Add(new LevelInfo
+                {
+                    XPath = $"{ElementName(node.Type)}[@name='{node.Name}']",
+                    Node = node
+                });
+            }
+
+            return levels.ToArray();
+
+            // 去掉路径中除了最后一个 Field 以外的其它 Field
+            void AdjustPath()
+            {
+                if (path.Count(o => o.Type == UnitType.Field) > 1)
+                {
+                    var last = path.Last(o => o.Type == UnitType.Field);
+                    var results = new List<UnitNode>();
+                    foreach (var node in path)
+                    {
+                        if (node.Type == UnitType.Field && node != last)
+                        {
+
+                        }
+                        else
+                            results.Add(node);
+                    }
+                    path = results.ToArray();
+                }
+            }
+        }
+
+
+#if REMOVED
         static string BuildXPath(UnitNode[] path)
         {
             AdjustPath();
@@ -2697,6 +2840,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 }
             }
         }
+#endif
 
         static string ElementName(UnitType type)
         {

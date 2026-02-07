@@ -15005,12 +15005,14 @@ this.m_marcEditor.UiState);
                 // 去掉Control/Shift/Alt 以后的纯净的键码
                 Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
 
+                /*
                 if (keyData == Keys.Escape)
                 {
                     this.DialogResult = DialogResult.Cancel;
                     this.Close();
                     return true;
                 }
+                */
 
                 if (keyData == Keys.F2/*
                 || keyData == (Keys.Control | Keys.Shift | Keys.S)*/)

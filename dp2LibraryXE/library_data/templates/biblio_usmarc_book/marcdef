@@ -10,7 +10,7 @@
       <ValueList name="*" src="marcvaluelist" />
     </Style>
     <Description>USMARC西文图书</Description>
-    <!-- 最后修订: 2021/10/25 -->
+    <!-- 最后修订: 2026/2/8 -->
   </Property>
   <Field name="###" length="24" mandatory="yes" repeatable="no">
     <Property>
@@ -399,7 +399,7 @@
         <Label xml:lang="en">Undefined</Label>
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_12/1" />
+        <ValueList ref="marcvaluelist#006computer_12/6" />
       </Property>
     </Char>
   </Field>
@@ -2168,7 +2168,7 @@
         <Label xml:lang="en">Undefined</Label>
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_12/1" />
+        <ValueList ref="marcvaluelist#006computer_12/6" />
         <Display style="bold" />
       </Property>
     </Char>

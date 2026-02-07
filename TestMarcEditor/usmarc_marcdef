@@ -399,7 +399,7 @@
         <Label xml:lang="en">Undefined</Label>
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_12/1" />
+        <ValueList ref="marcvaluelist#006computer_12/6" />
       </Property>
     </Char>
   </Field>
@@ -2168,7 +2168,7 @@
         <Label xml:lang="en">Undefined</Label>
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_12/1" />
+        <ValueList ref="marcvaluelist#006computer_12/6" />
         <Display style="bold" />
       </Property>
     </Char>

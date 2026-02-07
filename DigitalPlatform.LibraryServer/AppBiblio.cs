@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading;
-using System.Xml;
-
-using DigitalPlatform;	// Stop类
+﻿using DigitalPlatform;	// Stop类
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
@@ -20,6 +9,17 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading;
+using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -6879,6 +6879,7 @@ out strError);
                 //      >0  命中条数。此时 strError 中返回发生重复的路径列表
                 nRet = SearchBiblioDup(
                     sessioninfo,
+                    null,
                     strBiblioRecPath,
                     strBiblio,
                     "setbiblio", // strResultSetName,
@@ -7010,6 +7011,7 @@ out strError);
                     //      >0  命中条数。此时 strError 中返回发生重复的路径列表
                     nRet = SearchBiblioDup(
                         sessioninfo,
+                        null,
                         strBiblioRecPath,
                         strBiblio,
                         "setbiblio", // strResultSetName,
@@ -7266,6 +7268,7 @@ out strError);
                     //      >0  命中条数。此时 strError 中返回发生重复的路径列表
                     nRet = SearchBiblioDup(
                         sessioninfo,
+                        null,
                         strBiblioRecPath,
                         strBiblio,
                         "setbiblio", // strResultSetName,
@@ -9505,10 +9508,13 @@ out strError);
                         }
 
                         // 查重
+                        // 2026/2/5
+                        // 在 move 情形，对 SearchBiblioDup() 传入源记录路径，这样可以在命中的路径中排除和源记录同样查重空间内的路径。
+                        // 这样就不影响在同一查重空间中移动。然而如果在不同的查重空间之间移动，则对目标空间依然要进行查重，发生了重复是不允许移动的。
                         // 2025/9/25 move 动作，实际上不应该查重。因为如果查重就会造成多条重复的情况下无法 move 成功，这样工作人员就没法利用 move 功能进行消除重复的操作了
                         // TODO: 一个可选的方法，是对 target 记录原内容进行查重，得到一个重复的记录路径的集合(注意减掉 source 路径)。然后对 target 记录的新内容进行查重，得到另一个发生重复的记录路径的集合(注意减掉 source 路径)。如果后一个集合中出现了越出第一个集合的路径，就报错返回。也就是说，只允许集合缩小，不允许集合变大
                         if (string.IsNullOrEmpty(strNewBiblio) == false
-                            && !(strAction == "move" || strAction == "onlymovebiblio"))
+                            /*&& !(strAction == "move" || strAction == "onlymovebiblio")*/)
                         {
                             // return:
                             //      -1  出错
@@ -9516,6 +9522,7 @@ out strError);
                             //      >0  命中条数。此时 strError 中返回发生重复的路径列表
                             nRet = SearchBiblioDup(
                                 sessioninfo,
+                                (strAction == "move" || strAction == "onlymovebiblio") ? strBiblioRecPath : null,
                                 strNewBiblioRecPath,
                                 strNewBiblio,
                                 "copybiblio", // strResultSetName,
@@ -9570,7 +9577,7 @@ out strError);
                             }
 
                             // 2025/9/25 move 动作，实际上不应该查重。因为如果查重就会造成多条重复的情况下无法 move 成功，这样工作人员就没法利用 move 功能进行消除重复的操作了
-                            if (!(strAction == "move" || strAction == "onlymovebiblio"))
+                            if (true)
                             {
                                 // return:
                                 //      -1  出错
@@ -9578,6 +9585,7 @@ out strError);
                                 //      >0  命中条数。此时 strError 中返回发生重复的路径列表
                                 nRet = SearchBiblioDup(
                                     sessioninfo,
+                                    (strAction == "move" || strAction == "onlymovebiblio") ? strBiblioRecPath : null,
                                     strNewBiblioRecPath,
                                     strExistingSourceXml,
                                     "copybiblio", // strResultSetName,
@@ -11234,6 +11242,10 @@ out error);
         // 对书目或者规范库做强制查重
         // 注：书目库和规范库的名字即便混合起来配置在一个空间内也不怕
         // parameters:
+        //      strSourceBiblioRecPath  源记录的路径。
+        //                  用于在 move 情况下辅助判断，查重命中的路径是否和源记录同在一个查重空间。如果同在一个空间，则重复不被计入。只有不同查重空间内出现的重复才会被计入
+        //                  如果不是 move 情形，则本参数要使用 null
+        //      strTargetBiblioRecPath  目标记录路径
         //      error_code [out] 返回出错码。undefined/notInUniqueSpace
         // return:
         //      -3  查重空间尚未定义
@@ -11243,7 +11255,8 @@ out error);
         //      >0  命中条数。此时 strError 中返回发生重复的路径列表
         int SearchBiblioDup(
             SessionInfo sessioninfo,
-            string strBiblioRecPath,
+            string strSourceBiblioRecPath,
+            string strTargetBiblioRecPath,
             string strBiblioXml,
             string strResultSetName,
             List<string> exclude_recpaths,
@@ -11277,11 +11290,15 @@ out error);
             //if (strKey == null)
             //    return 0;   // 因为西文图书还没有提供 997，所以暂时这样返回
 
-            string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+
+            string strSourceBiblioDbName = ResPath.GetDbName(strSourceBiblioRecPath);
+            List<string> source_space_dbnames = GetUniqueSpaceDbNames(strSourceBiblioDbName);
+
+            string strTargetBiblioDbName = ResPath.GetDbName(strTargetBiblioRecPath);
 
             // 一个书目库同时处在多个 space 中怎么办？
-            List<string> dbnames = GetUniqueSpaceDbNames(strBiblioDbName);
-            if (dbnames.Count == 0)
+            List<string> target_space_dbnames = GetUniqueSpaceDbNames(strTargetBiblioDbName);
+            if (target_space_dbnames.Count == 0)
             {
                 error_code = "notInUniqueSpace";    // 发起记录并不处在查重空间中
                 return 0;
@@ -11300,8 +11317,8 @@ out error);
             {
                 nRet1 = SearchDup(
         channel,
-        dbnames,
-        strBiblioRecPath,
+        target_space_dbnames,
+        strTargetBiblioRecPath,
         strKey,
         "ukey",
         strResultSetName,
@@ -11316,8 +11333,8 @@ out error);
             {
                 nRet2 = SearchDup(
     channel,
-    dbnames,
-    strBiblioRecPath,
+    target_space_dbnames,
+    strTargetBiblioRecPath,
     crKey,
     "crKey",
     strResultSetName,
@@ -11346,8 +11363,29 @@ out error);
                 }
             }
 
+            // 2026/2/5
+            // 去除和源记录同查重空间的路径
+            if (source_space_dbnames.Count > 0)
+            {
+                recpaths1 = RemovePath(recpaths1);
+            }
+
             strError = StringUtil.MakePathList(recpaths1);
             return recpaths1.Count;
+
+            // 从 list 中去除来自指定数据库的路径
+            List<string> RemovePath(List<string> list)
+            {
+                var results = new List<string>();
+                foreach(var path in list)
+                {
+                    if (source_space_dbnames.Contains(ResPath.GetDbName(path)))
+                        continue;
+                    results.Add(path);
+                }
+                return results;
+            }
+
 #if REMOVED
             // 构造检索书目库的 XML 检索式
             // return:
