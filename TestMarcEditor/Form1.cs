@@ -1,17 +1,13 @@
-﻿using DigitalPlatform.Marc;
-using DigitalPlatform.Text;
-using LibraryStudio.Forms;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
+using LibraryStudio.Forms;
+
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
+
 
 namespace TestMarcEditor
 {
@@ -329,7 +325,7 @@ namespace TestMarcEditor
             // 这个事件暂时用不到
         }
 
-        public string MarcSyntax = "usmarc";   // unimarc usmarc 之一
+        public string MarcSyntax = "unimarc";   // unimarc usmarc 之一
 
         private void marcEditor1_GetConfigDom(object sender, DigitalPlatform.Marc.GetConfigDomEventArgs e)
         {

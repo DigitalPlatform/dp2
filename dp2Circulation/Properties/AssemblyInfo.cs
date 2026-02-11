@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.200.*")]
-[assembly: AssemblyFileVersion("3.200.0.0")]
+[assembly: AssemblyVersion("3.201.*")]
+[assembly: AssemblyFileVersion("3.201.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -281,3 +281,4 @@ using System.Runtime.InteropServices;
 // 3.111 2025/12/18 (新增册时)册登记对话框中“创建索取号”按钮，在不关闭对话框前提下，多次点这个按钮(每次点之间删除 textbox 中的现有索取号)会每次分配一个新的种次号的 bug 得到修正
 // 3.112 2025/12/20 读者统计窗增加了一个内置统计方案 BorrowDetailStatis。
 // 3.200 2026/1/8   重构 MARC 编辑器。
+// 3.201 2026/2/8   MARC 编辑器增加就地编辑模板功能。410 等字段下级可以嵌套字段。USMARC 006/007/008 字段可以根据内容自动从多种模板定义中选择。

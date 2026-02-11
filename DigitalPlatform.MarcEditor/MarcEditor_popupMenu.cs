@@ -458,7 +458,8 @@ namespace DigitalPlatform.Marc
                     Caption="到下一个字段",
                     KeyData=Keys.Enter,
                     Handler=(s,e) => {
-                        if (this.ValueListWindowOpened())
+                        if (this.ValueListWindowOpened()
+                        && ValueListWindowHasFocus())
                             TriggerEvenArgs.SetHandled(e, false);
                         else
                             this.ToNextField();
