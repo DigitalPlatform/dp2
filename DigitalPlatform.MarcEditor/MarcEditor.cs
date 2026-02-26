@@ -2795,10 +2795,27 @@ func_getDef);
 
                         }
                         else
+                        {
+                            // 内嵌字段的名字 "###" 表示上级字段内容中第一个 $1 之前非法部分内容，为了避免被当作 “头标区”，要临时修正一下名字，变成空
+                            if (node.Name == "###"
+                                && node.Type == UnitType.Field
+                                && GetParent(node)?.Type == UnitType.Field)
+                            {
+                                node.Name = "";
+                            }
                             results.Add(node);
+                        }
                     }
                     path = results.ToArray();
                 }
+            }
+
+            UnitNode GetParent(UnitNode n)
+            {
+                int index = Array.IndexOf(path, n);
+                if (index <= 0)
+                    return null;
+                return path[index - 1];
             }
         }
 
