@@ -11,3 +11,8 @@ Add the following to your csproj on your "main"/root project
     <CleanSQLiteInteropFiles>false</CleanSQLiteInteropFiles>
     <CollectSQLiteInteropFiles>false</CollectSQLiteInteropFiles>
 </PropertyGroup>
+
+~~~
+git fetch origin
+git checkout -b patch_of_3.188 7b466353159c21763bd9fe61391cf94d532a1679
+git push origin patch_of_3.188

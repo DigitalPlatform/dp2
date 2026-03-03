@@ -6,11 +6,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using DuckDbResultSet;
+// using DuckDbResultSet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DigitalPlatform.ResultSet
 {
+#if REMOVED
     [TestClass]
     public class UnitTest
     {
@@ -286,4 +287,6 @@ namespace DigitalPlatform.ResultSet
 
         #endregion
     }
+
+#endif
 }

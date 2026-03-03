@@ -33,7 +33,7 @@ using System.Xml;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.188.*")]
+[assembly: AssemblyVersion("3.188.*")]  // patch
 [assembly: AssemblyFileVersion("3.188.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
@@ -501,6 +501,6 @@ public bool ItemCanReturn(Account account,
 //                          预约时写入读者 XML 记录 reservations/request 元素 requestItemBarcode 属性值，从写入 @refID:xxx 改进为尽量写入册条码号形态，便于兼容 dp2mini 备书功能的原有用法
 //              (2025/9/17) Reservation() API 写入的操作日志记录，先前版本写入的 itemBarcodeList 元素内容是册参考 ID，最新版改为尽量写入册条码号
 //      3.188 (2025/9/18) 为 WSDL metadata 修改了绑定的 URL 为: http://localhost/dp2library/$metadata。在 "metadata" 前增加了一个 "$"
-
+//      3.188.patch (2026/3/3) 解决 libraryservice.cs 中若干 id 被误改为 user_id 的 bug
 
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到

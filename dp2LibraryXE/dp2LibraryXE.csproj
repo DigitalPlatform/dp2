@@ -24,7 +24,7 @@
     <CopySQLiteInteropFiles>false</CopySQLiteInteropFiles>
     <CleanSQLiteInteropFiles>false</CleanSQLiteInteropFiles>
     <CollectSQLiteInteropFiles>false</CollectSQLiteInteropFiles>
-    <PublishUrl>c:\publish\dp2libraryxe\v3\</PublishUrl>
+    <PublishUrl>c:\publish\dp2libraryxe\v3_dev\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -34,15 +34,15 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://dp2003.com/dp2LibraryXE/v3/</InstallUrl>
+    <InstallUrl>https://dp2003.com/dp2LibraryXE/v3_dev/</InstallUrl>
     <TargetCulture>zh-CN</TargetCulture>
     <ProductName>dp2Library XE V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>614</ApplicationRevision>
-    <ApplicationVersion>3.135.0.%2a</ApplicationVersion>
+    <ApplicationRevision>615</ApplicationRevision>
+    <ApplicationVersion>3.137.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -72,10 +72,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>DED5AE6514E67718F75429B874D7CBACFED49FCA</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>CFEE4F28F3F2DF7F6C1E71AC8651732CF69566C8</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2LibraryXE_2_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2LibraryXE_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -322,6 +322,7 @@
     <Content Include="opac_style.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="dp2LibraryXE_1_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_2_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_TemporaryKey.pfx" />
     <None Include="packages.config" />

@@ -2681,19 +2681,19 @@ namespace dp2Library
     bool throw_exception = true)
         {
             // 2025/1/21
-            // 排序依据的列 sortby:user_id 或者 sortby:key
+            // 排序依据的列 sortby:id 或者 sortby:key
             var sortby = StringUtil.GetParameterByPrefix(strOutputStyle, "sortby");
             if (string.IsNullOrEmpty(sortby))
-                sortby = "user_id";
+                sortby = "id";
             else
             {
                 // 检查 sortby 值
-                if (sortby != "user_id" && sortby != "key")
+                if (sortby != "id" && sortby != "key")
                 {
-                    var error = $"strOutputStyle 参数值 '{strOutputStyle}' 不合法: sortby: 子参数值应为 'user_id' 或 'key'";
+                    var error = $"strOutputStyle 参数值 '{strOutputStyle}' 不合法: sortby: 子参数值应为 'id' 或 'key'";
                     if (throw_exception)
                         throw new ArgumentException(error);
-                    return "user_id";
+                    return "id";
                 }
             }
 
@@ -3595,7 +3595,7 @@ out error);
         //      strResultSetName    结果集名。如果为空，表示使用当前缺省结果集"default"
         //      lStart  要获取的开始位置。从0开始计数
         //      lCount  要获取的个数
-        //      strBrowseInfoStyle  所返回的SearchResult中包含哪些信息。为逗号分隔的字符串列表值，取值可为 user_id/cols 之一。例如，"user_id,cols"表示同时获取id和浏览信息各列，而"user_id"表示仅取得id列。
+        //      strBrowseInfoStyle  所返回的SearchResult中包含哪些信息。为逗号分隔的字符串列表值，取值可为 id/cols 之一。例如，"id,cols"表示同时获取id和浏览信息各列，而"id"表示仅取得id列。
         //                  sort 子参数，表示 dp2library 本地排序的特性
         //      strLang 语言代码。一般为"zh"
         //      searchresults   返回包含记录信息的SearchResult对象数组
@@ -3688,7 +3688,7 @@ out error);
                         strResultSetName,
                         lStart,
                         lCount,
-                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 user_id 
+                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
                         strLang,
                         null,
                         out searchresults,
@@ -3941,7 +3941,7 @@ out error);
             if (strBrowseInfoStyle.StartsWith("@"))
                 return strBrowseInfoStyle;
 
-            string modified_style = strBrowseInfoStyle + ",user_id";
+            string modified_style = strBrowseInfoStyle + ",id";
             if (StringUtil.IsInList("cols", strBrowseInfoStyle))
                 modified_style += ",xml";
             return modified_style;
@@ -4008,7 +4008,7 @@ out error);
                 // 2023/1/29
                 if (string.IsNullOrEmpty(record.Path))
                 {
-                    ClearRecord(record, $"因缺乏 record.Path 部分，无法进行过滤。请在 strBrowseStyle 中包含 user_id");
+                    ClearRecord(record, $"因缺乏 record.Path 部分，无法进行过滤。请在 strBrowseStyle 中包含 id");
                     i++;
                     continue;
                 }
@@ -5512,7 +5512,7 @@ out timestamp);
 
                 string strError = "";
                 long lRet = channel.GetBrowseRecords(paths,
-                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 user_id 
+                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
                         out searchresults,
                         out strError);
                 if (lRet == -1)
@@ -6379,9 +6379,9 @@ out QueryResult[] results)
         //      strQueryXml 返回数据库内核层所使用的XML检索式，便于进行调试
         //      strSearchStyle  可以包含 desc，表示命中结果按照降序排列
         //      strOutputStyle  如果包含"keycount"，表示输出 key + count形式
-        //                      如果包含"keyid"，表示输出 key + user_id 形式
-        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 user_id 形式
-        //                      当处于 keycount 或 keyid 状态时，可以包含 sortby:key 或 sortby:user_id 分别代表按照命中 key 排序和按照命中 user_id 排序。(缺省为 sortby:user_id)
+        //                      如果包含"keyid"，表示输出 key + id 形式
+        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 id 形式
+        //                      当处于 keycount 或 keyid 状态时，可以包含 sortby:key 或 sortby:id 分别代表按照命中 key 排序和按照命中 user_id 排序。(缺省为 sortby:user_id)
         //                      可以包含 desc，表示对命中结果排序采用降序。(为兼容以前版本，strSearchStyle 和 strOutputStyle 参数都可以用这个值，不过建议用在 strOutputStyle 中)
         //                      如果包含 explain，表示希望在 explain 参数中返回检索过程的解释信息
         //      strLocationFilter   馆藏地点过滤条件
@@ -7465,14 +7465,14 @@ out QueryResult[] results)
         //      strFrom 检索途径
         //      strMathStyle    匹配方式 exact left right middle
         //      strSearchStyle  检索风格。
-        //                      desc 表示检索结果集中的记录按照 user_id 倒序排列。缺省为正序
+        //                      desc 表示检索结果集中的记录按照 id 倒序排列。缺省为正序
         //                      最终是通过 XML 检索式中 item/order 元素文本值 "DESC" 来实现的
         //      strOutputStyle  输出风格。
         //                      desc 表示倒序。
         //                      keycount 
         //                      keycount，则输出归并统计后的key+count(把相同的 key 后面的 count 合并)；否则，或者缺省，为传统的输出记录id
-        //                      keyid，输出 key 和 user_id
-        //                      如果 keycount 和 keyid 都没有，则表示仅输出 user_id
+        //                      keyid，输出 key 和 id
+        //                      如果 keycount 和 keyid 都没有，则表示仅输出 id
         //                      特殊用法, 如果包含 __buildqueryxml，则在result.ErrorInfo中返回XML检索式，但不进行检索
         // 权限: 
         //      需要 searchitem 权限
@@ -7530,7 +7530,7 @@ out QueryResult[] results)
                 string strQueryXml = "";
                 // 构造检索实体库的 XML 检索式
                 // parameters:
-                //      strSearchStyle  desc 表示检索结果集中的记录按照 user_id 倒序排列。缺省为正序
+                //      strSearchStyle  desc 表示检索结果集中的记录按照 id 倒序排列。缺省为正序
                 //                      最终是通过 XML 检索式中 item/order 元素文本值 "DESC" 来实现的
                 // return:
                 //      -1  出错
