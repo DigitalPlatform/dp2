@@ -85,6 +85,11 @@ namespace DigitalPlatform.LibraryServer
                 "operations",
                 "libraryCode",
                 "oi",
+                // "http://dp2003.com/dprms:file",
+            };
+
+        // 对象资源元素名列表
+        public static string[] file_element_names = new string[] {
                 "http://dp2003.com/dprms:file",
             };
 
@@ -119,7 +124,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
                 range.AddRange(this.ItemAdditionalFields);
             range.AddRange(checkinout_element_names);
-
+            range.AddRange(LibraryApplication.file_element_names);
             return range;
         }
 
@@ -422,7 +427,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (changed == false)
             {
-                if (outof_range)
+                if (outof_range || bChangePartDeniedParam)
                 {
                     strError = "全部修改都没有兑现";
                     if (string.IsNullOrEmpty(strWarning) == false)

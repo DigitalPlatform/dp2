@@ -213,7 +213,7 @@ namespace DigitalPlatform.LibraryServer
                 || sessioninfo.GlobalUser == true) // 只有全局用户才能修改基本字段
             {
                 // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
-                changed = 
+                changed =
                 LibraryApplication.Overwrite(domNew, domExist, core_issue_element_names) ? true : changed;
 
 #if REMOVED
@@ -403,7 +403,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (changed == false)
             {
-                if (outof_range)
+                if (outof_range || bChangePartDeniedParam)
                 {
                     strError = "全部修改都没有兑现";
                     if (string.IsNullOrEmpty(strWarning) == false)
@@ -430,11 +430,12 @@ namespace DigitalPlatform.LibraryServer
             List<string> GetAllElements()
             {
                 string[] other_names = {
-                "operations",
-        };
+                    "operations",
+                };
 
                 List<string> range = new List<string>(core_issue_element_names);
                 range.AddRange(other_names);
+                range.AddRange(LibraryApplication.file_element_names);
                 return range;
             }
         }

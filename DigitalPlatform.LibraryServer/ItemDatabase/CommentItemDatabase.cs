@@ -284,7 +284,7 @@ unprocessed_element_names.Except(_auto_maintain_comment_element_names)));
 
             if (changed == false)
             {
-                if (outof_range)
+                if (outof_range || bChangePartDeniedParam)
                 {
                     strError = "全部修改都没有兑现";
                     if (string.IsNullOrEmpty(strWarning) == false)
@@ -313,6 +313,7 @@ unprocessed_element_names.Except(_auto_maintain_comment_element_names)));
                 List<string> range = new List<string>(core_comment_element_names);
                 range.AddRange(_auto_maintain_comment_element_names);
                 range.Add("creator");
+                range.AddRange(LibraryApplication.file_element_names);
                 return range;
             }
         }

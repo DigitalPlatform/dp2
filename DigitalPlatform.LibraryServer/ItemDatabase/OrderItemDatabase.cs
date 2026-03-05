@@ -283,7 +283,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (changed == false)
             {
-                if (outof_range)
+                if (outof_range || bChangePartDeniedParam)
                 {
                     strError = "全部修改都没有兑现";
                     if (string.IsNullOrEmpty(strWarning) == false)
@@ -310,11 +310,12 @@ namespace DigitalPlatform.LibraryServer
             List<string> GetAllElements()
             {
                 string[] other_names = {
-                "operations",
-        };
+                    "operations",
+                };
 
                 List<string> range = new List<string>(core_order_element_names);
                 range.AddRange(other_names);
+                range.AddRange(LibraryApplication.file_element_names);
                 return range;
             }
         }
