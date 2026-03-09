@@ -449,7 +449,7 @@ namespace DigitalPlatform.rms
         //		-6	无足够的权限
         //		0	成功
         public int doItem(XmlNode nodeItem,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             Delegate_isConnected isConnected,
             out string strError)
         {
@@ -586,7 +586,7 @@ namespace DigitalPlatform.rms
         //		-6	无权限
         //		0	成功
         public int DoQuery(XmlNode nodeRoot,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             Delegate_isConnected isConnected,
             out string strError)
         {
@@ -672,7 +672,7 @@ namespace DigitalPlatform.rms
         //			9)最后结果集为空
         //		-6	无足够的权限
         public int ProceedRPN(ArrayList rpn,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             Delegate_isConnected isConnected,
             out string strError)
         {
@@ -727,16 +727,16 @@ namespace DigitalPlatform.rms
                     string strOpreator = DomUtil.GetAttr(node, "value");
 
                     //三个输出用于输入的参数，因为是指针，所以不用out
-                    DpResultSet oTargetLeft = new DpResultSet();
-                    DpResultSet oTargetMiddle = new DpResultSet();
-                    DpResultSet oTargetRight = new DpResultSet();
+                    var oTargetLeft = new DpResultSet();
+                    var oTargetMiddle = new DpResultSet();
+                    var oTargetRight = new DpResultSet();
 
                     //做一个两个成员的ArrayList，
                     //成员类型为DpResultSet，
                     //存放从栈里pop出的（如果是node，需要进行计算）的结果集
-                    ArrayList oSource = new ArrayList();
-                    oSource.Add(new DpResultSet());
-                    oSource.Add(new DpResultSet());
+                    var oSource = new List<KernelResultSet>();
+                    oSource.Add(new KernelResultSet());
+                    oSource.Add(new KernelResultSet());
                     try
                     {
                         for (int j = 0; j < 2; j++)
@@ -792,11 +792,11 @@ namespace DigitalPlatform.rms
                     //注意参数的使用
                     if (strOpreator == "OR")
                     {
-                        DpResultSet left = (DpResultSet)oSource[0];
+                        var left = (DpResultSet)oSource[0];
                         left.EnsureCreateIndex();   // 确保创建了索引?
                         // ??????
                         //left.Sort();
-                        DpResultSet right = (DpResultSet)oSource[1];
+                        var right = (DpResultSet)oSource[1];
                         right.EnsureCreateIndex();
                         //right.Sort();
 
@@ -824,9 +824,9 @@ namespace DigitalPlatform.rms
 
                     if (strOpreator == "AND")
                     {
-                        DpResultSet left = (DpResultSet)oSource[0];
+                        var left = (DpResultSet)oSource[0];
                         left.EnsureCreateIndex();
-                        DpResultSet right = (DpResultSet)oSource[1];
+                        var right = (DpResultSet)oSource[1];
                         right.EnsureCreateIndex();
 
                         /*
@@ -854,9 +854,9 @@ namespace DigitalPlatform.rms
                     if (strOpreator == "SUB")
                     {
                         //因为使用从栈里pop，所以第0个是后面的，第1个是前面的
-                        DpResultSet left = (DpResultSet)oSource[1];
+                        var left = (DpResultSet)oSource[1];
                         left.EnsureCreateIndex();
-                        DpResultSet right = (DpResultSet)oSource[0];
+                        var right = (DpResultSet)oSource[0];
                         right.EnsureCreateIndex();
 
                         /*
@@ -943,14 +943,14 @@ namespace DigitalPlatform.rms
     {
         public int m_int;               // 类型 0:node 1:结果集
         public XmlNode m_node;          // node节点
-        public DpResultSet m_resultSet; // 结果集
+        public KernelResultSet m_resultSet; // 结果集
 
         // 构造函数
         // parameter:
         //		node        节点
         //		oResultSet  结果集
         public ReversePolishItem(XmlNode node,
-            DpResultSet resultSet)
+            KernelResultSet resultSet)
         {
             m_node = node;
             m_resultSet = resultSet;
@@ -992,7 +992,7 @@ namespace DigitalPlatform.rms
         //		oResult 结果集
         // return:
         //      void
-        public void PushResultSet(DpResultSet oResult)
+        public void PushResultSet(KernelResultSet oResult)
         {
             ReversePolishItem oItem = new ReversePolishItem(null,
                 oResult);
@@ -1006,7 +1006,7 @@ namespace DigitalPlatform.rms
         // return:
         //      void
         public void Push(XmlNode node,
-            DpResultSet oResult)
+            KernelResultSet oResult)
         {
             ReversePolishItem oItem = new ReversePolishItem(node,
                 oResult);
@@ -1035,7 +1035,7 @@ namespace DigitalPlatform.rms
         // pop一个对象，只返回结果集
         // return:
         //		结果集
-        public DpResultSet PopResultSet()
+        public KernelResultSet PopResultSet()
         {
             if (this.Count == 0)
             {

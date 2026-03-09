@@ -2164,7 +2164,7 @@ out strError);
                 // this.m_lock.ReleaseWriterLock();
                 this.UnlockForWrite();
             }
-        // 2008/10/13 
+            // 2008/10/13 
         ERROR1:
             if (bReload == false)
             {
@@ -7397,7 +7397,16 @@ out strError);
                 out strError);
             if (nRet == -1)
                 return -1;
+            if (dbnames.Count == 0)
+            {
+                if (app.ReaderDbs.Count == 0)
+                    strError = "当前尚没有配置读者库";
+                else
+                    strError = "当前没有可以操作的读者库";
+                return -1;
+            }
 
+#if OLD
             // 构造检索式
             string strQueryXml = "";
             // int nInCount = 0;   // 参与流通的读者库个数
@@ -7442,15 +7451,11 @@ out strError);
             {
                 strQueryXml = "<group>" + strQueryXml + "</group>";
             }
-
-#if NO
-            RmsChannel channel = channels.GetChannel(app.WsUrl);
-            if (channel == null)
-            {
-                strError = "get channel error";
-                return -1;
-            }
 #endif
+
+            string strQueryXml = $"<target list='{BuildTargetList(dbnames, strFrom)}'><item><word>"
+        + StringUtil.GetXmlStringSimple(strBarcode)
+        + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
 
             // 2023/4/11
             // TODO: 这里最好使用一个随机的结果集名字，使用完以后主动删除这个结果集
@@ -8353,6 +8358,7 @@ out strError);
 
             Debug.Assert(String.IsNullOrEmpty(strDisplayName) == false, "");
 
+#if OLD
             // 构造检索式
             // 查重要针对全部读者库进行
             string strQueryXml = "";
@@ -8383,6 +8389,17 @@ out strError);
             {
                 strQueryXml = "<group>" + strQueryXml + "</group>";
             }
+#endif
+            var dbnames = app.ReaderDbs.Select((item) => item.DbName).Where((name) => string.IsNullOrEmpty(name) == false).ToList();
+            if (dbnames.Count == 0)
+            {
+                strError = "当前系统中没有定义任何读者库，所以无法进行查重";
+                goto ERROR1;
+            }
+
+            string strQueryXml = $"<target list='{BuildTargetList(dbnames, strFrom)}'><item><word>"
++ StringUtil.GetXmlStringSimple(strDisplayName)
++ "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
 
             string strResultSetName = "search_reader_dup_001";
 
@@ -10297,6 +10314,18 @@ out strError);
             return -1;
         }
 
+        static string BuildTargetList(IEnumerable<string> dbnames,
+            string strFrom)
+        {
+            StringBuilder target_value = new StringBuilder();
+            foreach (var dbname in dbnames)
+            {
+                target_value.Append(dbname + ":" + strFrom + ";");
+            }
+
+            return target_value.ToString();
+        }
+
         // TODO: 判断strBarcode是否为空
         // 根据册条码号对实体库进行查重
         // 本函数只负责查重, 并不获得记录体
@@ -10330,6 +10359,7 @@ out strError);
     </target>
 </group>             * */
 
+#if OLD
             // 构造检索式
             string strQueryXml = "";
             int nDbCount = 0;
@@ -10364,6 +10394,19 @@ out strError);
             {
                 strQueryXml = "<group>" + strQueryXml + "</group>";
             }
+#endif
+            var dbnames = app.ItemDbs.Select((item) => item.DbName).Where((name) => string.IsNullOrEmpty(name) == false).ToList();
+            if (dbnames.Count == 0)
+            {
+                strError = "当前系统中没有定义任何实体库，所以无法对实体库进行查重";
+                goto ERROR1;
+            }
+
+            // 2007/4/5 改造 加上了 GetXmlStringSimple()
+            string strQueryXml = $"<target list='{BuildTargetList(dbnames, strFrom)}'><item><word>"
+                + StringUtil.GetXmlStringSimple(strBarcode)
+                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
 
             /*
             RmsChannel channel = channels.GetChannel(app.WsUrl);
@@ -10508,7 +10551,7 @@ out strError);
                 "id,xml,timestamp",
                 "zh");
             loader.ElementType = "Record";
-            foreach(Record record in loader)
+            foreach (Record record in loader)
             {
                 // 第一条记录的 XML 和 timestamp 返回
                 if (aPath.Count == 0)
@@ -18217,17 +18260,17 @@ out _);
 
 
 #else                         * */
-                    delegate_checkAccess func_checkAccess = (string r, string d) =>
-                        {
-                            if (r == "download" || r == "preview")
-                                return sessioninfo.RightsOrigin;
-                            return CheckAccess(sessioninfo,
-                                $"数据库 {strDbName} 记录下级对象({r})",
-                                strDbName,
-                                r,
-                                "",
-                                out _);
-                        };
+            delegate_checkAccess func_checkAccess = (string r, string d) =>
+                                    {
+                                        if (r == "download" || r == "preview")
+                                            return sessioninfo.RightsOrigin;
+                                        return CheckAccess(sessioninfo,
+                                            $"数据库 {strDbName} 记录下级对象({r})",
+                                            strDbName,
+                                            r,
+                                            "",
+                                            out _);
+                                    };
 
                         string strOperation = "download";
                         if (string.IsNullOrEmpty(strPartCmd) == false)

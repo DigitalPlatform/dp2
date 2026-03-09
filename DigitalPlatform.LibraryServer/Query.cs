@@ -123,6 +123,7 @@ namespace DigitalPlatform.LibraryServer
 
             bool bDesc = StringUtil.IsInList("desc", strSearchStyle);
 
+#if OLD
             // 构造检索式
             for (int i = 0; i < dbnames.Count; i++)
             {
@@ -130,62 +131,9 @@ namespace DigitalPlatform.LibraryServer
 
                 Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
 
-#if NO
-                strError = EnsureKdbs(false);
-                if (strError != null)
-                    return -1;
-#endif
 
                 string strRelation = "=";
                 string strDataType = "string";
-
-#if NO
-                string strFromStyle = this.kdbs.GetFromStyles(strDbName, strFrom, strLang);
-                if (strFrom == "__id")
-                {
-                    // 如果为范围式
-                    if (String.IsNullOrEmpty(strQueryWord) == false // 2013/3/25
-                        && strQueryWord.IndexOfAny(new char[] { '-', '~' }) != -1)
-                    {
-                        strRelation = "range";
-                        strDataType = "number";
-                        // 2012/3/29
-                        strMatchStyle = "exact";
-                    }
-                    else if (String.IsNullOrEmpty(strQueryWord) == false)
-                    {
-                        strDataType = "number";
-                        // 2012/3/29
-                        strMatchStyle = "exact";
-                    }
-                }
-                // 2014/8/28
-                else if (StringUtil.IsInList("_time", strFromStyle) == true)
-                {
-                    // 如果为范围式
-                    if (strQueryWord.IndexOf("~") != -1)
-                    {
-                        strRelation = "range";
-                        strDataType = "number";
-                    }
-                    else
-                    {
-                        strDataType = "number";
-
-                        // 如果检索词为空，并且匹配方式为前方一致、中间一致、后方一致，那么认为这是意图要命中全部记录
-                        // 注意：如果检索词为空，并且匹配方式为精确一致，则需要认为是获取空值，也就是不存在对应检索点的记录
-                        if (strMatchStyle != "exact" && string.IsNullOrEmpty(strQueryWord) == true)
-                        {
-                            strMatchStyle = "exact";
-                            strRelation = "range";
-                            strQueryWord = "~";
-                        }
-                    }
-
-                    // 最后统一修改为exact。不能在一开始修改，因为strMatchStyle值还有帮助判断的作用
-                    strMatchStyle = "exact";
-                }
-#endif
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
@@ -208,6 +156,18 @@ namespace DigitalPlatform.LibraryServer
             if (dbnames.Count > 0)
             {
                 strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+#endif
+
+            {
+                string strRelation = "=";
+                string strDataType = "string";
+
+                strQueryXml = $"<target list='{BuildTargetList(dbnames, strFrom)}'><item>"
+        + (bDesc == true ? "<order>DESC</order>" : "")
+    + "<word>"
+        + StringUtil.GetXmlStringSimple(strQueryWord)
+        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
             }
 
             // 对 XML 检索式进行必要的变换。处理 range 和 time 检索细节

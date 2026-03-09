@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.ResultSet;
+// using DigitalPlatform.ResultSet;
 using System.Data.SqlClient;
 
 namespace DigitalPlatform.rms
@@ -1366,7 +1366,7 @@ namespace DigitalPlatform.rms
             SearchItem searchItem,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             int nWarningLevel,
             StringBuilder explainInfo,
             out string strError,

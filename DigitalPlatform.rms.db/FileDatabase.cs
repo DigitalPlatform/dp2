@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.IO;
-using System.Diagnostics;
-
-using DigitalPlatform.ResultSet;
-using DigitalPlatform.Xml;
+﻿using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Core;
+// using DigitalPlatform.ResultSet;
+using DigitalPlatform.Xml;
+using DuckDbResultSet;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.Remoting.Contexts;
+using System.Text;
+using System.Xml;
 using static DigitalPlatform.rms.KeysCfg;
 
 namespace DigitalPlatform.rms
@@ -2260,7 +2261,7 @@ namespace DigitalPlatform.rms
         private int SearchByID(SearchItem searchItem,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             out string strError)
         {
             strError = "";
@@ -2282,18 +2283,23 @@ namespace DigitalPlatform.rms
             if (searchItem.Match == "left"
                 || searchItem.Match == "")
             {
-                foreach (string recordID in records)
+                int i = 0;
+                using (var context = resultSet.GetAppenderContext())
                 {
-                    if (recordID.Length < searchItem.Word.Length)
-                        continue;
-
-                    string strFirstPart = recordID.Substring(0,
-                        searchItem.Word.Length);
-
-                    if (strFirstPart == searchItem.Word)
+                    foreach (string recordID in records)
                     {
-                        string strRecPath = this.FullID + "/" + recordID;
-                        resultSet.Add(new DpRecord(strRecPath));
+                        if (recordID.Length < searchItem.Word.Length)
+                            continue;
+
+                        string strFirstPart = recordID.Substring(0,
+                            searchItem.Word.Length);
+
+                        if (strFirstPart == searchItem.Word)
+                        {
+                            string strRecPath = this.FullID + "/" + recordID;
+                            // resultSet.Add(new DuckRecord(strRecPath));
+                            context.AppendIdRow(strRecPath, i++);
+                        }
                     }
                 }
             }
@@ -2303,58 +2309,69 @@ namespace DigitalPlatform.rms
                 if (searchItem.Relation == "draw"
                     || searchItem.Relation == "range")
                 {
-                    foreach (string recordID in records)
+                    int i = 0;
+                    using (var context = resultSet.GetAppenderContext())
                     {
-                        string strStartID;
-                        string strEndID;
-                        bool bRet = StringUtil.SplitRangeEx(searchItem.Word,
-                            out strStartID,
-                            out strEndID);
-                        if (bRet == true)
+                        foreach (string recordID in records)
                         {
-                            strStartID = DbPath.GetID10(strStartID);
-                            strEndID = DbPath.GetID10(strEndID);
-
-                            if (String.Compare(recordID, strStartID, true) >= 0
-                                && String.Compare(recordID, strEndID, true) <= 0)
+                            string strStartID;
+                            string strEndID;
+                            bool bRet = StringUtil.SplitRangeEx(searchItem.Word,
+                                out strStartID,
+                                out strEndID);
+                            if (bRet == true)
                             {
-                                string strRecPath = this.FullID + "/" + recordID;
-                                resultSet.Add(new DpRecord(strRecPath));
-                                continue;
+                                strStartID = DbPath.GetID10(strStartID);
+                                strEndID = DbPath.GetID10(strEndID);
+
+                                if (String.Compare(recordID, strStartID, true) >= 0
+                                    && String.Compare(recordID, strEndID, true) <= 0)
+                                {
+                                    string strRecPath = this.FullID + "/" + recordID;
+                                    // resultSet.Add(new DpRecord(strRecPath));
+                                    context.AppendIdRow(strRecPath, i++);
+                                    continue;
+                                }
                             }
-                        }
-                        else
-                        {
-                            string strOperator;
-                            string strCanKaoID;
-                            StringUtil.GetPartCondition(searchItem.Word,
-                                out strOperator,
-                                out strCanKaoID);
-
-                            strCanKaoID = DbPath.GetID10(strCanKaoID);
-                            if (StringUtil.CompareByOperator(recordID,
-                                strOperator,
-                                strCanKaoID) == true)
+                            else
                             {
-                                string strRecPath = this.FullID + "/" + recordID;
-                                resultSet.Add(new DpRecord(strRecPath));
-                                continue;
+                                string strOperator;
+                                string strCanKaoID;
+                                StringUtil.GetPartCondition(searchItem.Word,
+                                    out strOperator,
+                                    out strCanKaoID);
+
+                                strCanKaoID = DbPath.GetID10(strCanKaoID);
+                                if (StringUtil.CompareByOperator(recordID,
+                                    strOperator,
+                                    strCanKaoID) == true)
+                                {
+                                    string strRecPath = this.FullID + "/" + recordID;
+                                    // resultSet.Add(new DpRecord(strRecPath));
+                                    context.AppendIdRow(strRecPath, i++);
+                                    continue;
+                                }
                             }
                         }
                     }
                 }
                 else
                 {
-                    foreach (string recordID in records)
+                    int i = 0;
+                    using (var context = resultSet.GetAppenderContext())
                     {
-                        searchItem.Word = DbPath.GetID10(searchItem.Word);
-                        if (StringUtil.CompareByOperator(recordID,
-                            searchItem.Relation,
-                            searchItem.Word) == true)
+                        foreach (string recordID in records)
                         {
-                            string strRecPath = this.FullID + "/" + recordID;
-                            resultSet.Add(new DpRecord(strRecPath));
-                            continue;
+                            searchItem.Word = DbPath.GetID10(searchItem.Word);
+                            if (StringUtil.CompareByOperator(recordID,
+                                searchItem.Relation,
+                                searchItem.Word) == true)
+                            {
+                                string strRecPath = this.FullID + "/" + recordID;
+                                // resultSet.Add(new DpRecord(strRecPath));
+                                context.AppendIdRow(strRecPath, i++);
+                                continue;
+                            }
                         }
                     }
                 }
@@ -2398,7 +2415,7 @@ namespace DigitalPlatform.rms
                         null, //dataDom
                         strKeyValue,
                         new List<XmlElement> { nodeConvertQueryString },
-                        out List<KeyAndFrom>keys,
+                        out List<KeyAndFrom> keys,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -2421,7 +2438,7 @@ namespace DigitalPlatform.rms
                         null, // 2025/2/27
                         null,
                         strKeyValue,
-                        new List<XmlElement>{ nodeConvertQueryNumber},
+                        new List<XmlElement> { nodeConvertQueryNumber },
                         out List<string> keys,  // strMyKey,
                         out strError);
                     if (nRet == -1 || nRet == 1)
@@ -2661,7 +2678,7 @@ namespace DigitalPlatform.rms
             SearchItem searchItem,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             int nWarningLevel,
             StringBuilder explainInfo,
             out string strError,
@@ -2703,68 +2720,82 @@ namespace DigitalPlatform.rms
                     return 0;
                 }
 
-                for (int i = 0; i < aTableInfo.Count; i++)
+                int index = 0;
+                using (var context = resultSet.GetAppenderContext())
                 {
-                    TableInfo tableInfo = aTableInfo[i]; ;
-                    string strTiaoJian = "";
-                    try
+                    for (int i = 0; i < aTableInfo.Count; i++)
                     {
-                        nRet = GetKeyCondition(
-                            searchItem,
-                            FirstNode(tableInfo.nodesConvertQueryString),
-                            FirstNode(tableInfo.nodesConvertQueryNumber),
-                            out strTiaoJian,
-                            out strError);
-                        if (nRet == -1)
+                        handle?.CancelToken.ThrowIfCancellationRequested();
+
+                        TableInfo tableInfo = aTableInfo[i]; ;
+                        string strTiaoJian = "";
+                        try
+                        {
+                            nRet = GetKeyCondition(
+                                searchItem,
+                                FirstNode(tableInfo.nodesConvertQueryString),
+                                FirstNode(tableInfo.nodesConvertQueryNumber),
+                                out strTiaoJian,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                        }
+                        catch (NoMatchException ex)
+                        {
+                            strWarning += ex.Message;
+                            if (nWarningLevel == 0)
+                                return -1;
+                        }
+
+                        XmlDocument dom = new XmlDocument();
+                        dom.PreserveWhitespace = true; //设PreserveWhitespace为true
+
+                        string strTablePath = this.TableName2TableFileName(tableInfo.SqlTableName);
+                        try
+                        {
+                            dom.Load(strTablePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "加载检索点表'" + tableInfo.SqlTableName + "'到dom出错：" + ex.Message;
                             return -1;
-                    }
-                    catch (NoMatchException ex)
-                    {
-                        strWarning += ex.Message;
-                        if (nWarningLevel == 0)
+                        }
+
+                        string strXpath = "/root/key[" + strTiaoJian + "]/idstring";
+                        XmlNodeList listIdstring;
+                        try
+                        {
+                            listIdstring = dom.SelectNodes(strXpath);
+                        }
+                        catch (System.Xml.XPath.XPathException ex)
+                        {
+                            strError += "Xpath出错:" + strXpath + "-------" + ex.Message + "<br/>";
                             return -1;
-                    }
+                        }
 
-                    XmlDocument dom = new XmlDocument();
-                    dom.PreserveWhitespace = true; //设PreserveWhitespace为true
-
-                    string strTablePath = this.TableName2TableFileName(tableInfo.SqlTableName);
-                    try
-                    {
-                        dom.Load(strTablePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "加载检索点表'" + tableInfo.SqlTableName + "'到dom出错：" + ex.Message;
-                        return -1;
-                    }
-
-                    string strXpath = "/root/key[" + strTiaoJian + "]/idstring";
-                    XmlNodeList listIdstring;
-                    try
-                    {
-                        listIdstring = dom.SelectNodes(strXpath);
-                    }
-                    catch (System.Xml.XPath.XPathException ex)
-                    {
-                        strError += "Xpath出错:" + strXpath + "-------" + ex.Message + "<br/>";
-                        return -1;
-                    }
-
-                    for (int j = 0; j < listIdstring.Count; j++)
-                    {
-                        string strIdstring = listIdstring[j].InnerText.Trim(); // 2012/2/16
-                        string strId = this.FullID + "/" + strIdstring;
-                        resultSet.Add(new DpRecord(strId));
+                        for (int j = 0; j < listIdstring.Count; j++)
+                        {
+                            string strIdstring = listIdstring[j].InnerText.Trim(); // 2012/2/16
+                            string strId = this.FullID + "/" + strIdstring;
+                            // resultSet.Add(new DpRecord(strId));
+                            context.AppendIdRow(strId, index++);
+                        }
                     }
                 }
 
+                handle?.CancelToken.ThrowIfCancellationRequested();
+
+                // 因为去重会破坏原有的顺序，所以先去重，再排序
+                resultSet.DeDup(new string(KernelResultSet.CHAR_OR, 1),
+                    handle?.CancelToken ?? default);
+
+                handle?.CancelToken.ThrowIfCancellationRequested();
+
                 //排序
-                resultSet.Sort();
+                resultSet.Sort(false, handle?.CancelToken ?? default);
 
                 //去重
-                resultSet.RemoveDup();
-
+                // resultSet.RemoveDup();
                 return 0;
             }
             finally

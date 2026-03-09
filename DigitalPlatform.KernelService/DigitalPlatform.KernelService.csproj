@@ -64,10 +64,6 @@
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
-      <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
-      <Name>DigitalPlatform.ResultSet</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.rms.db\DigitalPlatform.rms.db.csproj">
       <Project>{985702E3-5CE7-40F1-A588-A58A7A50C57A}</Project>
       <Name>DigitalPlatform.rms.db</Name>
@@ -92,8 +88,14 @@
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DuckDbResultSet\DuckDbResultSet.csproj">
+      <Project>{e04ef3b7-521d-4419-8463-2633524390a3}</Project>
+      <Name>DuckDbResultSet</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="API Ducument\QueryXml.md" />
+    <None Include="API Ducument\Search.md" />
     <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,18 +1,16 @@
-﻿using System;
-using System.Xml;
+﻿// using static DigitalPlatform.ResultSet.DpResultSet;
+
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DuckDbResultSet;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-
-using DigitalPlatform;
-using DigitalPlatform.rms;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform.ResultSet;
-using DigitalPlatform.Text;
-using static DigitalPlatform.ResultSet.DpResultSet;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Xml;
 
 namespace DigitalPlatform.rms
 {
@@ -473,6 +471,16 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        public static ResultSetType GetResultSetType(string strOutputStyle)
+        {
+            if (StringUtil.IsInList("keycount", strOutputStyle))
+                return ResultSetType.KeyCount;
+            if (StringUtil.IsInList("keyid", strOutputStyle))
+                return ResultSetType.KeyId;
+
+            return ResultSetType.Id;
+        }
+
         public static string GetSortBy(string strOutputStyle,
             bool throw_exception = true)
         {
@@ -517,23 +525,28 @@ namespace DigitalPlatform.rms
             SessionInfo sessioninfo,
             string strOutputStyle,
             XmlElement nodeItem,
-            ref DpResultSet resultSet,
+            // ref KernelResultSet resultSet,
             ChannelHandle handle,
             StringBuilder explainInfo,
+            out KernelResultSet resultSet,
             out string strError)
         {
             strError = "";
+            resultSet = null;
+
             if (nodeItem == null)
             {
                 strError = "doItem() nodeItem 参数值不应为 null";
                 return -1;
             }
 
+            /* -- refactor
             if (resultSet == null)
             {
                 strError = "doItem() resultSet 参数值不应为 null";
                 return -1;
             }
+            */
 
             // 2025/1/17
             if (handle != null && handle.CancelToken.IsCancellationRequested)
@@ -560,13 +573,16 @@ namespace DigitalPlatform.rms
 #endif
             var sortby_key = Query.GetSortBy(strOutputStyle) == "key";
 
+            // 如果需要取出现有结果集
             string strResultSetName = nodeItem.GetAttribute("resultset");
             if (string.IsNullOrEmpty(strResultSetName) == false)
             {
+                /* -- refactor
                 resultSet.Close();
                 resultSet = null;
+                */
 
-                DpResultSet source = null;
+                KernelResultSet source = null;
                 if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
                 {
                     source = this.m_dbColl.KernelApplication.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
@@ -581,25 +597,41 @@ namespace DigitalPlatform.rms
                     strError = "没有找到名为 '" + strResultSetName + "' 的结果集对象";
                     return -1;
                 }
-                resultSet = source.Clone("handle");
+                // resultSet = source.Clone("handle");
+                resultSet = source;
 
-                // 2022/1/16
-                // 对即将 ReadOnly 的结果集先排序。因为一旦变成 ReadOnly 以后就不允许排序了
-                if (EnsureSorted(resultSet, handle, sortby_key,
-                    "克隆后",
-                    explainInfo,
-                    out strError) == -1)
+                // 要求 resultSet.Type 和 strOutputStyle 兼容
+                var type = GetResultSetType(strOutputStyle);
+                if (resultSet.Type != type)
                 {
-                    strError = $"在对克隆后的结果集排序时出现错误: {strError}";
+                    strError = $"现有结果集 '{strResultSetName}' 的类型 {resultSet.Type} 与 strOutputStyle 参数 '{strOutputStyle}' 要求的类型 {type} 不兼容";
                     return -1;
                 }
 
-                resultSet.ReadOnly = true;
+                if (resultSet.ReadOnly == false)
+                {
+                    // 2022/1/16
+                    // 对即将 ReadOnly 的结果集先排序。因为一旦变成 ReadOnly 以后就不允许排序了
+                    if (EnsureSorted(resultSet,
+                        handle,
+                        // sortby_key,
+                        "克隆后",
+                        explainInfo,
+                        out strError) == -1)
+                    {
+                        strError = $"在对克隆后的结果集排序时出现错误: {strError}";
+                        return -1;
+                    }
+
+                    resultSet.ReadOnly = true;
+                    Debug.Assert(resultSet.Cached == false);
+                }
                 return 0;
             }
 
-            //先清空一下
-            resultSet.Clear();
+            // 先清空一下，同时设定好结果集的类型
+            resultSet = sessioninfo.NewResultSet(GetResultSetType(strOutputStyle));
+            // resultSet.Clear(GetResultSetType(strOutputStyle));
 
             int nRet;
 
@@ -713,7 +745,6 @@ namespace DigitalPlatform.rms
                 long prev_count = resultSet.Count;
 
                 // 注: SearchByUnion不清空resultSet，从而使多个库的结果集放在一起
-                string strWarningInfo = "";
                 //		-1	出错
                 //		0	成功
                 //      1   成功，但resultset需要再行排序一次
@@ -726,7 +757,7 @@ namespace DigitalPlatform.rms
                     this.m_nWarningLevel,
                     explainInfo,
                     out strError,
-                    out strWarningInfo);
+                    out string strWarningInfo);
                 if (nRet == -1)
                     return -1;
 
@@ -747,16 +778,23 @@ namespace DigitalPlatform.rms
             // 2010/5/17
             if (bSearched == true)
             {
+                /* -- refactor
                 // 2010/5/11
                 resultSet.EnsureCreateIndex();   // 确保创建了索引
+                */
 
                 // 2022/1/24
                 // 把相同的 key 后面的 count 合并
                 if (StringUtil.IsInList("keycount", strOutputStyle)
                     && hit_database_count > 1)
                 {
+#if REMOVED
                     Stopwatch sw = Stopwatch.StartNew();
 
+                    Debug.Assert(resultSet.Type == ResultSetType.KeyCount, "结果集类型应该是 KeyCount");
+                    resultSet.Sort(false, handle.CancelToken);
+
+#if REMOVED
                     if (DoSort(resultSet,
                         handle/*isConnected*/,
                         (a, b) =>
@@ -769,12 +807,20 @@ namespace DigitalPlatform.rms
                         strError = "前端中断";
                         return -1;
                     }
+#endif
 
                     sw.Stop();
                     explainInfo?.AppendLine($"key+count 合并阶段排序耗费时间 {sw.Elapsed}");
-                    sw.Restart();
+                    
+#endif
 
-                    DpResultSet oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
+                    // sw.Restart();
+                    Stopwatch sw = Stopwatch.StartNew();
+
+                    resultSet.DeDup(new string(KernelResultSet.CHAR_OR, 1),
+                        handle.CancelToken);
+#if REMOVED
+                    var oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
                     StringBuilder debugInfo = null;
 
                     // 合并
@@ -788,8 +834,9 @@ namespace DigitalPlatform.rms
                         return -1;
                     resultSet.Close();
                     resultSet = oTargetMiddle;
-
                     bNeedSort = false;  // 已经排序了
+#endif
+
 
                     sw.Stop();
                     explainInfo?.AppendLine($"key+count 合并阶段归并耗费时间 {sw.Elapsed}");
@@ -799,8 +846,14 @@ namespace DigitalPlatform.rms
                 // TODO: 其实可以使用EnsureSorted()函数
                 if (bNeedSort == true)
                 {
+                    handle.CancelToken.ThrowIfCancellationRequested();
+
                     Stopwatch sw = Stopwatch.StartNew();
 
+                    resultSet.Sort(false,
+                        handle.CancelToken);
+
+#if REMOVED
                     if (DoSort(resultSet,
                         handle/*isConnected*/,
                         (a, b) =>
@@ -813,6 +866,7 @@ namespace DigitalPlatform.rms
                         strError = "前端中断";
                         return -1;
                     }
+#endif
 
                     sw.Stop();
                     explainInfo?.AppendLine($"doItem 排序耗费时间 {sw.Elapsed}");
@@ -825,13 +879,12 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-
+#if REF
         // return:
         //      fasle   正常完成
         //      true    中断
-        public static bool DoSort(DpResultSet resultset,
+        public static bool DoSort(KernelResultSet resultset,
             ChannelHandle handle,
-            // Delegate_isConnected isConnected
             delegate_compare func_compare = null)
         {
             resultset.Idle += new IdleEventHandler(sort_Idle);
@@ -852,10 +905,11 @@ namespace DigitalPlatform.rms
 
             return false;
         }
+#endif
 
         static void sort_Idle(object sender, IdleEventArgs e)
         {
-            DpResultSet resultset = (DpResultSet)sender;
+            var resultset = (KernelResultSet)sender;
 #if NO
             Delegate_isConnected isConnected = (Delegate_isConnected)resultset.Param;
 
@@ -885,11 +939,13 @@ namespace DigitalPlatform.rms
             SessionInfo sessioninfo,
             string strOutputStyle,
             XmlElement nodeRoot,
-            ref DpResultSet resultSet,
+            // ref KernelResultSet resultSet,
             ChannelHandle handle,
             StringBuilder explainInfo,
+            out KernelResultSet resultSet,
             out string strError)
         {
+            resultSet = null;
 #if DEBUG
             DateTime start_time = DateTime.Now;
             Debug.WriteLine("Begin DoQuery()");
@@ -922,8 +978,11 @@ namespace DigitalPlatform.rms
                 // 到item时不再继续递归
                 if (nodeRoot.Name == "item")
                 {
+                    /* -- refactor
                     if (resultSet == null)
                         resultSet = sessioninfo.NewResultSet(); // 延迟创建
+                    */
+
                     // return:
                     //		-1	出错
                     //		-6	无足够的权限
@@ -932,9 +991,10 @@ namespace DigitalPlatform.rms
                         sessioninfo,
                         strOutputStyle,
                         nodeRoot,
-                        ref resultSet,
+                        // ref resultSet,
                         handle,
                         explainInfo,
+                        out resultSet,
                         out strError);
                 }
 
@@ -973,13 +1033,15 @@ namespace DigitalPlatform.rms
                     sessioninfo,
                     strOutputStyle,
                     rpn,
-                    ref resultSet,
+                    // ref resultSet,
                     handle,
                     explainInfo,
+                    out resultSet,
                     out strError);
                 if (nRet <= -1)
                     return nRet;
 
+                Debug.Assert(resultSet != null);
                 return 0;
             }
             finally
@@ -991,9 +1053,9 @@ namespace DigitalPlatform.rms
             }
         }
 
-        static int EnsureSorted(DpResultSet resultset,
+        static int EnsureSorted(KernelResultSet resultset,
             ChannelHandle handle,
-            bool sortby_key,
+            // bool sortby_key,
             string comment,
             StringBuilder explainInfo,
             out string strError)
@@ -1004,8 +1066,14 @@ namespace DigitalPlatform.rms
 
             if (resultset.Sorted == false)
             {
+                handle.CancelToken.ThrowIfCancellationRequested();
+
                 Stopwatch sw = Stopwatch.StartNew();
 
+                // DuckDpResultSet 排序时，是根据 type 来创建适当的索引，自然就有序了
+                resultset.Sort(false, handle.CancelToken);
+
+#if REMOVED
                 if (DoSort(resultset,
                     handle/*isConnected*/,
                     (a, b) =>
@@ -1018,6 +1086,7 @@ namespace DigitalPlatform.rms
                     strError = "前端中断";
                     return -1;
                 }
+#endif
 
                 Debug.Assert(resultset.Sorted == true, "");
 
@@ -1048,12 +1117,14 @@ namespace DigitalPlatform.rms
             SessionInfo sessioninfo,
             string strOutputStyle,
             List<XmlElement> rpn,
-            ref DpResultSet resultSet,
+            // ref KernelResultSet resultSet,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
             StringBuilder explainInfo,
+            out KernelResultSet resultSet,
             out string strError)
         {
+            resultSet = null;
 #if DEBUG
             DateTime start_time = DateTime.Now;
             Debug.WriteLine("Begin ProceedRPN()");
@@ -1124,12 +1195,17 @@ namespace DigitalPlatform.rms
                         DpResultSet oTargetRight = sessioninfo.NewResultSet();   // new DpResultSet();
 #endif
 
-                        //做一个两个成员的ArrayList，
-                        //成员类型为DpResultSet，
-                        //存放从栈里pop出的（如果是node，需要进行计算）的结果集
-                        List<DpResultSet> oSource = new List<DpResultSet>();
+                        // 做一个两个成员的集合
+                        // 成员类型为DpResultSet，
+                        // 存放从栈里pop出的（如果是node，需要进行计算）的结果集
+                        var oSource = new List<KernelResultSet>();
+                        /* -- refactor
                         oSource.Add(sessioninfo.NewResultSet());   // new DpResultSet()
                         oSource.Add(sessioninfo.NewResultSet());   // new DpResultSet()
+                        */
+                        oSource.Add(null);   // new DpResultSet()
+                        oSource.Add(null);   // new DpResultSet()
+
                         try
                         {
                             for (int j = 0; j < 2; j++)
@@ -1152,7 +1228,9 @@ namespace DigitalPlatform.rms
                                         return -1;
                                     }
 
-                                    DpResultSet temp = oSource[j];
+                                    /* --refactor
+                                    var temp = oSource[j];
+                                    */
                                     // return:
                                     //		-1	出错
                                     //		-6	无权限
@@ -1161,14 +1239,18 @@ namespace DigitalPlatform.rms
                                         sessioninfo,
                                         strOutputStyle,
                                         nodePop,
-                                        ref temp,
+                                        // ref temp,
                                         handle,
                                         explainInfo,
+                                        out KernelResultSet temp,
                                         out strError);
                                     if (ret <= -1)
                                         return ret;
+                                    /* -- refactor
                                     if (temp != oSource[j])
+                                    */
                                     {
+                                        Debug.Assert(temp != null);
                                         // 2014/3/11
                                         if (oSource[j] != null)
                                             oSource[j].Close();
@@ -1177,7 +1259,7 @@ namespace DigitalPlatform.rms
                                 }
                                 else
                                 {
-                                    DpResultSet temp = oReversePolandStack.PopResultSet();
+                                    var temp = oReversePolandStack.PopResultSet();
                                     Debug.Assert(temp != oSource[j], "");
 
                                     // 2014/3/11
@@ -1221,8 +1303,33 @@ namespace DigitalPlatform.rms
                             bool bOutputKeyCount = StringUtil.IsInList("keycount", strOutputStyle);
                             bool bOutputKeyID = StringUtil.IsInList("keyid", strOutputStyle);
 
-                            DpResultSet left = oSource[1];
-                            DpResultSet right = oSource[0];
+                            var left = oSource[1];
+                            Debug.Assert(left != null, "oSource[1]不应为null");
+                            var right = oSource[0];
+                            Debug.Assert(right != null, "oSource[0]不应为null");
+
+                            KernelResultSet target = null;
+                            if (left.ReadOnly == true
+                                || left.Permanent == true)
+                            {
+                                target = sessioninfo.NewResultSet(left.Type);
+                            }
+
+                            left.OR(right,
+                                target,
+                                "records",
+                                new string(KernelResultSet.CHAR_OR, 1));
+                            oReversePolandStack.PushResultSet(target != null ? target : left);
+
+                            // 如果压入堆栈的是 target，则 left 要释放
+                            if (target != null)
+                            {
+                                Close(left);
+                            }
+
+                            Close(right);
+
+#if REMOVED
 
 #if DEBUG
                             Debug.Assert(left.IsClosed == false, "");
@@ -1272,7 +1379,7 @@ namespace DigitalPlatform.rms
                                         return -1;
                                     if (ret == 0)
                                     {
-                                        DpResultSet left_save = left;
+                                        var left_save = left;
                                         // 注意：函数执行过程，可能交换 left 和 right。也就是说返回后， left == right
                                         ret = DpResultSetManager.AddResults(ref left,
                                             right,
@@ -1303,6 +1410,7 @@ namespace DigitalPlatform.rms
                                             right.Sorted = false;
                                         }
 
+#if REMOVED
                                         if (EnsureSorted(left, handle, sortby_key,
                                             "OR (2)运算前对左侧",
                                             explainInfo,
@@ -1313,9 +1421,14 @@ namespace DigitalPlatform.rms
                                             explainInfo,
                                             out strError) == -1)
                                             return -1;
+#endif
 
                                         {
-                                            DpResultSet oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
+                                            left.OR(right);
+                                            oReversePolandStack.PushResultSet(left);
+                                            right.Close();
+#if REMOVED
+                                            var oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
                                             StringBuilder debugInfo = null;
                                             ret = DpResultSetManager.Merge(LogicOper.OR,
         left,
@@ -1338,29 +1451,41 @@ namespace DigitalPlatform.rms
                                             Debug.Assert(right != oTargetMiddle, "");
                                             left.Close();
                                             right.Close();
+#endif
                                         }
                                     }
                                 }
                             }
 
+#endif
                             continue;
                         }
 
                         if (strOpreator == "AND")
                         {
-                            DpResultSet left = oSource[1];
-                            DpResultSet right = oSource[0];
+                            // TODO: 如果 left 为 permanent resultset，right 为 temporary resultset，那么就直接在 right 上进行 AND 运算，结果放在 right 上
+                            // 如果 left 和 right 均为 permanent resultset，那么需要创建第三个 resultset 对象，结果进入这第三个对象，原有两个对象不要被修改
+
+                            var left = oSource[1];
+                            Debug.Assert(left != null, "oSource[1]不应为null");
+                            var right = oSource[0];
+                            Debug.Assert(right != null, "oSource[0]不应为null");
+                            /*
 #if DEBUG
                             Debug.Assert(left.IsClosed == false, "");
                             Debug.Assert(right.IsClosed == false, "");
 #endif
+                            */
 
+                            /*
                             if (left.Asc != right.Asc)
                             {
                                 right.Asc = left.Asc;
-                                right.Sorted = false;
+                                //right.Sorted = false;
                             }
+                            */
 
+#if REMOVED
                             if (EnsureSorted(left, handle, sortby_key,
                                 "AND 运算前对左侧",
                                 explainInfo,
@@ -1371,29 +1496,47 @@ namespace DigitalPlatform.rms
                                 explainInfo,
                                 out strError) == -1)
                                 return -1;
+#endif
 
                             // 优化
-                            if (left.Count == 0)
+                            if (left.Count == 0 || right.Count == 0)
                             {
+                                // 新创建一个空结果集压栈。
+                                // 这样做的好处是免去了对压栈对象的 Permanet 和 ReadOnly 判断
                                 oReversePolandStack.PushResultSet(
-                                    left
+                                    sessioninfo.NewResultSet(left.Type)
                                     );
-                                // 2014/3/11
                                 Debug.Assert(left != right, "");
-                                right.Close();
-                            }
-                            else if (right.Count == 0)
-                            {
-                                oReversePolandStack.PushResultSet(
-                                    right
-                                    );
-                                // 2014/3/11
-                                Debug.Assert(left != right, "");
-                                left.Close();
+                                Close(left);
+                                Close(right);
                             }
                             else
                             {
-                                DpResultSet oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
+                                KernelResultSet target = null;
+                                if (left.ReadOnly == true
+                                    || left.Permanent == true)
+                                {
+                                    target = sessioninfo.NewResultSet(left.Type);
+                                }
+
+                                left.AND(right,
+                                    target,
+                                    "records",
+                                    new string(KernelResultSet.CHAR_AND, 1),
+                                    new string(KernelResultSet.CHAR_OR, 1));
+
+                                oReversePolandStack.PushResultSet(target != null ? target : left);
+
+                                // 如果压入堆栈的是 target，则 left 要释放
+                                if (target != null)
+                                {
+                                    Close(left);
+                                }
+
+                                Close(right);
+
+#if REMOVED
+                                var oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
 
                                 StringBuilder debugInfo = null;
 
@@ -1418,6 +1561,7 @@ namespace DigitalPlatform.rms
                                 Debug.Assert(right != oTargetMiddle, "");
                                 left.Close();
                                 right.Close();
+#endif
                             }
 
                             continue;
@@ -1426,19 +1570,27 @@ namespace DigitalPlatform.rms
                         if (strOpreator == "SUB")
                         {
                             //因为使用从栈里pop，所以第0个是后面的，第1个是前面的
-                            DpResultSet left = oSource[1];
-                            DpResultSet right = oSource[0];
+                            var left = oSource[1];
+                            Debug.Assert(left != null, "oSource[1]不应为null");
+                            var right = oSource[0];
+                            Debug.Assert(right != null, "oSource[0]不应为null");
+                            /*
 #if DEBUG
                             Debug.Assert(left.IsClosed == false, "");
                             Debug.Assert(right.IsClosed == false, "");
 #endif
+                            */
 
+                            /*
                             if (left.Asc != right.Asc)
                             {
                                 right.Asc = left.Asc;
-                                right.Sorted = false;
+                                //right.Sorted = false;
                             }
+                            */
 
+                            // ?? DuckResultSet SUB() 之前并不要求排序吧?
+#if REMOVED
                             if (EnsureSorted(left,
                                 handle,
                                 sortby_key,
@@ -1453,29 +1605,41 @@ namespace DigitalPlatform.rms
                                 explainInfo,
                                 out strError) == -1)
                                 return -1;
+#endif
 
                             // 优化
-                            if (left.Count == 0)
+                            if (left.Count == 0 || right.Count == 0)
                             {
                                 oReversePolandStack.PushResultSet(
                                     left
                                     );
-                                // 2014/3/11
                                 Debug.Assert(left != right, "");
-                                right.Close();
-                            }
-                            else if (right.Count == 0)
-                            {
-                                oReversePolandStack.PushResultSet(
-                                    left
-                                    );
-                                // 2014/3/11
-                                Debug.Assert(left != right, "");
-                                right.Close();
+                                Close(right);
                             }
                             else
                             {
-                                DpResultSet oTargetLeft = sessioninfo.NewResultSet();   // new DpResultSet();
+                                KernelResultSet target = null;
+                                if (left.ReadOnly == true
+                                    || left.Permanent == true)
+                                {
+                                    target = sessioninfo.NewResultSet(left.Type);
+                                }
+
+                                left.SUB(right,
+                                    target,
+                                    "records",
+                                    new string(KernelResultSet.CHAR_OR, 1));
+                                oReversePolandStack.PushResultSet(target != null ? target : left);
+                                // 如果压入堆栈的是 target，则 left 要释放
+                                if (target != null)
+                                {
+                                    Close(left);
+                                }
+
+                                Close(right);
+
+#if REMOVED
+                                var oTargetLeft = sessioninfo.NewResultSet();   // new DpResultSet();
 
                                 StringBuilder debugInfo = null;
 
@@ -1502,12 +1666,20 @@ namespace DigitalPlatform.rms
                                 Debug.Assert(right != oTargetLeft, "");
                                 left.Close();
                                 right.Close();
+#endif
                             }
 
                             continue;
                         }
                     }
                 }
+
+                void Close(KernelResultSet r)
+                {
+                    if (r.Permanent == false)
+                        r.Close();
+                }
+
                 if (oReversePolandStack.Count > 1)
                 {
                     strError = "逆波兰出错";
@@ -1529,17 +1701,20 @@ namespace DigitalPlatform.rms
                             sessioninfo,
                             strOutputStyle,
                             node,
-                            ref resultSet,
+                            // ref resultSet,
                             handle,
                             explainInfo,
+                            out resultSet,
                             out strError);
                         if (ret <= -1)
                             return ret;
+
+                        Debug.Assert(resultSet != null);
                         // 2022/1/24
                         // TODO: 需要把里面的 count 值归并
                         if (StringUtil.IsInList("keycount", strOutputStyle))
                         {
-
+                            // DeDup()
                         }
                     }
                     else if (nType == 1)
@@ -1548,7 +1723,9 @@ namespace DigitalPlatform.rms
 
                         // TODO: 测算这个Copy所花费的时间。
                         // resultSet.Copy((DpResultSet)(oReversePolandStack.PopResultSet()));
-                        resultSet = (DpResultSet)(oReversePolandStack.PopResultSet());
+                        resultSet = oReversePolandStack.PopResultSet();
+
+                        // TODO: 如果 oReversePolandStack 中还残留了结果集对象，需要销毁么?
                     }
                     else
                     {
@@ -1596,14 +1773,14 @@ namespace DigitalPlatform.rms
     {
         public int m_int;               // 类型 0:node 1:结果集
         public XmlElement m_node;          // node节点
-        public DpResultSet m_resultSet; // 结果集
+        public KernelResultSet m_resultSet; // 结果集
 
         // 构造函数
         // parameter:
         //		node        节点
         //		oResultSet  结果集
         public ReversePolishItem(XmlElement node,
-            DpResultSet resultSet)
+            KernelResultSet resultSet)
         {
             m_node = node;
             m_resultSet = resultSet;
@@ -1645,7 +1822,7 @@ namespace DigitalPlatform.rms
         //		oResult 结果集
         // return:
         //      void
-        public void PushResultSet(DpResultSet oResult)
+        public void PushResultSet(KernelResultSet oResult)
         {
             ReversePolishItem oItem = new ReversePolishItem(null,
                 oResult);
@@ -1659,7 +1836,7 @@ namespace DigitalPlatform.rms
         // return:
         //      void
         public void Push(XmlElement node,
-            DpResultSet oResult)
+            KernelResultSet oResult)
         {
             ReversePolishItem oItem = new ReversePolishItem(node,
                 oResult);
@@ -1688,7 +1865,7 @@ namespace DigitalPlatform.rms
         // pop一个对象，只返回结果集
         // return:
         //		结果集
-        public DpResultSet PopResultSet()
+        public KernelResultSet PopResultSet()
         {
             if (this.Count == 0)
             {

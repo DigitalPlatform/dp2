@@ -1,17 +1,18 @@
 ﻿// #define USE_TEMPDIR  // 使用每个通道的临时目录
 
+using DigitalPlatform.Core;
+using DigitalPlatform.IO;
+using DigitalPlatform.Text;
+using DuckDbResultSet;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
-
-using DigitalPlatform.ResultSet;
-using DigitalPlatform.Text;
-using DigitalPlatform.Core;
-using DigitalPlatform.IO;
 using System.Runtime.Remoting.Messaging;
+using System.Text;
+using System.Threading;
 
 namespace DigitalPlatform.rms
 {
@@ -119,7 +120,7 @@ namespace DigitalPlatform.rms
         {
             foreach (string key in this.ResultSets.Keys)
             {
-                DpResultSet resultset = (DpResultSet)this.ResultSets[key];
+                var resultset = (KernelResultSet)this.ResultSets[key];
                 if (resultset != null)
                 {
                     try
@@ -135,7 +136,7 @@ namespace DigitalPlatform.rms
             this.ResultSets.Clear();
         }
 
-        public DpResultSet GetResultSet(string strResultSetName,
+        public KernelResultSet GetResultSet(string strResultSetName,
             bool bAutoCreate = true)
         {
             if (String.IsNullOrEmpty(strResultSetName) == true)
@@ -143,7 +144,7 @@ namespace DigitalPlatform.rms
 
             strResultSetName = strResultSetName.ToLower();
 
-            DpResultSet resultset = (DpResultSet)this.ResultSets[strResultSetName];
+            var resultset = (KernelResultSet)this.ResultSets[strResultSetName];
             if (resultset == null)
             {
                 if (bAutoCreate == false)
@@ -153,7 +154,7 @@ namespace DigitalPlatform.rms
                 resultset = new DpResultSet();
                 resultset.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
 #endif
-                resultset = NewResultSet();
+                resultset = NewResultSet(ResultSetType.Id);
                 this.ResultSets[strResultSetName] = resultset;
             }
 
@@ -161,9 +162,10 @@ namespace DigitalPlatform.rms
         }
 
         // 创建一个新的结果集对象，但并不进入容器管理范畴
-        public DpResultSet NewResultSet()
+        public KernelResultSet NewResultSet(ResultSetType type)
         {
-            DpResultSet resultset = new DpResultSet(GetTempFileName);
+            var resultset = new KernelResultSet(type);
+            resultset.Open(GetTempFileName);
             Debug.Assert(string.IsNullOrEmpty(this.app.ResultsetDir) == false, "");
             resultset.TempFileDir = this.app.ResultsetDir;
             // resultset.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
@@ -175,14 +177,14 @@ namespace DigitalPlatform.rms
         // parameters:
         //      resultset   结果集对象。如果为 null，实际上效果是删除这个结果集条目
         public void SetResultSet1(string strResultSetName,
-            DpResultSet resultset)
+            KernelResultSet resultset)
         {
             if (String.IsNullOrEmpty(strResultSetName) == true)
                 strResultSetName = "default";
 
             strResultSetName = strResultSetName.ToLower();
 
-            DpResultSet exist_resultset = (DpResultSet)this.ResultSets[strResultSetName];
+            var exist_resultset = (KernelResultSet)this.ResultSets[strResultSetName];
 
             // 即将设置的结果集正好是已经存在的结果集
             if (exist_resultset == resultset)
@@ -243,31 +245,73 @@ namespace DigitalPlatform.rms
 #endif
         }
 
+        public static string[] SplitSegments(string text,
+string delimeters)
+        {
+            if (text == null)
+                return new string[0];
+
+            List<string> lines = new List<string>();
+            StringBuilder line = null;  // new StringBuilder();
+            foreach (var ch in text)
+            {
+                /*
+                if (paragraph == null)
+                    paragraph = new StringBuilder();
+                */
+                if (delimeters.IndexOf(ch) != -1)
+                {
+                    if (line != null && line.Length > 0)
+                        lines.Add(line.ToString());
+                    line = new StringBuilder();
+                    line.Append(ch);
+                    //lines.Add(line.ToString());
+                    //line = null;
+                }
+                else
+                {
+                    if (line == null)
+                        line = new StringBuilder();
+                    line.Append(ch);
+                }
+
+            }
+            if (line != null && line.Length > 0)
+                lines.Add(line.ToString());
+
+            if (lines.Count == 0)
+                lines.Add("");
+
+            return lines.ToArray();
+        }
+
+
         KeyFrom[] BuildKeyFromArray(string strText)
         {
             if (String.IsNullOrEmpty(strText) == true)
                 return null;
 
+            string delemeters = $"{KernelResultSet.CHAR_OR}{KernelResultSet.CHAR_AND}";
             List<KeyFrom> results = new List<KeyFrom>();
-            string[] lines = strText.Split(new char[] { DpResultSetManager.SPLIT });
-            for (int i = 0; i < lines.Length; i++)
+            string[] lines = SplitSegments(strText, delemeters);
+            foreach (string line in lines)
             {
-                string strLine = lines[i];
-                if (String.IsNullOrEmpty(strLine) == true)
+                if (String.IsNullOrEmpty(line) == true)
                     continue;
 
+                string strLine = line;
                 string strKey = "";
                 string strFrom = "";
 
                 char chLogic = (char)0;  // none
-                if (strLine[0] == DpResultSetManager.OR
-                    || strLine[0] == DpResultSetManager.AND)
+                if (strLine[0] == KernelResultSet.CHAR_OR
+                    || strLine[0] == KernelResultSet.CHAR_AND)
                 {
                     chLogic = strLine[0];
                     strLine = strLine.Substring(1);
                 }
 
-                int nRet = strLine.IndexOf(DpResultSetManager.FROM_LEAD);
+                int nRet = strLine.IndexOf(KernelResultSet.FROM_LEAD);
                 if (nRet == -1)
                     strKey = strLine;
                 else
@@ -277,9 +321,9 @@ namespace DigitalPlatform.rms
                 }
 
                 KeyFrom keyfrom = new KeyFrom();
-                if (chLogic == DpResultSetManager.OR)
+                if (chLogic == KernelResultSet.CHAR_OR)
                     keyfrom.Logic = "OR";
-                else if (chLogic == DpResultSetManager.AND)
+                else if (chLogic == KernelResultSet.CHAR_AND)
                     keyfrom.Logic = "AND";
                 keyfrom.Key = strKey;
                 keyfrom.From = strFrom;
@@ -407,7 +451,7 @@ namespace DigitalPlatform.rms
         //		-1	出错
         //		>=0	结果集的总数
         public long API_GetRecords(
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             long lStart,
             long lLength,
             string strLang,
@@ -475,8 +519,11 @@ namespace DigitalPlatform.rms
 
             long lPos = -1; // 中间保持不透明的值
 
-            for (long i = 0; i < lOutputLength; i++)
+            // for (long i = 0; i < lOutputLength; i++)
+            long i = 0;
+            foreach(var dpRecord in resultSet.GetRange(lStart, lOutputLength))
             {
+                /*
                 DpRecord dpRecord = null;
 
                 long lIndex = lStart + i;
@@ -493,6 +540,7 @@ namespace DigitalPlatform.rms
                     dpRecord = resultSet.GetNextRecord(
                         ref lPos);
                 }
+                */
 
                 if (dpRecord == null)
                     break;
@@ -501,9 +549,9 @@ namespace DigitalPlatform.rms
 
                 if (isKeyCountState == true)
                 {
-                    record.Path = dpRecord.ID;
+                    record.Path = dpRecord.Key; // 原先使用 dpRecord.ID;
                     record.Cols = new string[1];
-                    record.Cols[0] = dpRecord.Index.ToString();
+                    record.Cols[0] = dpRecord.Count.ToString();
 
                     // 注: 返回的 record.Key 里面没有内容。因为 dpRecord.BrowseText 里面没有内容
 #if NO
@@ -632,20 +680,19 @@ out strError);
 
                     if (bHasKey == true)
                     {
-                        record.Keys = BuildKeyFromArray(dpRecord?.BrowseText);
+                        record.Keys = BuildKeyFromArray(dpRecord?.Key/*.BrowseText*/);
                         // lTotalPackageLength += GetLength(record.Keys);
                     }
 
                     if (bHasCols == true)
                     {
-                        string[] cols;
                         nRet = db.GetCols(
                             strFormat,
                             path.ID10,
                             strXml,
                             //0,
                             strStyle,
-                            out cols,
+                            out string [] cols,
                             out strError);
 #if NO
                         // 2013/1/14
@@ -755,6 +802,7 @@ out strError);
                 // records[i] = record;
                 results.Add(record);
                 Thread.Sleep(0);    // 降低CPU耗用?
+                i++;    // 2026/2/27
             }
 
             records = new Record[results.Count];
@@ -873,7 +921,7 @@ out strError);
         //		-1  出错
         //		>=0	结果集的总数
         public long API_GetRichRecords(
-            DpResultSet resultset,
+            KernelResultSet resultset,
             string strRanges,
             string strLang,
             string strStyle,
@@ -899,11 +947,12 @@ out strError);
 
                 // long lPos = 0;  // 应该用快速方式，不应用[]??? 2006/3/29
 
-                for (int j = 0; j < nLength; j++)
+                // for (int j = 0; j < nLength; j++)
+                foreach(var dpRecord in resultset.GetRange(nStart, nLength))
                 {
                     int nRet = 0;
 
-                    DpRecord dpRecord = resultset[j + nStart];
+                    // DpRecord dpRecord = resultset[j + nStart];
                     RichRecord richRecord = new RichRecord();
 
                     DbPath dbpath = new DbPath(dpRecord.ID);

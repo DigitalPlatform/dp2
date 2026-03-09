@@ -5,8 +5,9 @@ using System.Threading;
 using System.Diagnostics;
 using System.IO;
 
-using DigitalPlatform.ResultSet;
+//using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
+using DuckDbResultSet;
 
 namespace DigitalPlatform.rms
 {
@@ -41,7 +42,7 @@ namespace DigitalPlatform.rms
             {
                 foreach (string key in this.Keys)
                 {
-                    var resultset = (DpResultSet)this[key];
+                    var resultset = (KernelResultSet)this[key];
                     if (resultset != null)
                     {
                         resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
@@ -70,7 +71,7 @@ namespace DigitalPlatform.rms
         // 注意，没有锁定集合
         void FreeResultSet(string strOldName)
         {
-            DpResultSet resultset = (DpResultSet)this[strOldName];
+            var resultset = (KernelResultSet)this[strOldName];
             if (resultset == null)
                 return;
             this.Remove(strOldName);
@@ -94,7 +95,7 @@ namespace DigitalPlatform.rms
                 throw new ApplicationException("为 全局结果集集合 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
             try
             {
-                DpResultSet resultset = (DpResultSet)this[strOldName];
+                var resultset = (KernelResultSet)this[strOldName];
                 if (resultset == null)
                     return false;
 
@@ -112,7 +113,7 @@ namespace DigitalPlatform.rms
 
         // TODO: 似乎锁定不太严密。可以改用 UpgradeableReadLock
         // TODO: 全局结果集的名字可否就是文件名? 这样如果需要永久保持，下次启动的时候从文件系统就能列举出结果集名字
-        public DpResultSet GetResultSet(string strResultSetName,
+        public KernelResultSet GetResultSet(string strResultSetName,
     bool bAutoCreate = true)
         {
             if (String.IsNullOrEmpty(strResultSetName) == true)
@@ -123,12 +124,12 @@ namespace DigitalPlatform.rms
 
             strResultSetName = strResultSetName.ToLower();
 
-            DpResultSet resultset = null;
+            KernelResultSet resultset = null;
             if (this.m_lock.TryEnterReadLock(this.m_nLockTimeout) == false)
                 throw new ApplicationException("为 全局结果集集合 加读锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
             try
             {
-                resultset = (DpResultSet)this[strResultSetName];
+                resultset = (KernelResultSet)this[strResultSetName];
             }
             finally
             {
@@ -140,7 +141,8 @@ namespace DigitalPlatform.rms
                 if (bAutoCreate == false)
                     return null;
 
-                resultset = new DpResultSet(GetTempFileName);
+                resultset = new KernelResultSet(ResultSetType.Id);
+                resultset.Open(GetTempFileName);
                 // 注：这里要特别注意在 resultset 对象销毁以前卸载事件
                 resultset.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
 
@@ -205,7 +207,7 @@ namespace DigitalPlatform.rms
         //      返回实际设置的结果集名字
         public string SetResultset(
             string strName,
-            DpResultSet resultset)
+            KernelResultSet resultset)
         {
             if (this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
                 throw new ApplicationException("为 全局结果集集合 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
@@ -219,7 +221,7 @@ namespace DigitalPlatform.rms
                         foreach (string key in this.Keys)
                         {
                             // 2016/1/23
-                            resultset = (DpResultSet)this[key];
+                            resultset = (KernelResultSet)this[key];
                             if (resultset != null)
                             {
                                 resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
@@ -252,7 +254,7 @@ namespace DigitalPlatform.rms
                             current = name.Substring(1);
 
                         // 2016/1/23
-                        resultset = (DpResultSet)this[current];
+                        resultset = (KernelResultSet)this[current];
                         if (resultset != null)
                         {
                             resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
@@ -300,7 +302,7 @@ namespace DigitalPlatform.rms
                 {
                     token.ThrowIfCancellationRequested();
 
-                    DpResultSet resultset = (DpResultSet)this[key];
+                    var resultset = (KernelResultSet)this[key];
 
                     if (resultset == null)
                         continue;
@@ -336,7 +338,7 @@ namespace DigitalPlatform.rms
             }
 
             // 因为要删除某些元素，所以用写锁定
-            List<DpResultSet> delete_resultsets = new List<DpResultSet>();
+            var delete_resultsets = new List<KernelResultSet>();
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                 throw new ApplicationException("锁定尝试中超时");
             try
@@ -345,7 +347,7 @@ namespace DigitalPlatform.rms
                 {
                     token.ThrowIfCancellationRequested();
 
-                    DpResultSet resultset = (DpResultSet)this[key];
+                    var resultset = (KernelResultSet)this[key];
                     if (resultset == null)
                         continue;
 
@@ -360,7 +362,7 @@ namespace DigitalPlatform.rms
                 this.m_lock.ExitWriteLock();
             }
 
-            foreach (DpResultSet resultset in delete_resultsets)
+            foreach (KernelResultSet resultset in delete_resultsets)
             {
                 token.ThrowIfCancellationRequested();
 

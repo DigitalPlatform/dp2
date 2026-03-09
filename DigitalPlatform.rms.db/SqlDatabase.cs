@@ -34,7 +34,7 @@ using Npgsql;
 using System.Data.Entity.Core.Objects;
 using Ghostscript.NET.Rasterizer;
 
-using DigitalPlatform.ResultSet;
+// using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
@@ -3684,7 +3684,7 @@ ex);
         private int SearchByID(SearchItem searchItem,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             string strOutputStyle,
             StringBuilder explainInfo,
             out string strError)
@@ -4184,7 +4184,7 @@ handle.CancelTokenSource.Token).Result;
         ChannelHandle handle,
         string strCommand,
         List<DbParameter> aSqlParameter,
-        DpResultSet resultSet,
+        KernelResultSet resultSet,
         int nMaxCount,
         string strTimeout,
         OutputStyle style,
@@ -4550,7 +4550,7 @@ handle.CancelTokenSource.Token).Result;
         // ChannelHandle handle,
         CancellationToken token,
         DbDataReader reader,
-        DpResultSet resultSet,
+        KernelResultSet resultSet,
         int nMaxCount,
         OutputStyle style,
         bool bRecordTable,
@@ -4562,6 +4562,7 @@ handle.CancelTokenSource.Token).Result;
         {
             strError = "";
 
+            var context = resultSet.GetAppenderContext();
             try
             {
                 if (reader == null
@@ -4578,39 +4579,9 @@ handle.CancelTokenSource.Token).Result;
                 int nGetedCount = 0;
                 while (reader.Read())
                 {
-#if NO
-                                    if (handle != null
-                                        && (nGetedCount % 10000) == 0)
-                                    {
-                                        if (handle.DoIdle() == false)
-                                        {
-                                            strError = "用户中断";
-                                            return -1;
-                                        }
-                                    }
-#endif
                     if ((nGetedCount % 1000) == 0)
                     {
                         token.ThrowIfCancellationRequested();
-                        /*
-                        if (token.IsCancellationRequested)
-                        {
-                            // 2024/11/30
-                            // 如果不用 Command.Cancel()，则 DataReader.Close() 会滞留较长时间
-                            func_cancel?.Invoke();
-                            // 判断是否为超时
-                            strError = "用户中断";
-                            return -1;
-                        }
-                        */
-#if REMOVED
-                        var error = func_hasTimeout();
-                        if (string.IsNullOrEmpty(error) == false)
-                        {
-                            strError = error;
-                            return -1;
-                        }
-#endif
                     }
 
                     string strFirstColumn = ((string)reader[0]);
@@ -4624,26 +4595,46 @@ handle.CancelTokenSource.Token).Result;
 
                     if (style == OutputStyle.KeyCount)
                     {
+                        Debug.Assert(resultSet.Type == DuckDbResultSet.ResultSetType.KeyCount);
+                        /*
                         DpRecord dprecord = new DpRecord(strFirstColumn);
                         dprecord.Index = bRecordTable ? 1 : (int)reader.GetInt32(1);
                         resultSet.Add(dprecord);
+                        */
+                        context.AppendKeyCountRow(strFirstColumn,
+                            bRecordTable ? 1 : (int)reader.GetInt32(1),
+                            nGetedCount);
                     }
                     else if (style == OutputStyle.KeyID)
                     {
+                        Debug.Assert(resultSet.Type == DuckDbResultSet.ResultSetType.KeyId);
+
                         // datareader key, id
                         // 结果集格式 key, path
                         string strKey = strFirstColumn;
                         string strId = this.FullID + "/" + (string)reader[1]; // 格式为：库id/记录号
                         string strFrom = (string)reader[2];
+
+                        /*
                         DpRecord record = new DpRecord(strId);
                         record.BrowseText = strKey + new string(DpResultSetManager.FROM_LEAD, 1) + strFrom;
                         resultSet.Add(record);
+                        */
+
+                        context.AppendKeyIdRow(strId, 
+                            strKey + new string(KernelResultSet.FROM_LEAD, 1) + strFrom,
+                            nGetedCount);
                     }
                     else
                     {
+                        Debug.Assert(resultSet.Type == DuckDbResultSet.ResultSetType.Id);
+
                         string strId = "";
                         strId = this.FullID + "/" + strFirstColumn; // 记录格式为：库id/记录号
-                        resultSet.Add(new DpRecord(strId));
+                        
+                        // resultSet.Add(new DpRecord(strId));
+
+                        context.AppendIdRow(strId, nGetedCount);
                     }
 
                     nGetedCount++;
@@ -4665,6 +4656,7 @@ handle.CancelTokenSource.Token).Result;
             {
                 if (reader != null)
                     reader.Close();
+                context.Dispose();
             }
         }
 
@@ -5590,7 +5582,7 @@ List<DbParameter> aSqlParameter)
             SearchItem searchItem,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             int nWarningLevel,
             StringBuilder explainInfo,
             out string strError,
@@ -7975,7 +7967,7 @@ List<DbParameter> aSqlParameter)
                             if (nPageNo > nTotalPage)
                                 throw new Exception("超过页码范围");
 
-                            using (Image img = rasterizer.GetPage(nDPI, nDPI, nPageNo))
+                            using (Image img = rasterizer.GetPage(/*nDPI,*/ nDPI, nPageNo))
                             {
                                 img.Save(strTempFileName, format);
                             }
@@ -15496,7 +15488,6 @@ List<DbParameter> aSqlParameter)
                 {
                     // 这里报错已经晚了一步，尾号被推动过了，会形成攻击效果。
                     // 已经改到更早的地方，也就是尾号还没有被推动过的地方进行此项检查报错
-#if REMOVED
                     // 2022/7/6
                     if (StringUtil.IsInList("checkcreatingtimestamp", strStyle)
                         && baInputTimestamp != null)
@@ -15505,7 +15496,6 @@ List<DbParameter> aSqlParameter)
                         baOutputTimestamp = null;   // 返回给前端，让前端能够得知应使用的时间戳
                         return -2;
                     }
-#endif
                 }
             }
 

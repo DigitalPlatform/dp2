@@ -1450,7 +1450,7 @@ namespace DigitalPlatform.rms
         //		0	成功
         // 线: 安全的
         public int Search(string strQuery,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             User oUser,
             Delegate_isConnected isConnected,
             out string strError)
@@ -4377,7 +4377,7 @@ namespace DigitalPlatform.rms
 
             int nRet = 0;
 
-            DpResultSet resultSet = new DpResultSet();
+            var resultSet = new KernelResultSet();
 
 
             //*********对帐户库集合加读锁***********
@@ -4491,7 +4491,7 @@ namespace DigitalPlatform.rms
         //		0	成功
         // 线：不安全
         private int SearchUserInternal(string strUserName,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             out string strError)
         {
             strError = "";

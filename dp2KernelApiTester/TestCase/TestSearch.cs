@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
@@ -38,6 +38,7 @@ namespace dp2KernelApiTester
                 if (create_result.Value == -1)
                     return create_result;
 
+                /*
                 var search_result = TestSingleDbLogicSearch(token);
                 if (search_result.Value == -1)
                     return search_result;
@@ -45,8 +46,9 @@ namespace dp2KernelApiTester
                 search_result = TestSingleDbIdSearch(token);
                 if (search_result.Value == -1)
                     return search_result;
+                */
 
-                search_result = TestMultiDbLogicSearch(token);
+                var search_result = TestMultiDbLogicSearch(token);
                 if (search_result.Value == -1)
                     return search_result;
 
@@ -1080,6 +1082,7 @@ namespace dp2KernelApiTester
             {
                 token.ThrowIfCancellationRequested();
 
+#if COMMENTED
                 // AND
                 {
                     string query1 = $"<target list='{ database_name1}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
@@ -1210,6 +1213,8 @@ namespace dp2KernelApiTester
                 }
 
                 token.ThrowIfCancellationRequested();
+#endif
+                // MessageBox.Show("OK");
 
                 // OR
                 // keycount

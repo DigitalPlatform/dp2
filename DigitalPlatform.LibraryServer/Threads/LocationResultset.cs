@@ -144,7 +144,7 @@ namespace DigitalPlatform.LibraryServer
                     this.WriteErrorLog("馆藏地结果集无需创建(因为当前不存在任何分馆)");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.WriteErrorLog($"馆藏地 {location_list} 结果集创建过程中出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -277,6 +277,7 @@ namespace DigitalPlatform.LibraryServer
 #if DETAIL_LOG
                 this.WriteErrorLog("开始检索");
 #endif
+
                     long lHitCount = channel.DoSearch(strQueryXml,
         "default",
         "", // strOutputStyle,
@@ -297,6 +298,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (lHitCount > 0)
                         {
+                            // 将下级记录路径转换为书目记录路径并去重
                             nRet = GetResultset(channel,
                         "default",
                         resultset,

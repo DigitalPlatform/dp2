@@ -13,7 +13,7 @@ using DigitalPlatform.rms;
 using DigitalPlatform.Text;
 using DigitalPlatform.Text.SectionPropertyString;
 using DigitalPlatform.Xml;
-using DigitalPlatform.ResultSet;
+// using DigitalPlatform.ResultSet;
 using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms

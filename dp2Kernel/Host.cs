@@ -142,10 +142,8 @@ namespace dp2Kernel
 
             string strLocation = "SOFTWARE\\DigitalPlatform";
 
-            /*
             if (Environment.Is64BitProcess == true)
                 strLocation = "SOFTWARE\\Wow6432Node\\DigitalPlatform";
-             * */
 
             using (RegistryKey digitalplatform = Registry.LocalMachine.CreateSubKey(strLocation))
             {

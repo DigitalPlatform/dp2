@@ -2207,7 +2207,7 @@ namespace DigitalPlatform.rms
         // 线：不安全
         private int SearchByID(SearchItem searchItem,
             Delegate_isConnected isConnected,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             out string strError)
         {
             strError = "";
@@ -2581,7 +2581,7 @@ namespace DigitalPlatform.rms
         // 检索
         internal override int SearchByUnion(SearchItem searchItem,
             Delegate_isConnected isConnected,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             int nWarningLevel,
             out string strError,
             out string strWarning)

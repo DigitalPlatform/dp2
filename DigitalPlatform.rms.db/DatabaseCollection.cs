@@ -15,11 +15,12 @@ using System.Security.Cryptography;
 
 using Ghostscript.NET;
 
-using DigitalPlatform.ResultSet;
+// using DigitalPlatform.ResultSet;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
+using DuckDbResultSet;
 
 namespace DigitalPlatform.rms
 {
@@ -197,9 +198,16 @@ namespace DigitalPlatform.rms
             }
             this.BinDir = strBinDir;
 
-            string path = Path.Combine(this.BinDir, "gsdll32.dll");
+            
+            string path = Path.Combine(this.BinDir,
+                Environment.Is64BitProcess? "gsdll64.dll" : "gsdll32.dll");
+            if (File.Exists(path) == false)
+            {
+                strError = $"ghostscript dll 文件 {path} 没有找到";
+                return -1;
+            }
+            
             gvi = new GhostscriptVersionInfo(path);
-
 
             if (String.IsNullOrEmpty(this.DataDir) == true)
             {
@@ -2347,15 +2355,16 @@ namespace DigitalPlatform.rms
         public int API_Search(
             SessionInfo sessioninfo,
             string strQuery,
-            ref DpResultSet resultSet,
+            // ref KernelResultSet resultSet,
             User oUser,
-            // Delegate_isConnected isConnected,
             ChannelHandle handle,
             string strOutputStyle,
             StringBuilder explainInfo,
+            out KernelResultSet resultSet,
             out string strError)
         {
             strError = "";
+            resultSet = null;
 
             if (handle != null && handle.CancelToken.IsCancellationRequested)
             {
@@ -2410,10 +2419,11 @@ namespace DigitalPlatform.rms
                     sessioninfo,
                     strOutputStyle,
                     dom.DocumentElement,
-                    ref resultSet,
+                    // ref resultSet,
                     handle,
                     // isConnected,
                     explainInfo,
+                    out resultSet,
                     out strError);
                 if (resultSet != null)
                     resultSet.m_strQuery = strQuery;
@@ -2426,6 +2436,9 @@ namespace DigitalPlatform.rms
                     Stopwatch sw = Stopwatch.StartNew();
                     var sortby_key = Query.GetSortBy(strOutputStyle) == "key";
                     resultSet.Asc = -1;
+
+                    resultSet.Sort(false, handle.CancelToken);
+                    /*
                     if (Query.DoSort(resultSet,
                         handle,
                         (a, b) =>
@@ -2438,6 +2451,7 @@ namespace DigitalPlatform.rms
                         strError = "前端中断";
                         return -1;
                     }
+                    */
 
                     sw.Stop();
                     explainInfo?.AppendLine($"终末排序耗时 {sw.Elapsed}");
@@ -6940,10 +6954,12 @@ namespace DigitalPlatform.rms
 
             int nRet = 0;
 
-            DpRecord record = null;
+            DuckRecord record = null;
 
             // 2019/5/6 增加 using
-            using (DpResultSet resultSet = new DpResultSet(_getTempFileName))
+            var resultSet = new KernelResultSet(ResultSetType.Id);
+            resultSet.Open(_getTempFileName);
+            using (resultSet)
             {
                 resultSet.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
 
@@ -6986,7 +7002,7 @@ namespace DigitalPlatform.rms
                     }
 
                     // 按第一个帐户算
-                    record = (DpRecord)resultSet[0];
+                    record = resultSet[0];
                 }
                 finally
                 {
@@ -7065,7 +7081,7 @@ namespace DigitalPlatform.rms
         //		0	成功
         // 线：不安全
         private int SearchUserInternal(string strUserName,
-            DpResultSet resultSet,
+            KernelResultSet resultSet,
             out string strError)
         {
             strError = "";

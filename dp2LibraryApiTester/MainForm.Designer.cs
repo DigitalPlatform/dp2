@@ -141,7 +141,7 @@ namespace dp2LibraryApiTester
             // 
             this.MenuItem_test_setReaderInfoApi.Name = "MenuItem_test_setReaderInfoApi";
             this.MenuItem_test_setReaderInfoApi.Size = new System.Drawing.Size(392, 40);
-            this.MenuItem_test_setReaderInfoApi.Text = "测试 SerReaderInfo() API";
+            this.MenuItem_test_setReaderInfoApi.Text = "测试 SetReaderInfo() API";
             this.MenuItem_test_setReaderInfoApi.Click += new System.EventHandler(this.MenuItem_test_setReaderInfoApi_Click);
             // 
             // MenuItem_test_loginApi

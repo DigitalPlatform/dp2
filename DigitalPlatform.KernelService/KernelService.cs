@@ -12,7 +12,7 @@ using DigitalPlatform.rms;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.ResultSet;
+// using DigitalPlatform.ResultSet;
 using System.Text;
 
 namespace dp2Kernel
@@ -609,20 +609,25 @@ namespace dp2Kernel
                     sessioninfo.ChannelHandle = handle;
                     try
                     {
-                        DpResultSet resultSet = null;
 
                         // Debug.WriteLine(strQuery);
 
-                        // resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
+                        // 2026/3/2 改造: 不预先获得原有结果集。而是采用
+                        // 本次直接检索创建结果集的方法，最后按照结果集名字设回去
+                        /* -- refactor
+                        KernelResultSet resultSet = null;
                         if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
                             resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
                         else
                             resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
+                        */
 
                         lock (result)
                         {
+                            /* -- refactor
                             if (resultSet != null)
                                 resultSet.Clear();
+                            */
 
                             int nRet = 0;
 
@@ -633,7 +638,10 @@ namespace dp2Kernel
 #if DEBUG
                             app.MyWriteDebugInfo("begin searchex1 " + strQuery);
 #endif
-                            DpResultSet old_resultset = resultSet;
+                            /* -- refactor
+                            var old_resultset = resultSet;
+                            */
+
                             // return:
                             //		-1	出错
                             //      -6  权限不够
@@ -641,11 +649,12 @@ namespace dp2Kernel
                             nRet = app.Dbs.API_Search(
                                 sessioninfo,
                                 strQuery,
-                                ref resultSet,
+                                // ref resultSet,
                                 user,           //注意测一下没有权限的帐户
                                 handle,
                                 strSearchStyle,
                                 explainInfo,
+                                out KernelResultSet resultSet,
                                 out string strError);
 #if DEBUG
                             app.MyWriteDebugInfo("end searchex1 lRet=" + nRet.ToString() + " " + strQuery);
@@ -672,7 +681,9 @@ namespace dp2Kernel
                     if (old_resultset != resultSet)
                         sessioninfo.SetResultSet(strResultSetName, resultSet);
 #endif
+                            /* -- refactor
                             if (old_resultset != resultSet)
+                            */
                             {
                                 if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
                                     app.ResultSets.SetResultset(strResultSetName.Substring(1), resultSet);
@@ -838,17 +849,21 @@ namespace dp2Kernel
                     sessioninfo.ChannelHandle = handle;
                     try
                     {
-                        DpResultSet resultSet = null;
+                        /* -- refactor
+                        KernelResultSet resultSet = null;
 
                         if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
                             resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
                         else
                             resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
+                        */
 
                         lock (result)
                         {
+                            /* -- refactor
                             if (resultSet != null)
                                 resultSet.Clear();
+                            */
 
                             int nRet = 0;
                             string strError = "";
@@ -859,7 +874,9 @@ namespace dp2Kernel
                             if (StringUtil.IsInList("explain", strOutputStyle))
                                 explainInfo = new StringBuilder();
 
-                            DpResultSet old_resultset = resultSet;
+                            /* -- refactor
+                            var old_resultset = resultSet;
+                            */
                             // return:
                             //		-1	出错
                             //      -6  权限不够
@@ -867,12 +884,13 @@ namespace dp2Kernel
                             nRet = app.Dbs.API_Search(
                                 sessioninfo,
                                 strQuery,
-                                ref resultSet,
+                                // ref resultSet,
                                 user,           //注意测一下没有权限的帐户
                                 handle,
                                 // procIsConnected,
                                 strOutputStyle,
                                 explainInfo,
+                                out KernelResultSet resultSet,
                                 out strError);
 
                             /*
@@ -914,7 +932,9 @@ namespace dp2Kernel
 
                             result.Value = resultSet.Count;  //执行成功时，result.Value等于提取记录的数量
 
+                            /* -- refactor
                             if (old_resultset != resultSet)
+                            */
                             {
                                 if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
                                     app.ResultSets.SetResultset(strResultSetName.Substring(1), resultSet);
@@ -1379,7 +1399,7 @@ namespace dp2Kernel
                     return result;
                 }
 
-                DpResultSet resultset = null;
+                KernelResultSet resultset = null;
 
                 bool bCommand = false;
                 if (string.IsNullOrEmpty(strStyle) == false && strStyle[0] == '@')
@@ -1578,7 +1598,7 @@ namespace dp2Kernel
 
                 // DpResultSet resultset = this.sessioninfo.GetResultSet(strResultSetName);
 
-                DpResultSet resultset = null;
+                KernelResultSet resultset = null;
 
                 bool bCommand = false;
                 if (string.IsNullOrEmpty(strStyle) == false && strStyle[0] == '@')
@@ -1899,7 +1919,7 @@ namespace dp2Kernel
 
                 if (StringUtil.IsInList("renameResultset", strStyle) == true)
                 {
-                    DpResultSet resultSet = null;
+                    KernelResultSet resultSet = null;
 
                     string strOldName = StringUtil.GetStyleParam(strStyle, "oldname");
                     string strNewName = StringUtil.GetStyleParam(strStyle, "newname");
@@ -1940,13 +1960,17 @@ namespace dp2Kernel
 
                 if (StringUtil.IsInList("createResultset", strStyle) == true)
                 {
-                    DpResultSet resultSet = null;
+                    KernelResultSet resultSet = null;
 
                     string strResultSetName = StringUtil.GetStyleParam(strStyle, "name");
                     if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
+                    {
                         resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), true);
+                    }
                     else
+                    {
                         resultSet = this.sessioninfo.GetResultSet(strResultSetName, true);
+                    }
 
                     // 设为永久属性
                     if (StringUtil.IsInList("permanent", strStyle) == true)
@@ -1955,32 +1979,35 @@ namespace dp2Kernel
                     lock (result)
                     {
                         if (StringUtil.IsInList("clear", strStyle) == true && resultSet != null)
-                            resultSet.Clear();
-
-                        foreach (RecordBody body in inputs)
+                            resultSet.Clear(DuckDbResultSet.ResultSetType.Id);
+                        int i = 0;
+                        using (var context = resultSet.GetAppenderContext())
                         {
-                            // body.Path 要翻译为 kernel 内部形态
-                            DigitalPlatform.rms.DatabaseCollection.PathInfo info = null;
-                            // 解析资源路径
-                            // return:
-                            //      -1  一般性错误
-                            //		-5	未找到数据库
-                            //		-7	路径不合法
-                            //      0   成功
-                            nRet = app.Dbs.ParsePath(body.Path,
-                out info,
-                out strError);
-                            if (nRet <= -1)
+                            foreach (RecordBody body in inputs)
                             {
-                                result.Value = -1;
-                                result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
-                                result.ErrorString = strError;
-                                return result;
-                            }
-                            Database database = app.Dbs.GetDatabase(info.DbName);
+                                // body.Path 要翻译为 kernel 内部形态
+                                // 解析资源路径
+                                // return:
+                                //      -1  一般性错误
+                                //		-5	未找到数据库
+                                //		-7	路径不合法
+                                //      0   成功
+                                nRet = app.Dbs.ParsePath(body.Path,
+                    out DatabaseCollection.PathInfo info,
+                    out strError);
+                                if (nRet <= -1)
+                                {
+                                    result.Value = -1;
+                                    result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                                    result.ErrorString = strError;
+                                    return result;
+                                }
+                                Database database = app.Dbs.GetDatabase(info.DbName);
 
-                            DpRecord record = new DpRecord(database.FullID + "/" + info.RecordID10);
-                            resultSet.Add(record);
+                                //DpRecord record = new DpRecord(database.FullID + "/" + info.RecordID10);
+                                //resultSet.Add(record);
+                                context.AppendIdRow(database.FullID + "/" + info.RecordID10, i++);
+                            }
                         }
                     }
 
