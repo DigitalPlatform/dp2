@@ -246,7 +246,7 @@ namespace dp2Circulation
                     this.TryInvoke(() =>
                     {
                         this.m_marcEditor.MarcDefDom = null;
-                        this.m_marcEditor.Invalidate();   // TODO: ??
+                        // this.m_marcEditor.Invalidate();   // TODO: ??
                     });
                 }
 
@@ -3088,11 +3088,27 @@ true);
             }
         }
 
+        string _marcSyntax = null;
+
         // 2015/8/12
         public string MarcSyntax
         {
-            get;
-            set;
+            get
+            {
+                return _marcSyntax;
+            }
+            set
+            {
+                if (_marcSyntax != value)
+                {
+                    _marcSyntax = value;
+                    this.TryInvoke(() =>
+                    {
+                        this.m_marcEditor.MarcDefDom = null;
+                        // this.m_marcEditor.Invalidate();
+                    });
+                }
+            }
         }
 
         // 
@@ -6121,7 +6137,7 @@ TaskScheduler.Default);
                 if (_willCloseBrowseWindow == true)
                     CloseBrowseWindow();
 
-                END1:
+            END1:
                 this.TryInvoke(() =>
                 {
                     this.textBox_queryWord.SelectAll();
@@ -6438,7 +6454,7 @@ TaskScheduler.Default);
                 if (item != null)
                     item.BackColor = Color.LightGreen;
 
-                CONTINUE:
+            CONTINUE:
                 i++;
             }
 
