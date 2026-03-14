@@ -108,6 +108,7 @@
     <Compile Include="AppConvertXmlToHtml.cs" />
     <Compile Include="ChatRoom\ChatRoom.cs" />
     <Compile Include="ColumnStorage.cs" />
+    <Compile Include="FilterItem.cs" />
     <Compile Include="IpTable.cs" />
     <Compile Include="ResultsetFilter.cs" />
     <Compile Include="FilterHost.cs" />

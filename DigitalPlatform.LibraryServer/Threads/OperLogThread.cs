@@ -145,67 +145,75 @@ namespace DigitalPlatform.LibraryServer
         // 一次操作循环
         public override void Worker()
         {
-            List<XmlDocument> current = new List<XmlDocument>();
-
-            this.m_lock.EnterWriteLock();
             try
             {
-                if (this._datas.Count == 0)
-                    return;
-                current.AddRange(this._datas);
-                this._datas.Clear();
-                this._errorWrited = false;
-            }
-            finally
-            {
-                this.m_lock.ExitWriteLock();
-            }
+                List<XmlDocument> current = new List<XmlDocument>();
 
-            foreach (XmlDocument dom in current)
-            {
-                string strOperation = DomUtil.GetElementText(dom.DocumentElement,
-    "operation");
-                if (this.ChargingOperEnabled == true
-                    && (strOperation == "borrow" 
-                    || strOperation == "return"
-                    || strOperation == "lost"/*2023/6/20*/))
+                this.m_lock.EnterWriteLock();
+                try
                 {
-                    int nRet = BuildMongoOperDatabase.AppendOperationBorrowReturn(this.App,
-                        dom,
-                        strOperation,
-                        out string strError);
-                    if (nRet == -1)
-                        this.App.WriteErrorLog("OperLogThread 写入 mongodb 日志库时出错: " + strError);
+                    if (this._datas.Count == 0)
+                        return;
+                    current.AddRange(this._datas);
+                    this._datas.Clear();
+                    this._errorWrited = false;
+                }
+                finally
+                {
+                    this.m_lock.ExitWriteLock();
                 }
 
-                if ((strOperation == "borrow"
-                    || strOperation == "return"
-                    || strOperation == "amerce"
-                    || strOperation == "setReaderInfo"
-                    || strOperation == "setUser")
+                foreach (XmlDocument dom in current)
+                {
+                    string strOperation = DomUtil.GetElementText(dom.DocumentElement,
+        "operation");
+                    if (this.ChargingOperEnabled == true
+                        && (strOperation == "borrow"
+                        || strOperation == "return"
+                        || strOperation == "lost"/*2023/6/20*/))
+                    {
+                        int nRet = BuildMongoOperDatabase.AppendOperationBorrowReturn(this.App,
+                            dom,
+                            strOperation,
+                            out string strError);
+                        if (nRet == -1)
+                            this.App.WriteErrorLog("OperLogThread 写入 mongodb 日志库时出错: " + strError);
+                    }
+
+                    if ((strOperation == "borrow"
+                        || strOperation == "return"
+                        || strOperation == "amerce"
+                        || strOperation == "setReaderInfo"
+                        || strOperation == "setUser")
 #if NO
                     && string.IsNullOrEmpty(this.App.OutgoingQueue) == false
                     && StringUtil.IsInList("mq", this.App.CirculationNotifyTypes) == true
 #endif
- && this.MqNotifyEnabled == true
-                    )
-                {
-                    // 写入 MSMQ 队列
-                    // return:
-                    //      -2  MSMQ 错误
-                    //      -1  出错
-                    //      0   成功
-                    int nRet = SendToQueue(
-                        dom,
-                        strOperation,
-                        out string strError);
-                    if (nRet == -1 || nRet == -2)
-                        this.App.WriteErrorLog("OperLogThread 写入 MSMQ 队列时出错: " + strError);
+     && this.MqNotifyEnabled == true
+                        )
+                    {
+                        // 写入 MSMQ 队列
+                        // return:
+                        //      -2  MSMQ 错误
+                        //      -1  出错
+                        //      0   成功
+                        int nRet = SendToQueue(
+                            dom,
+                            strOperation,
+                            out string strError);
+                        if (nRet == -1 || nRet == -2)
+                            this.App.WriteErrorLog("OperLogThread 写入 MSMQ 队列时出错: " + strError);
 
-                    // 2019/9/8
-                    if (nRet == -2)
-                        this.App.AddHangup("MessageQueueWriteFail");
+                        // 2019/9/8
+                        if (nRet == -2)
+                            this.App.AddHangup("MessageQueueWriteFail");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                // 2026/3/11
+                this.App?.WriteErrorLog("OperLogThread.Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex));
             }
         }
 

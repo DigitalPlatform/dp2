@@ -179,15 +179,29 @@ ref sessioninfo) == false)
         }
 #endif
 
+        // 2026/3/14
+        if (this.IsPostBack == false)
+        {
+            // 请求中的 library 参数表示当前分馆的馆代码，会影响到检索命中的册记录显示，仅显示这个分馆的册。其它分馆的册不予显示
+            string strLibraryCode = this.Request["library"];
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            {
+                // 强制设置图书馆代码
+                this.TitleBarControl1.SelectedLibraryCode = strLibraryCode;
+            }
+        }
+
         // 如果有参数
         string strWord = this.Request["word"];
         if (String.IsNullOrEmpty(strWord) == false
             && this.IsPostBack == false)
         {
+            // 请求中的 filter 参数表示馆藏地过滤字符串，影响检索命中的书目记录。例如，filter 参数值为 "海淀分馆"，表示只显示馆藏地为“海淀分馆”的书目记录；filter 参数值为 "*海淀分馆"，表示只显示馆藏地包含馆代码为“海淀分馆”的这个分馆有收藏册的书目记录。如果一种书目里面没有下属的馆藏地为“海淀分馆”的册记录，则这个书目记录不予显示。
             GetSearchParams(out strWord,
                 out string strDbName,
                 out string strFrom,
-                out string strMatchStyle);
+                out string strMatchStyle,
+                out string strFilter);
 
             // 根据检索参数创建XML检索式
             nRet = OpacApplication.BuildQueryXml(
@@ -204,6 +218,14 @@ ref sessioninfo) == false)
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+
+            if (string.IsNullOrEmpty(strFilter) == false)
+            {
+                //                  strFilter 为馆藏地过滤字符串，格式为 *A-B+C 其中，*表示AND，-表示SUB，+表示OR，A、B、C分别是结果集名称
+                //                  * - + 符号缺省时，表示AND关系。例如 "海淀分馆"，表示 "*海淀分馆"
+                var items = QueryFilterItem.BuildList(strFilter);
+                strXml = QueryFilterItem.BuildQueryXml(strXml, items);
+            }
 
             string strResultSetNamePrefix = "";
 
@@ -398,15 +420,21 @@ ref sessioninfo) == false)
         return null;
     }
 
+    // parameters:
+    //      strFilter [out] 返回请求参数 filter 的值。
+    //                  表示馆藏地过滤字符串，格式为 *A-B+C 其中，*表示AND，-表示SUB，+表示OR，A、B、C分别是结果集名称
+    //                  * - + 符号缺省时，表示AND关系。例如 "海淀分馆"，表示 "*海淀分馆"
     void GetSearchParams(out string strWord,
         out string strDbName,
         out string strFrom,
-        out string strMatchStyle)
+        out string strMatchStyle,
+        out string strFilter)
     {
         strWord = "";
         strDbName = "";
         strFrom = "";
         strMatchStyle = "";
+        strFilter = "";
 
         string strQueryString = "";
 
@@ -418,6 +446,7 @@ ref sessioninfo) == false)
             strDbName = this.Request["dbname"];
             strFrom = this.Request["from"];
             strMatchStyle = this.Request["matchstyle"];
+            strFilter = this.Request["filter"];
             return;
         }
 
@@ -432,6 +461,7 @@ ref sessioninfo) == false)
             strDbName = this.Request["dbname"];
             strFrom = this.Request["from"];
             strMatchStyle = this.Request["matchstyle"];
+            strFilter = this.Request["filter"];
             return;
         }
 
@@ -439,6 +469,7 @@ ref sessioninfo) == false)
         strDbName = HttpUtility.UrlDecode((string)table["dbname"], encoding);
         strFrom = HttpUtility.UrlDecode((string)table["from"], encoding);
         strMatchStyle = HttpUtility.UrlDecode((string)table["matchstyle"], encoding);
+        strFilter = HttpUtility.UrlDecode((string)table["filter"], encoding);
     }
 
     static string MakeSelectedPath(string strResultsetName, string strOffset)
