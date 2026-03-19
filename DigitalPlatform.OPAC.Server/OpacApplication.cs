@@ -430,7 +430,7 @@ namespace DigitalPlatform.OPAC.Server
             var loggingLevel = new LoggingLevelSwitch(level);
             Log.Logger = new LoggerConfiguration()
     .MinimumLevel.ControlledBy(loggingLevel)
-    .WriteTo.File(Path.Combine(logDir, "log_.txt"), rollingInterval: RollingInterval.Day)
+    .WriteTo.File(Path.Combine(logDir, "log_.txt"), rollingInterval: RollingInterval.Day, shared:true)
     .CreateLogger();
         }
 

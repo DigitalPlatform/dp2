@@ -235,15 +235,18 @@ ref sessioninfo) == false)
         {
             using (Stream stream = File.Open(strFilename,
                 FileMode.Open,
-                FileAccess.ReadWrite,
-                FileShare.ReadWrite))
+                FileAccess.Read,    // FileAccess.ReadWrite,
+                FileShare.ReadWrite
+                ))
             {
+                this.Response.AddHeader("Content-Type", "text/plain; charset=utf-8");
                 this.Response.AddHeader("Content-Length", stream.Length.ToString());
 
                 FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
 
                 stream.Seek(0, SeekOrigin.Begin);
 
+                // TODO: 以后用 Chunked Transfer Encoding 方式发送数据，这样就不需要事先知道文件的长度了
                 StreamUtil.DumpStream(stream, this.Response.OutputStream,
                     flushdelegate);
             }
