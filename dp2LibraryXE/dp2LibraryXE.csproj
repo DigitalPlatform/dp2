@@ -41,13 +41,8 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-<<<<<<< HEAD
     <ApplicationRevision>632</ApplicationRevision>
     <ApplicationVersion>3.136.0.%2a</ApplicationVersion>
-=======
-    <ApplicationRevision>618</ApplicationRevision>
-    <ApplicationVersion>3.137.0.%2a</ApplicationVersion>
->>>>>>> 6aa6fad9 (searchbiblio.aspx URL 命令行调用检索未命中时显示完整检索面板和未命中文字提示。)
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
