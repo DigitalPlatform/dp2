@@ -1552,7 +1552,7 @@ out string strError)
                         oper_name = "解除保护";
                     */
                     string text = $"{strAction} 种次号 '{strTestNumber}' (类号={strClass}, 排架体系名={strArrangeGroupName}) ret={lRet} error={error}";
-                    Program.MainForm.OperHistory.AppendHtml($"<div class='debug {(lRet == -1 || string.IsNullOrEmpty(error) == false? "error" : "green")}'>" + HttpUtility.HtmlEncode(text) + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml($"<div class='debug {(lRet == -1 || string.IsNullOrEmpty(error) == false ? "error" : "green")}'>" + HttpUtility.HtmlEncode(text) + "</div>");
                 }
             }
             finally
@@ -4160,7 +4160,7 @@ MessageBoxDefaultButton.Button2);
 
 
             // 准备书目列标题
-            Order.ExportBiblioColumnOption biblio_column_option = new Order.ExportBiblioColumnOption(Program.MainForm.UserDir);
+            var biblio_column_option = new NewBookColumnOption(Program.MainForm.UserDir);
             biblio_column_option.LoadData(Program.MainForm.AppInfo,
             SaveEntityNewBookFileDialog.BiblioDefPath);
 
@@ -4191,6 +4191,7 @@ MessageBoxDefaultButton.Button2);
                 outputFileName = Path.Combine(Path.GetDirectoryName(outputFileName),
                     Path.GetFileNameWithoutExtension(outputFileName) + ".xml");
             }
+            var temp_file_names = new List<string>();
             StreamWriter writer = null;
             try
             {
@@ -4495,7 +4496,11 @@ MessageBoxDefaultButton.Button2);
                                             };
                                         }
                                         else
-                                            return new PathInfo { FullPath = Program.MainForm.GetTempFileName("newbookimage_") };
+                                        {
+                                            var temp_file_name = Program.MainForm.GetTempFileName("newbookimage_");
+                                            temp_file_names.Add(temp_file_name);
+                                            return new PathInfo { FullPath = temp_file_name };
+                                        }
                                     });
 
                                 string items_table = "";
@@ -4703,6 +4708,24 @@ TaskScheduler.Default);
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
+
+                RemoveTempFiles();
+            }
+
+            void RemoveTempFiles()
+            {
+                foreach(var temp_file in temp_file_names)
+                {
+                    try
+                    {
+                        File.Delete(temp_file);
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                temp_file_names.Clear();
             }
 
             MainForm.StatusBarMessage = biblioRecPathList.Count.ToString()
