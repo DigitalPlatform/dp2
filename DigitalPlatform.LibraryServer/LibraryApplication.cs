@@ -4866,10 +4866,11 @@ out error);
                     this.m_bChanged = false;
 
                     // 2017/11/25
+                    // 2026/3/19 改掉原先用 .LibraryCfgDom 的 bug。这种用法会遇到锁定失败
                     {
-                        if (this.LibraryCfgDom == null)
-                            this.LibraryCfgDom = new XmlDocument();
-                        this.LibraryCfgDom.Load(strFileName);
+                        if (this._libraryCfgDom == null)
+                            this._libraryCfgDom = new XmlDocument();
+                        this._libraryCfgDom.Load(strFileName);
                     }
 
                     /*

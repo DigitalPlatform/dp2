@@ -2117,7 +2117,11 @@ namespace dp2Circulation
 
             for (; ; )
             {
-                LibraryChannel channel = Program.MainForm.GetExtChannel(strUrl, "public");
+                LibraryChannel channel = Program.MainForm.GetExtChannel(strUrl,
+                    "public",
+                    GetChannelStyle.None,
+                    10);
+                // TODO: 为 channel 提供停止按钮的机制
                 try
                 {
                     // 这个函数具有catch 通讯中 exeption的能力
