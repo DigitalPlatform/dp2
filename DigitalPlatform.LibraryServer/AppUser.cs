@@ -2604,16 +2604,24 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-
-        static string[] _normal_rights = new string[] {
-        "setiteminfo",
-        "getiteminfo",
-        "setorderinfo",
-        "getorderinfo",
-        "setissueinfo",
-        "getissueinfo",
-        "setcommentinfo",
-        "getcommentinfo",
+        // 从 3.4 版本升级到 3.5 版本时，涉及权限字符串的变动如下，
+        // 当 access 不为空时，rights 中这些权限需要从旧版本的权限字符串中移动到存取定义字符串中
+        public static string[] _v305_upgrade_rights = {
+            // "getbiblioinfo","setbiblioinfo", // get(set)biblioinfo 权限以前就是 access 定义的一部分了，不需要再移动了
+            "getiteminfo","setiteminfo",
+            "getorderinfo","setorderinfo",
+            "getissueinfo","setissueinfo",
+            "getcommentinfo","setcommentinfo",
+            "getobject", "setobject",
+            "getbiblioobject","setbiblioobject",
+            "getitemobject","setitemobject",
+            "getorderobject","setorderobject",
+            "getissueobject","setissueobject",
+            "getcommentobject","setcommentobject",
+            "getbibliosummary",
+            "getrecord","writerecord",
+            "order",
+            "managedatabase",
         };
 
         // 将旧版本的普通权限字符串升级到新版本的 存取定义 中
@@ -2630,7 +2638,7 @@ namespace DigitalPlatform.LibraryServer
             var source_rights = rights.Split(',');
             foreach (var source_right in source_rights)
             {
-                if (_normal_rights.Contains(source_right))
+                if (_v305_upgrade_rights.Contains(source_right))
                 {
                     access = AddToAccessString(access, source_right);
                 }

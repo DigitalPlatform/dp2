@@ -2989,12 +2989,24 @@ out strError);
                         var account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
                         foreach (XmlElement account in account_nodes)
                         {
+                            string access = account.GetAttribute("access");
+                            if (string.IsNullOrEmpty(access) == true)
+                            {
+                                this.WriteErrorLog($"(3.04->3.05)自动升级账户 '{account.GetAttribute("name")}' 的权限字符串，因 access 为空，没有必要改变");
+                                continue;
+                            }
+
                             string rights = account.GetAttribute("rights");
                             string old_rights = rights;
-                            string access = account.GetAttribute("access");
                             string old_access = access;
 
                             MoveUserRightsToAccess(ref rights, ref access);
+
+                            if (old_rights == rights && old_access == access)
+                            {
+                                this.WriteErrorLog($"(3.04->3.05)自动升级账户 '{account.GetAttribute("name")}' 的权限字符串，\r\n原 rights='{old_rights}' \r\n原 access='{old_access}' \r\n升级后没有变化");
+                                continue;
+                            }
 
                             account.SetAttribute("rights", rights);
                             account.SetAttribute("access", access);
