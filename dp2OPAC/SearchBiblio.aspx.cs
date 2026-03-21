@@ -284,7 +284,11 @@ ref sessioninfo) == false)
                     this.filter.Visible = false;
 #endif
                     strError = "没有找到";
-                    goto ERROR1;
+                    // goto ERROR1;
+
+                    // 显示提示信息，允许用户继续进行检索
+                    this.BiblioSearchControl1.SetResultInfo(strError);
+                    return;
                 }
 
                 this.BrowseSearchResultControl1.Clear();

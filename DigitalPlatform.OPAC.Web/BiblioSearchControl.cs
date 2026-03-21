@@ -607,7 +607,8 @@ namespace DigitalPlatform.OPAC.Web
             row.Controls.Add(cell);
         }
 
-        void SetResultInfo(string strText)
+        // 设置关于检索结果是否命中的提示信息
+        public void SetResultInfo(string strText)
         {
             PlaceHolder line = (PlaceHolder)FindControl("resultline");
             TableCell cell = (TableCell)line.FindControl("resultinfo");
