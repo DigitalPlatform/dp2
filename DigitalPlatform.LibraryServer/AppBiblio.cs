@@ -2753,6 +2753,7 @@ namespace DigitalPlatform.LibraryServer
         // 从册条码号(+册记录路径)获得种记录摘要，或者从订购记录路径、期记录路径、评注记录路径获得种记录摘要
         // 权限:   需要具有 getbibliosummary 或 order 权限
         // parameters:
+        //      sessioninfo                 注意 sessioninfo 可能为 null
         //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
         //      strConfirmItemRecPath       册、订购、期、评注记录路径
         //                                  如果 strConfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
@@ -3162,7 +3163,7 @@ out strError);
             if (nRet == 1)
             {
                 // 从存储中命中
-                if (this.Statis != null)
+                if (this.Statis != null && sessioninfo != null)
                     this.Statis.IncreaseEntryValue(
                     sessioninfo.LibraryCodeList,
                     "获取书目摘要",

@@ -94,8 +94,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="API Ducument\GetRecords.md" />
     <None Include="API Ducument\QueryXml.md" />
     <None Include="API Ducument\Search.md" />
+    <None Include="API Ducument\SearchEx.md" />
     <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

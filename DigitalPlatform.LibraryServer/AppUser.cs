@@ -2608,6 +2608,12 @@ namespace DigitalPlatform.LibraryServer
         static string[] _normal_rights = new string[] {
         "setiteminfo",
         "getiteminfo",
+        "setorderinfo",
+        "getorderinfo",
+        "setissueinfo",
+        "getissueinfo",
+        "setcommentinfo",
+        "getcommentinfo",
         };
 
         // 将旧版本的普通权限字符串升级到新版本的 存取定义 中

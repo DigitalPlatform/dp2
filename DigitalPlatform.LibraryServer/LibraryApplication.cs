@@ -2981,6 +2981,31 @@ out strError);
                         }
 
                     }
+
+                    // 从 3.04 版升级
+                    if (version <= 3.04)
+                    {
+                        // 自动修改 accounts/account@rights 中的权限字符串
+                        var account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
+                        foreach (XmlElement account in account_nodes)
+                        {
+                            string rights = account.GetAttribute("rights");
+                            string old_rights = rights;
+                            string access = account.GetAttribute("access");
+                            string old_access = access;
+
+                            MoveUserRightsToAccess(ref rights, ref access);
+
+                            account.SetAttribute("rights", rights);
+                            account.SetAttribute("access", access);
+
+                            this.WriteErrorLog($"(3.04->3.05)自动升级账户 '{account.GetAttribute("name")}' 的权限字符串，\r\n原 rights='{old_rights}' \r\n升级后 rights='{rights}' \r\n原 access='{old_access}' \r\n升级后 access='{access}'");
+                        }
+
+
+                        modify_version("3.05");
+                    }
+
                     if (bChanged == true)
                     {
                         this.Changed = true;
@@ -4866,10 +4891,11 @@ out error);
                     this.m_bChanged = false;
 
                     // 2017/11/25
+                    // 2026/3/19 解决了原来用 .LibraryCfgDom 导致锁定失败的问题
                     {
-                        if (this.LibraryCfgDom == null)
-                            this.LibraryCfgDom = new XmlDocument();
-                        this.LibraryCfgDom.Load(strFileName);
+                        if (this._libraryCfgDom == null)
+                            this._libraryCfgDom = new XmlDocument();
+                        this._libraryCfgDom.Load(strFileName);
                     }
 
                     /*
@@ -18260,17 +18286,17 @@ out _);
 
 
 #else                         * */
-            delegate_checkAccess func_checkAccess = (string r, string d) =>
-                                    {
-                                        if (r == "download" || r == "preview")
-                                            return sessioninfo.RightsOrigin;
-                                        return CheckAccess(sessioninfo,
-                                            $"数据库 {strDbName} 记录下级对象({r})",
-                                            strDbName,
-                                            r,
-                                            "",
-                                            out _);
-                                    };
+                        delegate_checkAccess func_checkAccess = (string r, string d) =>
+                                                {
+                                                    if (r == "download" || r == "preview")
+                                                        return sessioninfo.RightsOrigin;
+                                                    return CheckAccess(sessioninfo,
+                                                        $"数据库 {strDbName} 记录下级对象({r})",
+                                                        strDbName,
+                                                        r,
+                                                        "",
+                                                        out _);
+                                                };
 
                         string strOperation = "download";
                         if (string.IsNullOrEmpty(strPartCmd) == false)

@@ -549,11 +549,15 @@ string delimeters)
 
                 if (isKeyCountState == true)
                 {
+                    // keycount 意味着不可能有 cols 和 xml 记录体，所以这里的处理简化了
                     record.Path = dpRecord.Key; // 原先使用 dpRecord.ID;
                     record.Cols = new string[1];
                     record.Cols[0] = dpRecord.Count.ToString();
 
                     // 注: 返回的 record.Key 里面没有内容。因为 dpRecord.BrowseText 里面没有内容
+
+                    // 2026/3/10 TODO: 增加对 bHasKey 的判断，如果 bHasKey == true，则返回 record.Keys，内容来自 dpRecord.Key
+
 #if NO
                     lTotalPackageLength += record.Path.Length;
                     lTotalPackageLength += record.Cols[0].Length;

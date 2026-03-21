@@ -1,8 +1,11 @@
-# Serach() – 检索数据库
+# Search() – 检索数据库
 
 ## 用途
 
 利用 XML 检索式对一个或多个数据库进行检索。
+
+注: 和 SearchEx() API 的差异是，本 API 无法直接返回命中记录，而 Search() API 可以直接返回命中记录。
+
 
 ## 接口定义
 
@@ -12,18 +15,18 @@
             string strResultSetName,
             string strOutputStyle,
             out string explain)
-
 ```
 
 ## 参数
 
 ### strQuery
 
-XML检索式。XML检索式的定义请参见《参考手册》3.4小节。
+XML检索式。XML检索式的定义请参见 QueryXml.md。
 
 ### strResultSetName
 
-结果集名。检索结果会被放入这个结果集当中。结果集的定义请参见《参考手册》3.5小节。
+结果集名。检索命中的结果被自动放入这个结果集当中。
+后继可通过调用 GetRecords() API 获得结果集中的记录。
 
 ### strOutputStyle
 
