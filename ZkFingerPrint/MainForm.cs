@@ -58,7 +58,7 @@ namespace ZkFingerprint
             if (DetectVirus.DetectXXX(out _) || DetectVirus.DetectGuanjia(out _))
             {
                 // ClientInfo.WriteErrorLog("zkprintcenter 被木马软件干扰，无法启动");
-                MessageBox.Show(this, "zkprintcenter 被木马软件干扰，无法启动");
+                this.MessageBoxShow("zkprintcenter 被木马软件干扰，无法启动");
                 if (Control.ModifierKeys == Keys.Control)
                 {
 

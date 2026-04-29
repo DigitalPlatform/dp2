@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 
@@ -116,7 +113,7 @@ namespace dp2Circulation
                     this.m_nodeProject = this.dom.DocumentElement.SelectSingleNode("//project[@name='" + this.ProjectName + "']");
                     if (this.m_nodeProject == null)
                     {
-                        MessageBox.Show(this, "DOM中并不存在name属性值为 '" + this.ProjectName + "' 的<project>元素");
+                        this.MessageBoxShow("DOM中并不存在name属性值为 '" + this.ProjectName + "' 的<project>元素");
                     }
                 }
 

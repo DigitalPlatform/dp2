@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using DigitalPlatform;
+
 namespace dp2Circulation
 {
     /// <summary>
@@ -37,7 +39,7 @@ namespace dp2Circulation
     this._content,
     out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
         }
 

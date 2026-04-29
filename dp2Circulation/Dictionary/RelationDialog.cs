@@ -121,7 +121,7 @@ namespace dp2Circulation
                 out strError);
             if (nRet == -1 || nRet == 0)
             {
-                MessageBox.Show(this, "RelationDialog 需要先设置序列号才能使用");
+                this.MessageBoxShow("RelationDialog 需要先设置序列号才能使用");
                 API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
                 return;
             }

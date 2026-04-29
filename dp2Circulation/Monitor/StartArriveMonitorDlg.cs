@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -48,7 +44,7 @@ namespace dp2Circulation
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void StartArriveMonitorDlg_FormClosed(object sender, FormClosedEventArgs e)

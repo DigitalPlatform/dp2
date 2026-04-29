@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 
 namespace dp2Circulation
@@ -95,7 +92,7 @@ out string strError)
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void button_OK_Click(object sender, EventArgs e)

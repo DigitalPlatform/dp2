@@ -1995,7 +1995,6 @@ this.textBox_callNumber_ignore_item_state.Text);
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 

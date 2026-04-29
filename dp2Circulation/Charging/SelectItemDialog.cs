@@ -114,7 +114,7 @@ namespace dp2Circulation
 
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.33") < 0)
             {
-                MessageBox.Show(this, "选择册记录功能要求 dp2Library 版本必须在 2.33 以上。当前 dp2Library 的版本为 " + Program.MainForm.ServerVersion.ToString() + "，请及时升级");
+                this.MessageBoxShow("选择册记录功能要求 dp2Library 版本必须在 2.33 以上。当前 dp2Library 的版本为 " + Program.MainForm.ServerVersion.ToString() + "，请及时升级");
             }
         }
 

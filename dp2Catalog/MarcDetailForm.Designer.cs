@@ -159,7 +159,6 @@ namespace dp2Catalog
             this.MarcEditor.NameTextColor = System.Drawing.Color.Blue;
             this.MarcEditor.ReadOnly = false;
             this.MarcEditor.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.MarcEditor.SelectionStart = -1;
             this.MarcEditor.Size = new System.Drawing.Size(1011, 439);
             this.MarcEditor.TabIndex = 0;
             this.MarcEditor.Text = "marcEditor1";

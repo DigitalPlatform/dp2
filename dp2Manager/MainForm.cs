@@ -435,7 +435,7 @@ namespace dp2Manager
             }
             catch (SerializationException ex)
             {
-                MessageBox.Show(this, ex.Message);
+                this.MessageBoxShow(ex.Message);
                 Servers = new ServerCollection();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
                 Servers.FileName = this.DataDir
@@ -460,7 +460,7 @@ namespace dp2Manager
             }
             catch (SerializationException ex)
             {
-                MessageBox.Show(this, ex.Message);
+                this.MessageBoxShow(ex.Message);
                 LinkInfos = new LinkInfoCollection();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
                 LinkInfos.FileName = this.DataDir
@@ -513,7 +513,7 @@ namespace dp2Manager
             string strError = "";
             nRet = this.LinkInfos.Link(out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             this.ClearHtml();
         }

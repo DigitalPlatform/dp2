@@ -120,7 +120,7 @@ namespace dp2Catalog
             nRet = this.zTargetControl1.Load(Path.Combine(m_mainForm.UserDir, "zserver.xml"),
                 out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             this.zTargetControl1.Marc8Encoding = this.m_mainForm.Marc8Encoding;
             this.zTargetControl1.MainForm = this.m_mainForm;  // 2007/12/16

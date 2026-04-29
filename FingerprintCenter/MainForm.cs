@@ -201,7 +201,7 @@ bool bClickClose = false)
             if (DetectVirus.DetectXXX(out _) || DetectVirus.DetectGuanjia(out _))
             {
                 ClientInfo.WriteErrorLog("fingerprintcenter 被木马软件干扰，无法启动");
-                MessageBox.Show(this, "fingerprintcenter 被木马软件干扰，无法启动");
+                this.MessageBoxShow("fingerprintcenter 被木马软件干扰，无法启动");
                 if (Control.ModifierKeys == Keys.Control)
                 {
 

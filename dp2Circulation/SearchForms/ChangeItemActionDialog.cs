@@ -80,7 +80,7 @@ namespace dp2Circulation
             int nRet = LoadCfgDom(strCfgFileName,
                 out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             listView_actions_SelectedIndexChanged(this, new EventArgs());
 #if NO

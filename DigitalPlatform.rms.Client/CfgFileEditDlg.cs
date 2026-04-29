@@ -393,7 +393,7 @@ namespace DigitalPlatform.rms.Client
                     out strError);
                 if (values == null)
                 {
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                     return;
                 }
                 strMime = (string)values["mimetype"];

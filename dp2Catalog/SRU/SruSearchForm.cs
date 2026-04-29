@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Marc;
@@ -321,10 +316,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                this.Invoke((Action)(() =>
-                {
-                    MessageBox.Show(this, $"装载 sru.xml 出现异常: {ex.Message}");
-                }));
+                this.MessageBoxShow($"装载 sru.xml 出现异常: {ex.Message}");
             }
         }
 
@@ -1081,7 +1073,7 @@ this.UiState);
             return true;
         }
 
-#endregion
+        #endregion
 
     }
 

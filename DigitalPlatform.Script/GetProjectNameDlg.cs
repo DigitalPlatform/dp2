@@ -166,9 +166,9 @@ namespace DigitalPlatform.Script
             this.PerformLayout();
 
 		}
-		#endregion
+        #endregion
 
-		private void GetProjectNameDlg_Load(object sender, System.EventArgs e)
+        private void GetProjectNameDlg_Load(object sender, System.EventArgs e)
 		{
 			treeView1.ImageList = imageList_projectNodeType;
 			treeView1.PathSeparator = "/";
@@ -176,6 +176,7 @@ namespace DigitalPlatform.Script
 
 			if (scriptManager != null)
 			{
+#if OLD
 				try 
 				{
 					scriptManager.FillTree(this.treeView1);
@@ -195,7 +196,25 @@ namespace DigitalPlatform.Script
 						+ ex.Message);
 					return;
 				}
-			}
+#endif
+
+                try
+                {
+                    scriptManager.FillTree(this.treeView1);
+                }
+                catch (Exception ex)
+                {
+                    string error = "装载 " + scriptManager.CfgFilePath + " 文件失败，原因:" + ex.Message;
+
+                    this.BeginInvoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, error);
+                        this.DialogResult = DialogResult.Cancel;
+                        this.Close();
+                    }));
+                    // throw new Exception("装载 " + scriptManager.CfgFilePath + " 文件失败，原因:" + ex.Message, ex);
+                }
+            }
 
 			if (textBox_projectName.Text != "") 
 			{

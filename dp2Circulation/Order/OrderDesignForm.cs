@@ -83,7 +83,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    this.MessageBoxShow(ex.Message);
                 }
 
                 this.orderDesignControl1.RemoveMultipleZeroCopyItem();

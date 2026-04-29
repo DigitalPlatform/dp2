@@ -278,7 +278,6 @@ namespace dp2Catalog
             this.marcEditor_record.NameCaptionBackColor = System.Drawing.SystemColors.Info;
             this.marcEditor_record.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
             this.marcEditor_record.NameTextColor = System.Drawing.Color.Blue;
-            this.marcEditor_record.SelectionStart = 0;
             this.marcEditor_record.Size = new System.Drawing.Size(403, 108);
             this.marcEditor_record.TabIndex = 0;
             this.marcEditor_record.Text = "marcEditor1";

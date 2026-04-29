@@ -257,7 +257,7 @@ namespace dp2Catalog
             if (nRet == -1)
             {
                 if (IsFirstRun == false)
-                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
+                    this.MessageBoxShow(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
 
             cfgCache.TempDir = Path.Combine(this.UserDir, "cfgcache");  // this.DataDir
@@ -266,7 +266,7 @@ namespace dp2Catalog
             // Z39.50 froms
             nRet = LoadFroms(Path.Combine(this.DataDir, "bib1use.xml"), out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             // MARC-8字符表
             this.EaccCharsetTable = new CharsetTable();
@@ -281,7 +281,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "装载 EACC 码表文件时发生错误: " + ex.Message);
+                this.MessageBoxShow("装载 EACC 码表文件时发生错误: " + ex.Message);
             }
 
             // 将 servers.bin 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
@@ -289,14 +289,14 @@ namespace dp2Catalog
             if (nRet == -1)
             {
                 this.ReportError("dp2catalog 移动 servers.bin 文件时出现错误", "(安静报错)" + strError);
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
 
             nRet = ConvertServersBin(out strError);
             if (nRet == -1)
             {
                 this.ReportError("dp2catalog 转换 servers.bin 文件到 servers.json 时出现错误", "(安静报错)" + strError);
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
 
             // 从文件中装载创建一个dp2ServerCollection对象
@@ -315,14 +315,14 @@ namespace dp2Catalog
             }
             catch (SerializationException ex)
             {
-                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                this.MessageBoxShow(ExceptionUtil.GetAutoText(ex));
                 Servers = new dp2ServerCollectionNew();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
                 Servers.FileName = Path.Combine(this.DataDir, "servers.json");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "servers.json 装载出现异常: " + ex.Message);
+                this.MessageBoxShow("servers.json 装载出现异常: " + ex.Message);
             }
 
             this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
@@ -386,7 +386,7 @@ namespace dp2Catalog
                     nRet = DownloadUserFile("zserver.xml",
                         out strError);
                     if (nRet == -1)
-                        MessageBox.Show(this, strError);
+                        this.MessageBoxShow(strError);
                 }
             }
 
@@ -394,7 +394,7 @@ namespace dp2Catalog
             if (nRet == -1)
             {
                 strError = "装载ISBN处理器时出现错误: " + strError;
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
 
             this.LastSavePath = this.AppInfo.GetString(

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.GUI;
 
 namespace dp2Circulation
@@ -31,7 +32,7 @@ namespace dp2Circulation
 
             int nRet = FillDbNames(out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
         }
 
         private void button_OK_Click(object sender, EventArgs e)

@@ -34,7 +34,7 @@ namespace DigitalPlatform.Z3950.UI
         {
             var result = FillList();
             if (result.Value == -1)
-                MessageBox.Show(this, result.ErrorInfo);
+                this.MessageBoxShow(result.ErrorInfo);
         }
 
         private void ZServerListDialog_FormClosing(object sender, FormClosingEventArgs e)

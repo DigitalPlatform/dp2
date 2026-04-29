@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform;
 
 namespace dp2Catalog
 {
@@ -24,7 +21,7 @@ namespace dp2Catalog
             nRet = this.oaiTargeControl1.Load(MainForm.DataDir + "\\oai_server.xml",
                 out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
         }
 

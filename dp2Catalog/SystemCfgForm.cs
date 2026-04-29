@@ -96,7 +96,7 @@ true);
                 string strError = "";
                 int nRet = FillAmazonDefaultServerList(out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 this.tabComboBox_amazon_defaultServer.Text = MainForm.AppInfo.GetString(
 "amazon_search_form",

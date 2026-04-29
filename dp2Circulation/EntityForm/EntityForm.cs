@@ -13319,7 +13319,7 @@ out strError);
                         return;
                     if (Int16.TryParse(count_string, out short count) == false)
                     {
-                        MessageBox.Show(this, $"输入内容 '{count_string}' 不合法。应该是一个纯数字。请重新输入");
+                        this.MessageBoxShow($"输入内容 '{count_string}' 不合法。应该是一个纯数字。请重新输入");
                         goto REDO_INPUT;
                     }
                     if (count > 100)
@@ -18015,7 +18015,7 @@ out string error1);
             }
 
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         static bool Has049(MarcRecord record)
@@ -18308,7 +18308,7 @@ out string error1);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // return:
@@ -18463,7 +18463,7 @@ out strError);
             VerifyData(this, "verify", rule, false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void textBox_biblioRecPath_TextChanged(object sender, EventArgs e)

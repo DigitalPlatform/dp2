@@ -257,7 +257,7 @@ namespace DigitalPlatform.CirculationClient
         {
             if (this.Fill(null, node, out string strError) == -1)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
                 return false;
             }
 

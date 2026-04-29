@@ -117,7 +117,7 @@ namespace dp2Catalog
                 out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
             else
             {

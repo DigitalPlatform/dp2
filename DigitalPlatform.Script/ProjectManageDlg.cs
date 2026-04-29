@@ -288,7 +288,7 @@ namespace DigitalPlatform.Script
                     //return;
                     if (bDone == false)
                     {
-                        MessageBox.Show(this, "自动创建新文件 " + scriptManager.CfgFilePath);
+                        this.MessageBoxShow("自动创建新文件 " + scriptManager.CfgFilePath);
 
                         // 触发事件
                         if (this.CreateProjectXmlFile != null)
@@ -305,13 +305,13 @@ namespace DigitalPlatform.Script
                     }
                     else
                     {
-                        MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                        this.MessageBoxShow(ExceptionUtil.GetAutoText(ex));
                         return;
                     }
                 }
                 catch (System.Xml.XmlException ex)
                 {
-                    MessageBox.Show(this,
+                    this.MessageBoxShow(
                         "装载 " + scriptManager.CfgFilePath + " 文件失败，原因:"
                         + ex.Message);
                     return;
@@ -1627,7 +1627,7 @@ namespace DigitalPlatform.Script
                 nameDlg.textBox_projectName.Text);
             */
 
-            REDOEXPORT:
+        REDOEXPORT:
 
             string strTargetLocate = "";
             // 获得目标方案参数
@@ -1683,7 +1683,15 @@ namespace DigitalPlatform.Script
                     nameDlg.ProjectName = strSourceProjectName;
 
                     nameDlg.StartPosition = FormStartPosition.CenterScreen;
-                    nameDlg.ShowDialog(this);
+                    try
+                    {
+                        nameDlg.ShowDialog(this);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ("GetProjectNameDlg.ShowDialog() error : " + ex.Message);
+                        goto ERROR1;
+                    }
 
                     if (nameDlg.DialogResult != DialogResult.OK)
                         goto END2;
@@ -1815,7 +1823,7 @@ namespace DigitalPlatform.Script
 
             // 查询Project路径+名是否已经在输出的projects.xml已经存在
 
-            REDOEXPORT:
+        REDOEXPORT:
 
             string strTargetLocate = "";
             // 获得方案参数
@@ -2177,12 +2185,12 @@ Stack:
             }
             catch (FileNotFoundException)
             {
-                strError = $"文件 { dlg.FileName} 不存在...";
+                strError = $"文件 {dlg.FileName} 不存在...";
                 goto ERROR1;
             }
             catch (Exception ex)
             {
-                strError = $"从文件 { dlg.FileName} 读入时发生错误: " + ExceptionUtil.GetAutoText(ex);
+                strError = $"从文件 {dlg.FileName} 读入时发生错误: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 

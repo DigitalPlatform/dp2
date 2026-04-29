@@ -268,7 +268,10 @@ namespace dp2Circulation
                 var ret = MainForm.UpgradeServersCfgFile(ServersXmlFileName,
                     out string error);
                 if (ret == -1)
+                {
+                    // Program.MainForm 一定是打开的
                     MessageBox.Show(Program.MainForm, $"自动升级 servers.xml 配置文件时出错: {error}");
+                }
             }
 
             LoadServerXml();

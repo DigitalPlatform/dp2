@@ -41,7 +41,15 @@ namespace DigitalPlatform.Script
             string strError = "";
             int nRet = FillList(out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+            {
+                // MessageBox.Show(this, strError);
+                this.BeginInvoke((Action)(() =>
+                {
+                    MessageBox.Show(this, strError);
+                    this.DialogResult = DialogResult.Cancel;
+                    this.Close();
+                }));
+            }
         }
 
         private void SelectInstallProjectsDialog_FormClosed(object sender, FormClosedEventArgs e)
@@ -85,6 +93,10 @@ namespace DigitalPlatform.Script
         int FillList(out string strError)
         {
             strError = "";
+
+            // testing
+            // strError = "test";
+            // return -1;
 
             this.listView1.Items.Clear();
 

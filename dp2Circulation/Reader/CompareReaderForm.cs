@@ -67,7 +67,7 @@ namespace dp2Circulation
                 out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
 
             this.readerEditControl_existing.SetReadOnly("all");
@@ -79,7 +79,7 @@ namespace dp2Circulation
                 out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
 
             this.readerEditControl_unSaved.SetReadOnly("librarian");
