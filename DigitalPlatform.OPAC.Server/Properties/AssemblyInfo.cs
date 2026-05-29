@@ -40,4 +40,3 @@ using System.Runtime.InteropServices;
 // 3.1 (2025/5/18) 错误日志改用 Serilog
 //                  opac.xml 中根节点增加 logWebRequest 属性。值为 "true" 表示 Web 请求要记入错误日志
 //                  根节点增加 logLevel 属性。值为 Verbose,Debug,Information,Warning,Error,Fatal 之一
-// 3.3 (2026/5/29) Host 增加 Params 和 Channel 两个成员，供过滤器使用
