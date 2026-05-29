@@ -503,4 +503,5 @@ public bool ItemCanReturn(Account account,
 //      3.188 (2025/9/18) 为 WSDL metadata 修改了绑定的 URL 为: http://localhost/dp2library/$metadata。在 "metadata" 前增加了一个 "$"
 //      3.188.patch (2026/3/3) 解决 libraryservice.cs 中若干 id 被误改为 user_id 的 bug
 //                  (2026/3/4) 解决内务记到界面为期添加封面以后保存时报错“全部修改都没有兑现: 超出定义范围的元素 http://dp2003.com/dprms:file 在保存时已被拒绝”的 bug
+//                  (2026/4/11) 巩固 WriteRes() 处理上传 .zip 文件带有 extract style 时偶遇删除失败的部分代码
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到

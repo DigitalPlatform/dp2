@@ -606,13 +606,38 @@ namespace DigitalPlatform.LibraryServer
                                 }
                             }
                         }
-
-                        File.Delete(strFilePath);
                     }
                     catch (Exception ex)
                     {
-                        strError = ExceptionUtil.GetAutoText(ex);
+                        strError = $"WriteFile() 解压文件 {strFilePath} 过程出现异常: {ExceptionUtil.GetDebugText(ex)}";
                         return -1;
+                    }
+
+                    // 多次尝试删除文件，因为有时候会因为被占用而删除失败
+                    int error_count = 0;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        try
+                        {
+                            File.Delete(strFilePath);
+                            if (error_count > 0)
+                            {
+                                this.WriteErrorLog($"WriteFile() 删除文件 {strFilePath} 成功 (第{i + 1}次尝试)");
+                            }
+                            break;
+                        }
+                        catch
+                        {
+                            this.WriteErrorLog($"WriteFile() 删除文件 {strFilePath} (第{i + 1}次) 失败，自动重试...");
+                            Thread.Sleep(500);
+                            error_count++;
+                        }
+                    }
+
+                    if (error_count > 0)
+                    {
+                        this.WriteErrorLog($"WriteFile() 删除文件 {strFilePath} 经过 {error_count} 次重试依然失败");
+                        // API 设计上不报错，因为文件已经被成功解压了，删除失败只是一个后续的清理工作失败了
                     }
                 }
             }
@@ -1130,7 +1155,7 @@ namespace DigitalPlatform.LibraryServer
                         var error = proc_filter(si.FullName);
                         if (error != null)
                         {
-                            errors.Add($"文件 { si.Name } 删除操作被拒绝: {error}");
+                            errors.Add($"文件 {si.Name} 删除操作被拒绝: {error}");
                             continue;
                         }
                     }
