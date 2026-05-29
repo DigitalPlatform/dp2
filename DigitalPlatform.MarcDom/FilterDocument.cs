@@ -1,22 +1,21 @@
-﻿using System;
-using System.Xml;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Reflection;
+﻿using DigitalPlatform.IO;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using Microsoft.CSharp;
+using Microsoft.VisualBasic;
+using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Globalization;
-
-using Microsoft.CSharp;
-using Microsoft.VisualBasic;
-
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
+using System.Xml;
 
 // 2005/4/18	增加PrevName NextName DupCount变量
 // 2005/4/18	改变结构体元素name内容定义办法，加@为regular expression, 否则为原来的*字符串
@@ -1561,8 +1560,25 @@ namespace DigitalPlatform.MarcDom
             return "";
         }
 
+        // 去除路径中的宏%bindir%
+        public static void RemoveRefsProjectDirMacro(ref string[] refs,
+            string strBinDir)
+        {
+            Hashtable macroTable = new Hashtable();
+
+            macroTable.Add("%bindir%", strBinDir);
+
+            for (int i = 0; i < refs.Length; i++)
+            {
+                string strNew = PathUtil.UnMacroPath(macroTable,
+                refs[i],
+                false); // 不要抛出异常，因为可能还有%bindir%宏现在还无法替换
+                refs[i] = strNew;
+            }
+        }
+
         // 获得.fltx中<ref>所定义的参考库
-        public string[] GetRefs()
+        public string[] GetRefs(string strBinDir)
         {
             XmlNodeList nodes = this.dom.SelectNodes("//ref");
             List<string> refs = new List<string>();
@@ -1578,6 +1594,12 @@ namespace DigitalPlatform.MarcDom
             for (int i = 0; i < refs.Count; i++)
             {
                 results[i] = refs[i];
+            }
+
+            // 2026/5/28
+            if (string.IsNullOrEmpty(strBinDir) == false)
+            {
+                RemoveRefsProjectDirMacro(ref results, strBinDir);
             }
 
             return results;

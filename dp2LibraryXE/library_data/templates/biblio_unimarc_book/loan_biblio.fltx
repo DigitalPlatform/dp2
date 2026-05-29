@@ -3,6 +3,7 @@
 	<using>
 		<![CDATA[
 
+// 中文图书
 
 // CNMARC格式图书 html 格式构造。用于内务详细窗的 OPAC 属性页
 // (C)Copyright 2006-2014 数字平台(北京)软件有限责任公司

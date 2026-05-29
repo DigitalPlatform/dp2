@@ -18,6 +18,10 @@ using ZXing;
 using ZXing.QrCode;
 using ZXing.QrCode.Internal;
 
+using Serilog.Core;
+using Serilog;
+using Serilog.Events;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
@@ -25,10 +29,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
-using Serilog.Core;
-using Serilog;
-using Serilog.Events;
-using Microsoft.SqlServer.Server;
+
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -2418,65 +2419,15 @@ System.Text.Encoding.UTF8))
             }
         }
 
-#if NO
-        void BeginVirtualDirWatcher()
-        {
-            virtual_watcher = new FileSystemWatcher();
-            virtual_watcher.Path = this.HostDir;
-
-            /* Watch for changes in LastAccess and LastWrite times, and 
-               the renaming of files or directories. */
-            virtual_watcher.NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.Security;
-
-            virtual_watcher.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
-            virtual_watcher.IncludeSubdirectories = true;
-
-            // Add event handlers.
-            virtual_watcher.Changed -= new FileSystemEventHandler(watcher_appdir_Changed);
-            virtual_watcher.Changed += new FileSystemEventHandler(watcher_appdir_Changed);
-
-            // Begin watching.
-            virtual_watcher.EnableRaisingEvents = true;
-
-            /*
-            // 停止 ASP.NET 监视 style 子目录
-            {
-                PropertyInfo p = typeof(System.Web.HttpRuntime).GetProperty("FileChangesMonitor", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-                object o = p.GetValue(null, null);
-                FieldInfo f = o.GetType().GetField("_dirMonSubdirs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
-                object monitor = f.GetValue(o);
-                MethodInfo m = monitor.GetType().GetMethod("StopMonitoring", BindingFlags.Instance | BindingFlags.NonPublic);
-                m.Invoke(monitor, new object[] { });
-            }
-             * */
-
-        }
-
-        void EndVirtualWather()
-        {
-            if (this.virtual_watcher != null)
-            {
-                virtual_watcher.EnableRaisingEvents = false;
-                virtual_watcher.Changed -= new FileSystemEventHandler(watcher_appdir_Changed);
-                this.virtual_watcher.Dispose();
-                this.virtual_watcher = null;
-            }
-        }
-
-        // 虚拟目录内发生改变
-        void watcher_appdir_Changed(object sender, FileSystemEventArgs e)
-        {
-#if NO
-            string strError = "*** 虚拟目录内发生改变: name: " + e.Name.ToString()
-                + "; changetype: " + e.ChangeType.ToString()
-                + "; fullpath: " + e.FullPath.ToString();
-            this.WriteErrorLog(strError);
-#endif
-        }
-#endif
-
         void BeginWatcher()
         {
+            // 2026/5/27
+            if (watcher != null)
+            {
+                watcher.Dispose();
+                watcher = null;
+            }
+
             watcher = new FileSystemWatcher();
             watcher.Path = Path.GetDirectoryName(this.m_strFileName);
 
@@ -2495,7 +2446,7 @@ System.Text.Encoding.UTF8))
             watcher.EnableRaisingEvents = true;
         }
 
-        void EndWather()
+        void EndWatcher()
         {
             if (this.watcher != null)
             {
@@ -2614,7 +2565,7 @@ System.Text.Encoding.UTF8))
                 //this.StopAll();
 
                 // 2015/1/22
-                this.EndWather();
+                this.EndWatcher();
 
                 // 2013/12/24
                 this.BatchTasks.Close();

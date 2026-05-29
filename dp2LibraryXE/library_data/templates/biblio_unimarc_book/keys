@@ -346,7 +346,7 @@
 		<table ref="crkey" />
 	</key>
 	<table name="crkey" id="22" type="crkey">
-    		<convert>
+		<convert>
 			<string style="upper" />
 		</convert>
 		<convertquery>
@@ -354,6 +354,17 @@
 		</convertquery>
 		<caption lang="zh-CN">编目规则码</caption>
 		<caption lang="en">Catalog Rule Code</caption>
+	</table>
+
+	<!-- 2026/5/8 增加 参考ID-->
+	<key>
+		<xpath>*/refID</xpath>
+		<from>refID</from>
+		<table ref="refID" />
+	</key>
+	<table name="refID" id="27" type="refid"	>
+		<caption lang="zh-CN">参考ID</caption>
+		<caption lang="en">Reference ID</caption>
 	</table>
 
 	<!-- ******************配置非用字**************************************** -->

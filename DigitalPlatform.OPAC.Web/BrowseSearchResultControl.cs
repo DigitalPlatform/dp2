@@ -2068,6 +2068,7 @@ namespace DigitalPlatform.OPAC.Web
                                     //      1   成功
                                     nRet = itemcontrol.LoadRecord(strItemPath,
                                         out string strParentID,
+                                        out string issue_query,
                                         out strError);
                                     if (nRet == -1)
                                     {
@@ -2103,6 +2104,7 @@ namespace DigitalPlatform.OPAC.Web
 
                                     bibliocontrol.Visible = true;
                                     bibliocontrol.RecPath = strBiblioDbName + "/" + strParentID;
+                                    bibliocontrol.RefIssueQuery = issue_query;    // 2026/5/28
 
                                     // 重新布局
                                     this.Controls.Remove(itemcontrol);
@@ -2434,14 +2436,18 @@ namespace DigitalPlatform.OPAC.Web
 
                                     if (bFltx == true)
                                     {
+                                        var parameters = new KeyValueCollection();
+                                        parameters.Add("issue_query", bibliocontrol.RefIssueQuery);
                                         // string strFilterFileName = app.CfgDir + "\\opacdetail.fltx";
                                         nRet = app.ConvertBiblioXmlToHtml(
-                                                strLocalPath,
-                                                strBiblioXml,
-                                                cols[0],
-                                                out strContent,
-                                                out KeyValueCollection result_params,
-                                                out strError);
+                                            strLocalPath,
+                                            strBiblioXml,
+                                            cols[0],
+                                            parameters,
+                                            channel,
+                                            out strContent,
+                                            out KeyValueCollection result_params,
+                                            out strError);
                                     }
                                     else
                                     {

@@ -33,8 +33,8 @@ using System.Xml;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.198.*")]
-[assembly: AssemblyFileVersion("3.198.0.0")]
+[assembly: AssemblyVersion("3.199.*")]
+[assembly: AssemblyFileVersion("3.199.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -515,5 +515,8 @@ public bool ItemCanReturn(Account account,
 //                          GetCallNumberSearchResult() API strBrowseInfoStyle 中增加了 "format:xxx" 子参数用法，由请求者指定需要返回哪些列。这种用法时，列信息会返回在 CallNumberSearchResult::Reserve 成员中，为 XML 格式内容。
 //      3.197 (2025/12/5)   SetOneClassTailNumber() API 的 memo unmemo protect 动作改进了返回值。以前无论如何都返回 result.Value == 1，现在改为如果没有发生实质性效果则返回 0。
 //      3.198 (2026/2/6)    CopyBiblioInfo() API 中针对 move 和 onlymovebiblio 动作的查重逻辑做了改进。最早版本对 move 是要查重的，2025 年改为对 move 不查重。现在改为要对 move 进行查重，但增加了条件判断，当查重命中的记录路径中包含和源书目记录的查重空间相同，则去掉这些记录路径，去掉以后再进行是否重复的判断。改进后的效果是，不允许跨不同查重空间进行移动，但允许源和目标在同一个查重空间时进行移动。
+//      3.199 (2026/5/9)    GetBiblioInfos() API 中 strBiblioRecPath 参数值中的 @refID:xxx 形态的参考 ID 之前版本是当作册记录的参考 ID 来处理的，现在改为当作书目记录参考 ID。若要指册记录的参考 ID，则需要用 @itemRefID:xxx 形态。根据书目记录参考 ID 获得书目记录功能是本次新实现的，原来没有实现。
+//                          在 dp2library templates 模板中，为所有类型的书目库的 keys 配置文件增加了 style 为 "refid" 的检索途径。以前版本没有配置这个检索途径。
+
 
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到

@@ -2430,7 +2430,7 @@ out string strError)
             string strWarning = "";
             // string strLibPaths = "";
 
-            string[] saRef2 = filter.GetRefs();
+            string[] saRef2 = filter.GetRefs(strBinDir);
 
             string[] saRef = new string[saRef2.Length + saAddRef1.Length];
             Array.Copy(saRef2, saRef, saRef2.Length);

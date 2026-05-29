@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections;
-using System.Web;
-using System.Xml;
-using System.Reflection;
-
+﻿using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Reflection;
+using System.Text;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Xml;
 
 namespace DigitalPlatform.Script
 {
@@ -928,6 +930,90 @@ namespace DigitalPlatform.Script
     /// </summary>
     public static class LibraryChannelExtension2
     {
+        public static string[] GetIssueImageUrl(this LibraryChannel channel,
+            string strBiblioRecPath,
+            string issue_query,
+            string displayBlank = "displayBlank,hideWhenAllBlank",
+            string strPrefferSize = "LargeImage")
+        {
+            var querys = issue_query.Split(';');
+            if (querys.Length == 0)
+                return new string[0];
+
+            //string displayBlank = this.DisplayBlankIssueCover;  // 缺省 "displayBlank,hideWhenAllBlank"
+            //string strPrefferSize = this.IssueCoverSize;    //  "MediumImage"; // "LargeImage",
+
+            int nNotBlankCount = 0;
+            List<string> results = new List<string>();
+            foreach (string s in querys)
+            {
+                string strUri = "";
+                string strError = "";
+
+                // 获得指定一期的封面图片 URI
+                // parameters:
+                //      strBiblioPath   书目记录路径
+                //      strQueryString  检索词。例如 “2005|1|1000|50”。格式为 年|期号|总期号|卷号。一般为 年|期号| 即可。
+                int nRet = channel.GetIssueCoverImageUri(null,
+                    strBiblioRecPath,
+                    s,
+                    strPrefferSize,
+                    out strUri,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "(用户 '" + channel.UserName + "') " + strError;
+                    results.Add("error:" + HttpUtility.HtmlEncode(strError));
+                    continue;
+                }
+
+                string strUrl = "";
+
+                if (string.IsNullOrEmpty(strUri))
+                {
+                    if (StringUtil.IsInList("displayBlank", displayBlank) == false)
+                        continue;
+
+                    if (strPrefferSize == "LargeImage")
+                        strUrl = GetStylePath("blankcover_large.png");
+                    else
+                        strUrl = GetStylePath("blankcover_medium.png");
+                }
+                else
+                {
+                    strUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                    nNotBlankCount++;
+                }
+
+                results.Add(strUrl);
+            }
+
+            if (StringUtil.IsInList("hideWhenAllBlank", displayBlank) == true
+                && nNotBlankCount == 0)
+            {
+                return new string[0];
+            }
+            else
+            {
+                /*
+                LiteralControl literal = new LiteralControl();
+                literal.ID = "";
+                literal.Text = "<div class='issue_cover_frame' >" + text.ToString() + "</div>";
+                line.Controls.Add(literal);
+                */
+            }
+
+            return results.ToArray();
+
+            // 构造一个 style 目录中文件的路径
+            string GetStylePath(string strFilename)
+            {
+                return "./stylenew/" + strFilename;
+                // return "./style/" + strFilename;
+            }
+        }
+
+
         // 获得指定一期的封面图片 URI
         // parameters:
         //      strBiblioPath   书目记录路径

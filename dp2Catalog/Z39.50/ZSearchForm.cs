@@ -2518,7 +2518,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
             string strWarning = "";
             // string strLibPaths = "";
 
-            string[] saRef2 = filter.GetRefs();
+            string[] saRef2 = filter.GetRefs(this.BinDir);
 
             string[] saRef = new string[saRef2.Length + saAddRef1.Length];
             Array.Copy(saRef2, saRef, saRef2.Length);

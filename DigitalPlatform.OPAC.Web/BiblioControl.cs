@@ -39,6 +39,10 @@ namespace DigitalPlatform.OPAC.Web
 
         public string RecPath = "";
 
+        // 2026/5/28
+        // 和书目记录相关的期号参数。用来决定显示期刊的封面图片时，需要从哪个期记录获取
+        public string RefIssueQuery = "";
+
         public bool Wrapper = false;
 
         ResourceManager m_rm = null;
@@ -677,62 +681,64 @@ namespace DigitalPlatform.OPAC.Web
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
             string strBiblioXml = "";
-            LibraryChannel channel = sessioninfo.GetChannel(true);
-            try
             {
-                // string strBiblioState = "";
-
-                byte[] timestamp = null;
-                string[] formats = new string[1];
-                formats[0] = "xml";
-
-                string[] results = null;
-                lRet = // sessioninfo.Channel.
-                    channel.GetBiblioInfos(
-                    null,
-                    this.RecPath,
-                    "",
-                    formats,
-                    out results,
-                    out timestamp,
-                    out strError);
-                if (lRet == -1)
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
                 {
-                    strError = "获得书目记录 '" + this.RecPath + "' 时出错: " + strError;
-                    // 2021/7/21
-                    if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.AccessDenied)
+                    // string strBiblioState = "";
+
+                    byte[] timestamp = null;
+                    string[] formats = new string[1];
+                    formats[0] = "xml";
+
+                    string[] results = null;
+                    lRet = // sessioninfo.Channel.
+                        channel.GetBiblioInfos(
+                        null,
+                        this.RecPath,
+                        "",
+                        formats,
+                        out results,
+                        out timestamp,
+                        out strError);
+                    if (lRet == -1)
                     {
-                        this.m_strXml = "";
-                        this.Timestamp = null;
-                        this.BiblioRecPath = this.RecPath;
-                        this.m_strMARC = "";
-                        this.m_strOpacBiblio = "";
-                        return -2;
+                        strError = "获得书目记录 '" + this.RecPath + "' 时出错: " + strError;
+                        // 2021/7/21
+                        if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.AccessDenied)
+                        {
+                            this.m_strXml = "";
+                            this.Timestamp = null;
+                            this.BiblioRecPath = this.RecPath;
+                            this.m_strMARC = "";
+                            this.m_strOpacBiblio = "";
+                            return -2;
+                        }
+                        goto ERROR1;
                     }
-                    goto ERROR1;
+                    if (lRet == 0)
+                    {
+                        strError = "书目记录 '" + this.RecPath + "' 不存在";
+                        goto ERROR1;
+                    }
+                    if (results == null || results.Length < 1)
+                    {
+                        strError = "results error {A9217775-645E-42F1-8307-22B26C0E1D69}";
+                        goto ERROR1;
+                    }
+
+                    strBiblioXml = results[0];
+                    this.m_strXml = strBiblioXml;
+
+                    this.Timestamp = ByteArray.GetHexTimeStampString(timestamp);
+                    this.BiblioRecPath = this.RecPath;
                 }
-                if (lRet == 0)
+                finally
                 {
-                    strError = "书目记录 '" + this.RecPath + "' 不存在";
-                    goto ERROR1;
-                }
-                if (results == null || results.Length < 1)
-                {
-                    strError = "results error {A9217775-645E-42F1-8307-22B26C0E1D69}";
-                    goto ERROR1;
+                    sessioninfo.ReturnChannel(channel);
                 }
 
-                strBiblioXml = results[0];
-                this.m_strXml = strBiblioXml;
-
-                this.Timestamp = ByteArray.GetHexTimeStampString(timestamp);
-                this.BiblioRecPath = this.RecPath;
             }
-            finally
-            {
-                sessioninfo.ReturnChannel(channel);
-            }
-
 #if OPAC_SEARCH_LOG
             if (app.SearchLog != null)
             {
@@ -811,18 +817,31 @@ namespace DigitalPlatform.OPAC.Web
                 // 将种记录数据从XML格式转换为HTML格式
                 KeyValueCollection result_params = null;
 
+                var parameters = new KeyValueCollection();
+                parameters.Add("issue_query", this.RefIssueQuery);
+
                 // 2006/11/28 changed
                 string strFilterFileName = strLocalPath;    // app.CfgDir + "\\biblio.fltx";
-                nRet = app.ConvertBiblioXmlToHtml(
-                        strFilterFileName,
-                        strBiblioXml,
-                        this.RecPath,
-                        out strBiblio,
-                        out result_params,
-                        out strError);
-                if (nRet == -1)
-                    goto ERROR1;
 
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
+                {
+                    nRet = app.ConvertBiblioXmlToHtml(
+                            strFilterFileName,
+                            strBiblioXml,
+                            this.RecPath,
+                            parameters,
+                            channel,
+                            out strBiblio,
+                            out result_params,
+                            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                finally
+                {
+                    sessioninfo.ReturnChannel(channel);
+                }
                 // TODO: Render的时候设置，已经晚了半拍
                 // 要想办法在全部Render前得到题名和进行设置
                 if (this.AutoSetPageTitle == true
@@ -1050,7 +1069,7 @@ namespace DigitalPlatform.OPAC.Web
                     if (string.IsNullOrEmpty(strAccessDeniedComment) == false)
                         strBiblio = $"<div>{HttpUtility.HtmlEncode(this.RecPath)} {strAccessDeniedComment}</div>";
                     else
-                        strBiblio = "<div class='pending'>biblio_html:" + HttpUtility.HtmlEncode(this.RecPath) + "</div>";
+                        strBiblio = "<div class='pending'>biblio_html:" + HttpUtility.HtmlEncode(this.RecPath) + "," + HttpUtility.HtmlEncode(this.RefIssueQuery) + "</div>";
                 }
                 else
                 {

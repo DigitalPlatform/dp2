@@ -882,7 +882,7 @@ namespace dp2Circulation
                                          strMainCsDllName};
 
                 // fltx文件里显式增补的链接库
-                string[] saAdditionalRef = filter.GetRefs();
+                string[] saAdditionalRef = filter.GetRefs(Environment.CurrentDirectory);
 
                 // 合并的链接库
                 string[] saTotalFilterRef = new string[saAddRef1.Length + saAdditionalRef.Length];

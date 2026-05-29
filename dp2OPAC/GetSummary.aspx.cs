@@ -78,7 +78,13 @@ ref sessioninfo) == false)
 
         if (StringUtil.HasHead(strBarcode, "biblio_html:") == true)
         {
+            // 2026/5/28
+            // biblio_html:记录路径,期号
+            // 期号是为了在书目记录中显示期刊的相关的、最新一期的期刊封面而传入的参数
             string strBiblioRecPath = strBarcode.Substring("biblio_html:".Length);
+            var parts = strBiblioRecPath.Split(new char[] { ',' }, 2);
+            strBiblioRecPath = parts[0];
+            string issue_query = parts.Length > 1 ? parts[1] : "";
 
             // 获得书目记录XML
             string[] formats = new string[1];
@@ -145,17 +151,32 @@ ref sessioninfo) == false)
             // 将种记录数据从XML格式转换为HTML格式
             string strResult = "";
 
+            var parameters = new KeyValueCollection();
+            parameters.Add("issue_query", issue_query);
+
             KeyValueCollection result_params = null;
             string strFilterFileName = strLocalPath;    // app.CfgDir + "\\biblio.fltx";
-            nRet = app.ConvertBiblioXmlToHtml(
-                    strFilterFileName,
-                    strBiblioXml,
-                    strBiblioRecPath,
-                    out strResult,
-                    out result_params,
-                    out strError);
-            if (nRet == -1)
-                goto ERROR1;
+
+            channel = sessioninfo.GetChannel(true);
+            try
+            {
+                nRet = app.ConvertBiblioXmlToHtml(
+                        strFilterFileName,
+                        strBiblioXml,
+                        strBiblioRecPath,
+                        parameters,
+                        channel,
+                        out strResult,
+                        out result_params,
+                        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                sessioninfo.ReturnChannel(channel);
+            }
+
             this.Response.Write(strResult);
             this.Response.End();
             return;

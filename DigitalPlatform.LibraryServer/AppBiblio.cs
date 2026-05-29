@@ -9,6 +9,8 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.SqlServer.Server;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -145,8 +147,47 @@ namespace DigitalPlatform.LibraryServer
                     strItemBarcode = strItemBarcode.Substring("@itemBarcode:".Length);
                 else if (strItemBarcode.StartsWith("@refID:"))
                 {
+                    // 为了兼容以前用法，注意 @refID: 语义实际上是册参考 ID，注意不是书目记录参考 ID!
                     // 2024/2/13
                     // 不用变化
+                }
+                else if (strItemBarcode.StartsWith("@itemRefID:"))
+                {
+                    // 2026/5/10
+                    // 册参考 ID
+                    strItemBarcode = strItemBarcode.Replace("@itemRefID:", "@refID:");
+                }
+                else if (strItemBarcode.StartsWith("@biblioRefID:"))
+                {
+                    // 2026/5/10
+                    string query_word = strItemBarcode.Replace("@itemRefID:", "@refID:");
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   命中1条
+                    //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+                    int nRet = GetBiblioRecXml(
+            channel,
+            query_word,
+            // string strStyle,
+            "id",
+            out _,
+            out string biblio_recpath,
+            out _,
+            out strError);
+                    if (nRet == -1)
+                    {
+                        strError = $"根据检索词 '{query_word}' 获取书目记录路径时出错: {strError}";
+                        result_strings.Add("!" + strError);
+                        return 0;
+                    }
+                    if (nRet > 1)
+                    {
+                        strError = $"根据检索词 '{query_word}' 获取书目记录路径时出错: 命中多于1条({nRet})";
+                        result_strings.Add("!" + strError);
+                        return 0;
+                    }
+                    strItemBarcode = "@bibliorecpath:" + biblio_recpath;
                 }
                 else if (strItemBarcode.StartsWith("@bibliorecpath:"))
                 {
@@ -273,6 +314,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+            // 专门对只有一个 format，并且这个 format 是 "summary" ，并且 strBiblioRecPath 是成批检索式(以 @path-list: 开头)的情况进行优化
             if (formats != null && formats.Length == 1 && formats[0] == "summary"
                 && strBiblioRecPath.StartsWith("@path-list:")   // 2016/4/15 增加
                 && string.IsNullOrEmpty(strBiblioXmlParam) == true)
@@ -396,30 +438,81 @@ namespace DigitalPlatform.LibraryServer
                     out strCurrentBiblioRecPath,
                     out string strCommand);
 
-                // 2016/1/2
-                if (/*strCurrentBiblioRecPath.StartsWith("@itemBarcode:") == true*/
-                    true)
+                string strBiblioXml = "";
+                // 2026/5/8
+                if (strCurrentBiblioRecPath.StartsWith("@biblioRefID:"))
                 {
-                    // string strItemBarcode = strCurrentBiblioRecPath.Substring("@itemBarcode:".Length);
-                    // 2025/10/30 从 GetBiblioRecPathByItemBarcode() 改用 GetBiblioRecPathByItemBarcodeEx()
-
-                    nRet = GetBiblioRecPathByItemBarcodeEx(
-                        // sessioninfo,
-                        channel,
-                        strCurrentBiblioRecPath,
-                        out string strTemp,
-                        out strError);
+                    var query_word = strCurrentBiblioRecPath.Replace("@biblioRefID:", "@refID:");
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   命中1条
+                    //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+                    nRet = GetBiblioRecXml(
+            channel,
+            query_word,
+            "id,xml,timestamp",
+            out strBiblioXml,
+            out string biblio_recpath,
+            out timestamp,
+            out strError);
                     if (nRet == -1)
                     {
-                        strError = "根据检索词 '" + strCurrentBiblioRecPath + "' 获取书目记录路径时出错: " + strError;
+                        strError = $"根据检索词 '{query_word}' 获取书目记录路径时出错: {strError}";
                         goto ERROR1;
                     }
+                    if (nRet > 1)
+                    {
+                        strError = $"根据检索词 '{query_word}' 获取书目记录路径时出错: 命中多于1条({nRet})";
+                        goto ERROR1;
+                    }
+
                     if (nRet == 0)
                     {
                         result_strings.AddRange(new string[formats.Length]);
                         continue;
                     }
-                    strCurrentBiblioRecPath = strTemp;
+                    strCurrentBiblioRecPath = biblio_recpath;
+                    strOutputPath = biblio_recpath;
+
+                    // 如果没有 $prev $next 之类的命令，则后面没有必要再取一次书目记录。
+                    // 如果需要 metadata，则后面还得取一次书目记录，但如果不需要 metadata，则后面就没有必要再取一次书目记录了
+                    if (string.IsNullOrEmpty(strCommand) == false
+                        || (formats != null && Array.IndexOf(formats, "metadata") != -1))
+                        strBiblioXml = "";
+                }
+                else
+                {
+                    // 2016/1/2
+                    if (/*strCurrentBiblioRecPath.StartsWith("@itemBarcode:") == true*/
+                        true)
+                    {
+                        // string strItemBarcode = strCurrentBiblioRecPath.Substring("@itemBarcode:".Length);
+                        // 2025/10/30 从 GetBiblioRecPathByItemBarcode() 改用 GetBiblioRecPathByItemBarcodeEx()
+
+
+                        // 注意：为了兼容以前用法，@refID: 语义实际上是册参考 ID，注意不是书目记录参考 ID!
+                        if (strCurrentBiblioRecPath.StartsWith("@itemRefID:"))
+                            strCurrentBiblioRecPath = "@refID:" + strCurrentBiblioRecPath.Substring("@itemRefID:".Length);
+
+                        nRet = GetBiblioRecPathByItemBarcodeEx(
+                            // sessioninfo,
+                            channel,
+                            strCurrentBiblioRecPath,
+                            out string strTemp,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "根据检索词 '" + strCurrentBiblioRecPath + "' 获取书目记录路径时出错: " + strError;
+                            goto ERROR1;
+                        }
+                        if (nRet == 0)
+                        {
+                            result_strings.AddRange(new string[formats.Length]);
+                            continue;
+                        }
+                        strCurrentBiblioRecPath = strTemp;
+                    }
                 }
 
                 nRet = ParseDbName(strCurrentBiblioRecPath,
@@ -644,7 +737,6 @@ namespace DigitalPlatform.LibraryServer
                 }
                 */
 
-                string strBiblioXml = "";
                 string strMetaData = "";
                 if (String.IsNullOrEmpty(strBiblioXmlParam) == false)
                 {
@@ -659,7 +751,7 @@ namespace DigitalPlatform.LibraryServer
                     else
                         strBiblioXml = strBiblioXmlParam;
                 }
-                else
+                else if (string.IsNullOrEmpty(strBiblioXml))
                 {
                     string strStyle = "timestamp,outputpath";  // "metadata,timestamp,outputpath";
 
@@ -11378,7 +11470,7 @@ out error);
             List<string> RemovePath(List<string> list)
             {
                 var results = new List<string>();
-                foreach(var path in list)
+                foreach (var path in list)
                 {
                     if (source_space_dbnames.Contains(ResPath.GetDbName(path)))
                         continue;

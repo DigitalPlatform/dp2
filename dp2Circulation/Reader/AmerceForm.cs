@@ -1115,23 +1115,23 @@ TaskScheduler.Default);
                         //                  注意函数返回时 strItemKey 有可能为空
                         GetItemKeyAndSummary(listView_amerced,
         item,
-        out string strItemKet,
+        out string strItemKey,
         out string strSummary);
 
                         // 已经有内容了，就不刷新了
                         if (String.IsNullOrEmpty(strSummary) == false)
                             continue;
-                        if (string.IsNullOrEmpty(strItemKet))
+                        if (string.IsNullOrEmpty(strItemKey))
                             continue;
 
-                        if (String.IsNullOrEmpty(strItemKet) == true
+                        if (String.IsNullOrEmpty(strItemKey) == true
                             /*&& String.IsNullOrEmpty(strItemRecPath) == true*/)
                             continue;
 
-                        if (strItemKet.StartsWith("@refID:"))
-                            path_list.Add(strItemKet);
+                        if (strItemKey.StartsWith("@refID:"))
+                            path_list.Add(strItemKey);
                         else
-                            path_list.Add($"@itemBarcode:{strItemKet}");
+                            path_list.Add($"@itemBarcode:{strItemKey}");
                         item_list.Add(item);
                     }
 

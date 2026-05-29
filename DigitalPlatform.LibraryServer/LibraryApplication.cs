@@ -3723,6 +3723,13 @@ out error);
         // 监视library.xml文件变化
         void BeginWatcher()
         {
+            // 2026/5/27
+            if (watcher != null)
+            {
+                watcher.Dispose();
+                watcher = null;
+            }
+
             watcher = new FileSystemWatcher();
             watcher.Path = Path.GetDirectoryName(this.m_strFileName);
 
@@ -3742,7 +3749,7 @@ out error);
 
         }
 
-        void EndWather()
+        void EndWatcher()
         {
             if (this.watcher != null)
             {
@@ -5051,7 +5058,7 @@ out error);
 
             _app_down.Cancel();
 
-            this.EndWather();
+            this.EndWatcher();
 
             //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
 
@@ -8819,6 +8826,101 @@ out strError);
     out strOutputPath,
     out timestamp,
     out strError);
+        }
+
+        // 2026/5/8
+        // 获得一条书目记录
+        // 本函数为了执行效率方面的原因, 不去获得超过1条以上的路径。所返回的重复条数最大为1000
+        // parameters:
+        //      strWord 检索词。
+        //              如果希望用参考ID检索，可以在前面加上 "@refID:" 前缀。
+        //              目前仅支持 "@refID:xxx" 形态的检索词。
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+        public int GetBiblioRecXml(
+            RmsChannel channel,
+            string strWord,
+            string strBrowseStyle,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            if (strWord.StartsWith("@refID:"))
+            {
+                string refid = strWord.Substring("@refID:".Length);
+                // 检索出所有“内部”状态的书目记录
+                int nRet = this.BuildSearchBiblioQuery(
+"<全部书目>",
+refid,
+-1,
+"refid",
+"exact",
+"zh",
+"", // strSearchStyle,
+"",
+out List<string> dbTypes,
+out string strQueryXml,
+    out strError);
+                if (nRet != 1)
+                    return -1;
+
+                // string strBrowseStyle = "id,xml,timestamp";
+
+                string resultSetName = "temp";
+                long lRet = channel.DoSearchEx(strQueryXml,
+                    resultSetName,
+                    "", // strOuputStyle
+                    1,
+                    "zh",
+                    strBrowseStyle, // "id,xml,timestamp",
+                    out Record[] records,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                // not found
+                if (lRet == 0)
+                {
+                    strError = $"refid 为 '{refid}' 的书目记录没有找到";
+                    return 0;
+                }
+
+                long lHitCount = lRet;
+
+                if (records == null || records.Length == 0)
+                {
+                    strError = "records error";
+                    return -1;
+                }
+
+                /*
+                if (records[0].RecordBody == null)
+                {
+                    strError = "records[0].RecordBody == null";
+                    return -1;
+                }
+                Debug.Assert(records[0].RecordBody != null, "");
+                */
+
+                strOutputPath = records[0].Path;
+                strXml = records[0].RecordBody?.Xml;
+                timestamp = records[0].RecordBody?.Timestamp;
+
+                return (int)lHitCount;
+            }
+
+
+            strError = $"无法识别的检索词 '{strWord}'";
+            return -1;
         }
 
         // 2014/9/19 strBarcode 可以包含 @refID: 前缀了

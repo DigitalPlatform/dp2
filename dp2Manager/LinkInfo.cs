@@ -213,6 +213,13 @@ namespace dp2Manager
                 return -1;
             }
 
+            // 2026/5/27
+            if (watcher != null)
+            {
+                watcher.Dispose();
+                watcher = null;
+            }
+
             watcher = new FileSystemWatcher();
 
             watcher.Path = this.LocalPath;
@@ -224,6 +231,7 @@ namespace dp2Manager
             watcher.Filter = "*.*";
 
             // Add event handlers.
+            watcher.Changed -= new FileSystemEventHandler(OnChanged);
             watcher.Changed += new FileSystemEventHandler(OnChanged);
 
             // Begin watching.

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-
+using DigitalPlatform.LibraryClient;
 using DigitalPlatform.MarcDom;
 
 namespace DigitalPlatform.OPAC.Server
@@ -11,6 +11,9 @@ namespace DigitalPlatform.OPAC.Server
     {
         public OpacApplication App = null;
         public string RecPath = "";
+        public KeyValueCollection Params = null;   // 2026/5/28 传入的参数
+        public LibraryChannel Channel = null;   // 2026/5/28 传入的 LibraryChannel 对象
+
         public string ResultString = "";
         public KeyValueCollection ResultParams = null;   // 2012/11/30
 

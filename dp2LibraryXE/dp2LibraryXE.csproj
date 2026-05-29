@@ -41,7 +41,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>629</ApplicationRevision>
+    <ApplicationRevision>632</ApplicationRevision>
     <ApplicationVersion>3.136.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -69,13 +69,13 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>E08A3737AA36B8D9C5B2EABA2C4796936DE77152</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>A637E4CCB31877DF1294E754A54AB2841B4F6515</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2LibraryXE_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2LibraryXE_4_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -332,6 +332,7 @@
     <None Include="dp2LibraryXE_1_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_2_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_3_TemporaryKey.pfx" />
+    <None Include="dp2LibraryXE_4_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />

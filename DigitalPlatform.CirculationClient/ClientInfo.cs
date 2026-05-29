@@ -200,7 +200,7 @@ ApplicationDeployment.CurrentDeployment != null)
         {
             // 2021/3/3
             // 2021/9/8 调整到 SaveConfig() 之前
-            EndWather();
+            EndWatcher();
 
             SaveConfig();
         }
@@ -347,7 +347,7 @@ ApplicationDeployment.CurrentDeployment != null)
 #endif
             if (StringUtil.IsInList("watcher", style))
             {
-                EndWather();
+                EndWatcher();
                 BeginWatcher(style);
             }
         }
@@ -435,7 +435,7 @@ ApplicationDeployment.CurrentDeployment != null)
             }
         }
 
-        static void EndWather()
+        static void EndWatcher()
         {
             if (_watcher != null)
             {

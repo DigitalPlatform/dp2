@@ -110,11 +110,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="API Document\CopyBiblioInfo.md" />
-    <None Include="API Document\GetBiblioInfo.md" />
+    <None Include="..\..\temp\GetBiblioInfo.md">
+      <Link>API Document\GetBiblioInfo.md</Link>
+    </None>
     <None Include="API Document\GetBiblioSummary.md" />
+    <None Include="API Document\GetOperLog.md" />
     <None Include="API Document\Login.md" />
     <None Include="API Document\Return.md" />
-    <None Include="API Document\SetBiblioInfo.md" />
+    <None Include="..\..\temp\SetBiblioInfo.md">
+      <Link>API Document\SetBiblioInfo.md</Link>
+    </None>
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup />

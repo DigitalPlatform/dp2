@@ -21,6 +21,7 @@ using DigitalPlatform.IO;
 //using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
+using System.Linq;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -290,17 +291,23 @@ namespace DigitalPlatform.OPAC.Web
         bool m_bLoaded = false;
 
         // 提前获得记录体，然后可以获得parentid
+        // parameters:
+        //      issue_query     2026/5/28 期信息字符串，包含了定位一个册中若干期的年、期、卷等信息。
+        //                      之所以是若干期，是因为册可能是合订册包含多个期
+        //                      多个期信息之间用分号分隔；每个期的信息内用竖线分隔不同部分。
         // return:
         //      -1  出错
         //      0   本册已经隐藏显示
         //      1   成功
         public int LoadRecord(string strItemRecPath,
             out string strParentID,
+            out string issue_query,
             out string strError)
         {
             int nRet = 0;
             strError = "";
             strParentID = "";
+            issue_query = "";
 
             this.EnsureChildControls();
 
@@ -347,6 +354,12 @@ namespace DigitalPlatform.OPAC.Web
                 strError = "装载册记录进入XML DOM时发生错误: " + strError;
                 goto ERROR1;
             }
+
+            // 2026/5/28
+            // 获得期信息字符串
+            List<IssueString> query_strings = dp2StringUtil.GetIssueQueryStringFromItemXml(itemdom);
+            // 2026/5/28
+            issue_query = query_strings.Count > 0 ? query_strings.Select(x => x.Query).Aggregate((a, b) => a + ";" + b) : "";
 
             strParentID = DomUtil.GetElementText(itemdom.DocumentElement,
                 "parent");
@@ -460,6 +473,7 @@ namespace DigitalPlatform.OPAC.Web
                 //      1   成功
                 nRet = LoadRecord(this.ItemRecPath,
                     out string strParentID,
+                    out string issue_query,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;

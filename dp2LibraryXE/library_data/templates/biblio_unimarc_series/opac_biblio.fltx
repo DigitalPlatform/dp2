@@ -3,6 +3,7 @@
     <using>
   <![CDATA[
 
+// 中文期刊，在 dp2OPAC Server Application 端执行
 
 // CNMARC格式期刊 OPAC 书目详细格式构造
 // (C)Copyright 2006-2011 数字平台(北京)软件有限责任公司
@@ -12,6 +13,7 @@
 // 2011/8/27 将search.aspx修改为searchbiblio.aspx
 // 2017/12/20 
 // 2018/7/26 1) 将几个分类法根查检索锚点修改为具体的分类法检索途径。不过刚安装好的时候没有科图法和人大法的检索点，如果需要请专门去配置；2)  改用带有模板功能的 ScriptUtil.BuildObjectHtmlTable()，包含 "unimarc" 参数。
+// 2026/5/27 命中详细画面(书目型)显示 856 字段中的封面图片。在册型画面中，为右侧书目部分增加了封面显示，这个封面是和左侧册记录所从属的期记录中获得的
 
 using System;
 using System.Collections.Generic;
@@ -23,12 +25,15 @@ using System.Xml;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
 
 ]]></using>
     <ref>system.dll</ref>
     <ref>system.web.dll</ref>
     <ref>system.xml.dll</ref>
-    <def>
+	<ref>%bindir%/DigitalPlatform.LibraryClient.dll</ref>
+	<def>
      <![CDATA[
 
 			public string isbnandprice = "";	//获得方式项 010 011 091
@@ -65,6 +70,8 @@ using DigitalPlatform.Script;
    int number5 = 0;
    int urlNum = 0;
    int serials = 0;   // 是否为期刊 ==1 :头标7位为S   
+   
+        string _imageUrl = "";
 
 	// 从一个纯路径(不含url部分)中截取库名部分
 	public static string GetDbName(string strLongPath)
@@ -1186,10 +1193,32 @@ using DigitalPlatform.Script;
         }
       </subfield>
         </field>
-        <end><![CDATA[
+		<!-- 建立封面图像段落 -->
+		<end>
+			<![CDATA[
+			
+			// 判断 dp2OPAC 版本。如果版本较新，则使用新的接口获取封面图像URL；如果版本较旧，则使用旧的接口获取封面图像URL。
+			if (StringUtil.CompareVersion(OpacApplication.ClientVersion,"3.3") >= 0)
+			{
+			    string issue_query = Host.Params == null ? "" : (string)Host.Params["issue_query"].Value;
+			    if (string.IsNullOrEmpty(issue_query) == false)
+			    {
+			        string [] urls = Host.Channel.GetIssueImageUrl(Host.RecPath,
+                        issue_query,
+                        "displayBlank,hideWhenAllBlank",
+                        "LargeImage");
+                    Root._imageUrl = urls.Length > 0 ? urls[0] : "";
+			    }
+			}
+			
+			if (string.IsNullOrEmpty(Root._imageUrl))
+		        Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
+                      
 		XmlElement container = Host.App.WebUiDom.DocumentElement.SelectSingleNode("maps_856u") as XmlElement;
 		Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container, "unimarc");
-		]]></end>
+
+		]]>
+		</end>
     </record>
     <end>
         <![CDATA[
@@ -1365,7 +1394,20 @@ using DigitalPlatform.Script;
 			    Host.ResultString += "<td class='name' width='10%' nowrap>电子资源</td>";
 			    Host.ResultString += "<td class='value' width='90%'>"+s856+"</td>";
 			    Host.ResultString += "</tr>";
-      }                         
+      }                        
+	  
+	  	    // 2026/5/27
+		// 显示封面图像
+        if (string.IsNullOrEmpty(Root._imageUrl) == false)
+        {
+            if (StringUtil.IsHttpUrl(Root._imageUrl) == true)
+                Host.ResultString = "<div class='coverimage'><img src='"+Root._imageUrl+"'></img></div>" + Host.ResultString;
+            else
+            {
+                string strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(OpacApplication.MakeObjectUrl(Host.RecPath, Root._imageUrl));
+                Host.ResultString = "<div class='coverimage'><img  src='"+strObjectUrl+"' alt='封面图片'></img></div>" + Host.ResultString;
+            }
+        }
       
       // 根查?
       
@@ -1376,4 +1418,84 @@ using DigitalPlatform.Script;
 		  Host.ResultString += "</body></html>";
 */      
 		]]></end>
+
+	<stringTable>
+		<s id="题名与责任说明">
+			<t lang="zh-CN">题名与责任说明</t>
+			<t lang="en-US">Title and Statement of Responsibility</t>
+		</s>
+		<s id="责任者">
+			<t lang="zh-CN">责任者</t>
+			<t lang="en-US">Contributor</t>
+		</s>
+		<s id="版本">
+			<t lang="zh-CN">版本</t>
+			<t lang="en-US">Edition</t>
+		</s>
+		<s id="资料特殊细节">
+			<t lang="zh-CN">资料特殊细节</t>
+			<t lang="en-US">Material or Type of Res. Spec.</t>
+		</s>
+		<s id="出版发行">
+			<t lang="zh-CN">出版发行</t>
+			<t lang="en-US">Publication</t>
+		</s>
+		<s id="载体形态">
+			<t lang="zh-CN">载体形态</t>
+			<t lang="en-US">Physical Description</t>
+		</s>
+		<s id="丛编">
+			<t lang="zh-CN">丛编</t>
+			<t lang="en-US">Series</t>
+		</s>
+		<s id="主题分析">
+			<t lang="zh-CN">主题分析</t>
+			<t lang="en-US">Subject</t>
+		</s>
+		<s id="分类号">
+			<t lang="zh-CN">分类号</t>
+			<t lang="en-US">Classification Number</t>
+		</s>
+		<s id="附注">
+			<t lang="zh-CN">附注</t>
+			<t lang="en-US">Notes</t>
+		</s>
+		<s id="相关题名">
+			<t lang="zh-CN">相关题名</t>
+			<t lang="en-US">Related Title</t>
+		</s>
+		<s id="出版频率">
+			<t lang="zh-CN">出版频率</t>
+			<t lang="en-US">Publication Frequency</t>
+		</s>
+		<s id="内容附注">
+			<t lang="zh-CN">内容附注</t>
+			<t lang="en-US">Content Note</t>
+		</s>
+		<s id="连接款目">
+			<t lang="zh-CN">连接款目</t>
+			<t lang="en-US">Linking Entries-General Info.</t>
+		</s>
+		<s id="标识和获得方式">
+			<t lang="zh-CN">标识和获得方式</t>
+			<t lang="en-US">Identifier and Terms of Availability</t>
+		</s>
+		<s id="登录号">
+			<t lang="zh-CN">登录号</t>
+			<t lang="en-US">Accession Number</t>
+		</s>
+		<s id="索取号">
+			<t lang="zh-CN">索取号</t>
+			<t lang="en-US">Call Number</t>
+		</s>
+		<s id="提要文摘">
+			<t lang="zh-CN">提要文摘</t>
+			<t lang="en-US">Summary or Abstract</t>
+		</s>
+		<s id="电子资源">
+			<t lang="zh-CN">电子资源</t>
+			<t lang="en-US">Electronic Resource</t>
+		</s>
+	</stringTable>
+	
 </filter>

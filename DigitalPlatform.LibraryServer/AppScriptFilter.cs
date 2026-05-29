@@ -496,7 +496,7 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
-                string[] saRef2 = filter.GetRefs();
+                string[] saRef2 = filter.GetRefs(this.BinDir);
 
                 filter.Assembly = this.AssemblyCache.GetObject(strFilterFileName,
                     () =>

@@ -25,7 +25,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class LabelPrintForm : ItemSearchFormBase    // MyForm
     {
-        FileSystemWatcher _wather = null;
+        FileSystemWatcher _watcher = null;
 
         PrinterInfo m_printerInfo = null;
 
@@ -3195,21 +3195,21 @@ TaskScheduler.Default);
             {
                 EndWatcher();
 
-                if (this._wather == null)
-                    this._wather = new FileSystemWatcher();
+                if (this._watcher == null)
+                    this._watcher = new FileSystemWatcher();
 
                 string filename = this.textBox_labelFile_labelFilename.Text;
 
-                _wather.Path = Path.GetDirectoryName(filename);
+                _watcher.Path = Path.GetDirectoryName(filename);
 
-                _wather.NotifyFilter = NotifyFilters.LastWrite; // | NotifyFilters.Size | NotifyFilters.Attributes;
+                _watcher.NotifyFilter = NotifyFilters.LastWrite; // | NotifyFilters.Size | NotifyFilters.Attributes;
 
-                _wather.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
-                _wather.IncludeSubdirectories = false;
+                _watcher.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
+                _watcher.IncludeSubdirectories = false;
 
-                _wather.Changed += new FileSystemEventHandler(watcher_Changed);
+                _watcher.Changed += new FileSystemEventHandler(watcher_Changed);
 
-                _wather.EnableRaisingEvents = true;
+                _watcher.EnableRaisingEvents = true;
             }
             catch (Exception ex)
             {
@@ -3219,12 +3219,12 @@ TaskScheduler.Default);
 
         void EndWatcher()
         {
-            if (this._wather != null)
+            if (this._watcher != null)
             {
-                _wather.EnableRaisingEvents = false;
-                _wather.Changed -= new FileSystemEventHandler(watcher_Changed);
-                this._wather.Dispose();
-                this._wather = null;
+                _watcher.EnableRaisingEvents = false;
+                _watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
+                this._watcher.Dispose();
+                this._watcher = null;
             }
         }
 

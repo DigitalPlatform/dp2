@@ -392,3 +392,8 @@ CheckWriteResRights() 中判断当前账户是否具备 managedatabase 的时候
 ListFile() API 的 delete 功能，和 WriteRes() API，在涉及到书目库记录的时候，
 如果当前账户是 order 权限，要测试此书目库具有和不具有 orderWork 角色时的不同表现。
 WriteRes() API 的 respath 是否为追加形态，也会产生影响。
+
+~~~
+注意需要增加一个启动时自动检查 dp2library 各个实例的 mongodb prefix 是否相同的功能，如果相同
+则报错。这种情况很容易由一个 dp2library 实例复制到另外一个新实例而发生。
+举一反三，所有这种可能重复的 prefix 都要自动检查。

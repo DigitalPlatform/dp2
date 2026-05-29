@@ -1785,6 +1785,7 @@ namespace DigitalPlatform.OPAC.Web
                 strResult += "<td class='volume'>" + (strVolume == "" ? "&nbsp;" : strVolume) + "</td>";
 
             // 累积期定位字符串
+            // 注: 如果一个期记录拥有封面图像，但没有任何一册，那就无法进入 _issue_query_strings。这是一个问题。
             if (string.IsNullOrEmpty(strVolume) == false)
             {
                 string strIssueDbName = GetIssueDbName(

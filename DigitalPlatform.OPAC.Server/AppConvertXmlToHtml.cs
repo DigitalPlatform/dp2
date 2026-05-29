@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.Diagnostics;
-using System.Threading;
-using System.IO;
-
-using DigitalPlatform.MarcDom;
+﻿using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
+using DigitalPlatform.MarcDom;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
-using DigitalPlatform.LibraryClient;
-using System.Xml;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
 using System.Web;
+using System.Xml;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -251,6 +251,8 @@ namespace DigitalPlatform.OPAC.Server
             string strFilterFileName,
             string strBiblioXml,
             string strRecPath,
+            KeyValueCollection parameters,
+            LibraryChannel channel,
             out string strBiblio,
             out KeyValueCollection result_params,
             out string strError)
@@ -264,6 +266,8 @@ namespace DigitalPlatform.OPAC.Server
             FilterHost host = new FilterHost();
             host.RecPath = strRecPath;
             host.App = this;
+            host.Params = parameters;   // 2026/5/28
+            host.Channel = channel;  // 2026/5/28
             host.ResultParams = new KeyValueCollection();
 
             // 如果必要,转换为MARC格式,调用filter
@@ -367,7 +371,7 @@ namespace DigitalPlatform.OPAC.Server
 
             try
             {
-                string[] saRef2 = filter.GetRefs();
+                string[] saRef2 = filter.GetRefs(this.BinDir);
 
                 filter.Assembly = this.AssemblyCache.GetObject(strFilterFileName,
                     () =>

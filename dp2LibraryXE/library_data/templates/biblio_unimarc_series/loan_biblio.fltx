@@ -3,6 +3,7 @@
     <using>
   <![CDATA[
 
+// 中文期刊
 
 // CNMARC格式图书 html 格式构造
 // (C)Copyright 2006-2011 数字平台(北京)软件有限责任公司
@@ -10,17 +11,24 @@
 // 2011/2/15	%datadir%
 // 2011/9/5 去掉  width='100%' cellspacing='1' cellpadding='4'
 // 2011/9/7 采用servermapped新体系结构
+// 2026/5/27 显示 856 字段中的封面图片
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
+using System.Xml;
+
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
 
 ]]></using>
     <ref>system.dll</ref>
     <ref>system.web.dll</ref>
+	<ref>system.xml.dll</ref>
     <ref>system.windows.forms.dll</ref>
     <def>
      <![CDATA[
@@ -57,6 +65,8 @@ using DigitalPlatform.LibraryServer;
    int number5 = 0;
    int urlNum = 0;
    int serials = 0;   // 是否为期刊 ==1 :头标7位为S   
+   
+     string _imageUrl = "";
    
 		]]></def>
     <record>
@@ -1102,8 +1112,12 @@ using DigitalPlatform.LibraryServer;
         }
       </subfield>
         </field>
-        <end><![CDATA[
-		]]></end>
+		<!-- 建立封面图像段落 -->
+		<end>
+		<![CDATA[
+		    Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
+		]]>
+		</end>
     </record>
     <end>
         <![CDATA[
@@ -1115,6 +1129,32 @@ using DigitalPlatform.LibraryServer;
         
 		  Host.ResultString += "<html><head>"+strLink+"</head><body>";    
     
+        // 2026/5/27
+		// 显示封面图像
+	{
+	      Host.ResultString += "<table class='frame'>";
+
+			Host.ResultString += "<tr>";
+      string strImageFragment = "";
+      if (string.IsNullOrEmpty(Root._imageUrl) == false)
+      {
+        if (StringUtil.IsHttpUrl(Root._imageUrl) == true)
+          strImageFragment = "<img src='"+Root._imageUrl+"' ></img>";
+          else
+          {
+            string strUri = ScriptUtil.MakeObjectUrl(Host.RecPath,
+                  Root._imageUrl);
+            strImageFragment = "<img class='pending' id='cardphoto' name='"
+            + (Host.RecPath == "?" ? "?" : "object-path:" + strUri)
+            + "' src='%mappeddir%\\images\\ajax-loader.gif' alt='封面图片'></img>";
+          }
+      }
+			Host.ResultString += "<td class='coverimage' width='1%' valign='top'>"+strImageFragment+"</td>";
+			Host.ResultString += "<td class='biblio' width='99%'>";
+
+	
+	}
+	
 			Host.ResultString += "<table class='biblio'>";
 
       // 题名与责任说明
@@ -1275,20 +1315,103 @@ using DigitalPlatform.LibraryServer;
 			    Host.ResultString += "</tr>";
       }      
       
-      // 多媒体
-      if (s856.Length > 0)
-      {
-          Host.ResultString += "<tr class='content'>";
-			    Host.ResultString += "<td class='name' width='10%' nowrap>多媒体</td>";
-			    Host.ResultString += "<td class='value' width='90%'>"+s856+"</td>";
-			    Host.ResultString += "</tr>";
-      }            
-      
+
+        // 电子资源
+        if (string.IsNullOrEmpty(s856) == false)
+        {
+		    Host.ResultString += "<tr class='content'>";
+		    Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("电子资源") + "</td>";
+		    Host.ResultString += "<td class='value' width='90%'>"+s856+"</td>";
+            Host.ResultString += "</tr>";
+        }
+	  
+     
       // 根查?
       
       
 			Host.ResultString += "</table>";
+			
+            Host.ResultString += "</td></tr></table>";
   
 		  Host.ResultString += "</body></html>";      
 		]]></end>
+	
+		<stringTable>
+    <s id="题名与责任说明">
+      <t lang="zh-CN">题名与责任说明</t>
+      <t lang="en-US">Title and Statement of Responsibility</t>
+    </s>
+    <s id="责任者">
+      <t lang="zh-CN">责任者</t>
+      <t lang="en-US">Contributor</t>
+    </s>
+    <s id="版本">
+      <t lang="zh-CN">版本</t>
+      <t lang="en-US">Edition</t>
+    </s>
+    <s id="资料特殊细节">
+      <t lang="zh-CN">资料特殊细节</t>
+      <t lang="en-US">Material or Type of Res. Spec.</t>
+    </s>
+    <s id="出版发行">
+      <t lang="zh-CN">出版发行</t>
+      <t lang="en-US">Publication</t>
+    </s>
+    <s id="载体形态">
+      <t lang="zh-CN">载体形态</t>
+      <t lang="en-US">Physical Description</t>
+    </s>
+    <s id="丛编">
+      <t lang="zh-CN">丛编</t>
+      <t lang="en-US">Series</t>
+    </s>
+    <s id="主题分析">
+      <t lang="zh-CN">主题分析</t>
+      <t lang="en-US">Subject</t>
+    </s>
+    <s id="分类号">
+      <t lang="zh-CN">分类号</t>
+      <t lang="en-US">Classification Number</t>
+    </s>
+    <s id="附注">
+      <t lang="zh-CN">附注</t>
+      <t lang="en-US">Notes</t>
+    </s>
+    <s id="相关题名">
+      <t lang="zh-CN">相关题名</t>
+      <t lang="en-US">Related Title</t>
+    </s>
+    <s id="出版频率">
+      <t lang="zh-CN">出版频率</t>
+      <t lang="en-US">Publication Frequency</t>
+    </s>
+    <s id="内容附注">
+      <t lang="zh-CN">内容附注</t>
+      <t lang="en-US">Content Note</t>
+    </s>
+    <s id="连接款目">
+      <t lang="zh-CN">连接款目</t>
+      <t lang="en-US">Linking Entries-General Info.</t>
+    </s>
+    <s id="标识和获得方式">
+      <t lang="zh-CN">标识和获得方式</t>
+      <t lang="en-US">Identifier and Terms of Availability</t>
+    </s>
+    <s id="登录号">
+      <t lang="zh-CN">登录号</t>
+      <t lang="en-US">Accession Number</t>
+    </s>
+    <s id="索取号">
+      <t lang="zh-CN">索取号</t>
+      <t lang="en-US">Call Number</t>
+    </s>
+    <s id="提要文摘">
+      <t lang="zh-CN">提要文摘</t>
+      <t lang="en-US">Summary or Abstract</t>
+    </s>
+    <s id="电子资源">
+      <t lang="zh-CN">电子资源</t>
+      <t lang="en-US">Electronic Resource</t>
+    </s>
+  </stringTable>
 </filter>
