@@ -501,6 +501,11 @@ public bool ItemCanReturn(Account account,
 //                          预约时写入读者 XML 记录 reservations/request 元素 requestItemBarcode 属性值，从写入 @refID:xxx 改进为尽量写入册条码号形态，便于兼容 dp2mini 备书功能的原有用法
 //            (2025/9/17)   Reservation() API 写入的操作日志记录，先前版本写入的 itemBarcodeList 元素内容是册参考 ID，最新版改为尽量写入册条码号
 //      3.188 (2025/9/18)   为 WSDL metadata 修改了绑定的 URL 为: http://localhost/dp2library/$metadata。在 "metadata" 前增加了一个 "$"
+
+//      3.188.patch (2026/3/3) 解决 libraryservice.cs 中若干 id 被误改为 user_id 的 bug
+//                  (2026/3/4) 解决内务记到界面为期添加封面以后保存时报错“全部修改都没有兑现: 超出定义范围的元素 http://dp2003.com/dprms:file 在保存时已被拒绝”的 bug
+//                  (2026/4/11) 巩固 WriteRes() 处理上传 .zip 文件带有 extract style 时偶遇删除失败的部分代码
+
 //      3.189 (2025/9/25)   SetEntities() GetItemInfo() 等 API 增加了存取定义中的 setiteminfo 和 getiteminfo 权限。原有账户，当存取定义不为空时，其普通权限中的 setiteminfo 和 getiteminfo 需要手动处理
 //                          CopyBiblio() API 中 move 和 onlymovebiblio 在三条以上书目记录发生重复的情况下，会报错说有重复记录无法移动成功。这是因为自动进行了查重，并且只从命中结果中排除了源记录路径，没有排除掉第三条记录的路径造成的。最新版在 *move* 操作都不自动查重了，目的是让试图缩减重复的操作得以进行。
 //      3.190 (2025/10/14)  GetReaderInfo() API 利用 strBarcode 进行检索的时候，如果 strBarcode 内容中出现了点，此前版本会当作机构代码和证条码号看待。最新版做了改进，当 library.xml 中存在 rfid 元素时，依然是原有效果，而当 library.xml 中没有定义 rfid 元素的时候，strBarcode 中的内容会被当作证条码号对待。也就是说，假设一条读者 XML 记录中 barcode 元素内容为 ABC.1234，则利用 GetReaderInfo() API 可以成功获得这条记录。
@@ -517,6 +522,5 @@ public bool ItemCanReturn(Account account,
 //      3.198 (2026/2/6)    CopyBiblioInfo() API 中针对 move 和 onlymovebiblio 动作的查重逻辑做了改进。最早版本对 move 是要查重的，2025 年改为对 move 不查重。现在改为要对 move 进行查重，但增加了条件判断，当查重命中的记录路径中包含和源书目记录的查重空间相同，则去掉这些记录路径，去掉以后再进行是否重复的判断。改进后的效果是，不允许跨不同查重空间进行移动，但允许源和目标在同一个查重空间时进行移动。
 //      3.199 (2026/5/9)    GetBiblioInfos() API 中 strBiblioRecPath 参数值中的 @refID:xxx 形态的参考 ID 之前版本是当作册记录的参考 ID 来处理的，现在改为当作书目记录参考 ID。若要指册记录的参考 ID，则需要用 @itemRefID:xxx 形态。根据书目记录参考 ID 获得书目记录功能是本次新实现的，原来没有实现。
 //                          在 dp2library templates 模板中，为所有类型的书目库的 keys 配置文件增加了 style 为 "refid" 的检索途径。以前版本没有配置这个检索途径。
-
 
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到
