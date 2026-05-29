@@ -530,7 +530,7 @@ namespace DigitalPlatform.Marc
                 if (this.m_domMarcDef != null)
                     return this.m_domMarcDef;
 
-                if (m_strMarcDomError != "")
+                if (string.IsNullOrEmpty(m_strMarcDomError) == false)
                     return null;    // 避免反复报错
 
                 string strError = "";

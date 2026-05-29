@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
@@ -231,7 +232,7 @@ strHtml2 +
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         string GetHeadString(bool bAjax = true)

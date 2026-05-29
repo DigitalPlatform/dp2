@@ -314,6 +314,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="AccessNoUtility.cs" />
+    <Compile Include="AsyncMessageBox.cs" />
     <Compile Include="AtomicBoolean.cs" />
     <Compile Include="BaseChannel.cs" />
     <Compile Include="ConfirmSupervisorDialog.cs">

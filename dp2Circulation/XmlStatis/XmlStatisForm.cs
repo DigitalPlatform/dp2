@@ -337,7 +337,7 @@ namespace dp2Circulation
                 if (nRet == 1)
                     goto END1;  // TODO: SkipAll如何执行? 是否连OnEnd也不执行了？
 
-                END1:
+            END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -795,7 +795,6 @@ namespace dp2Circulation
             Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;

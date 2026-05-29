@@ -14,10 +14,9 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using System.Xml;
+using static DigitalPlatform.Marc.MarcUtil;
 
 using ClosedXML.Excel;
-
-using static DigitalPlatform.Marc.MarcUtil;
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.dp2.Statis;
@@ -36,7 +35,6 @@ using DigitalPlatform.Z3950.UI;
 
 using dp2Circulation.Script;
 using dp2Circulation.SearchForms;
-
 
 namespace dp2Circulation
 {
@@ -263,7 +261,7 @@ namespace dp2Circulation
             {
                 this.dp2QueryControl1.Restore(strSaveString);
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
 
             }
@@ -2564,7 +2562,7 @@ out strError);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    CONTINUE:
+                CONTINUE:
                     i++;
                 }
             }
@@ -6482,7 +6480,7 @@ out strError);
                 RefreshPropertyView(false);
                 return nCount;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"VerifyBiblioRecord() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
                 return -1;
@@ -10017,6 +10015,7 @@ out string strError)
         }
 
         // 保存到其它书目库
+        // 线程: 允许在非界面线程执行
         // parameters:
         //      bCopy   是否为复制。如果是 false，表示移动
         // return:
@@ -10039,38 +10038,41 @@ out string strError)
             // 选择目标库名，还有选定是否要将下属记录也保存过去
             // 需要询问保存的路径
             BiblioSaveToDlg dlg = new BiblioSaveToDlg();
-            MainForm.SetControlFont(dlg, this.Font, false);
-
-            // dlg.MainForm = Program.MainForm;
-            dlg.Text = strActionName + "书目记录到数据库";
-
-            dlg.MessageText = "请指定书目记录要追加" + strActionName + "到的位置";
-            dlg.EnableCopyChildRecords = true;
-
-            dlg.BuildLink = false;
-
-            if (bCopy)
-                dlg.CopyChildRecords = false;
-            else
-                dlg.CopyChildRecords = true;
-
-            if (bCopy)
-                dlg.MessageText += "\r\n\r\n(注：本功能*可选择*是否复制书目记录下属的册、期、订购、实体记录和对象资源)\r\n\r\n将选定的书目记录复制到:";
-            else
+            this.TryInvoke(() =>
             {
-                dlg.MessageText += "\r\n\r\n注：\r\n1) 当前执行的是移动而不是复制操作;\r\n2) 书目记录下属的册、期、订购、实体记录和对象资源会被一并移动到目标位置";
-                dlg.EnableCopyChildRecords = false;
-            }
+                MainForm.SetControlFont(dlg, this.Font, false);
 
-            if (bCopy)
-                dlg.EnableCompressTailNo = false;
+                // dlg.MainForm = Program.MainForm;
+                dlg.Text = strActionName + "书目记录到数据库";
 
-            // TODO: 要让记录ID为问号，并且不可改动
+                dlg.MessageText = "请指定书目记录要追加" + strActionName + "到的位置";
+                dlg.EnableCopyChildRecords = true;
 
-            dlg.CurrentBiblioRecPath = "";  // 源记录路径？ 但是批处理情况下源记录路径并不确定阿
-            Program.MainForm.AppInfo.LinkFormState(dlg, "BiblioSearchform_BiblioSaveToDlg_state");
-            dlg.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                dlg.BuildLink = false;
+
+                if (bCopy)
+                    dlg.CopyChildRecords = false;
+                else
+                    dlg.CopyChildRecords = true;
+
+                if (bCopy)
+                    dlg.MessageText += "\r\n\r\n(注：本功能*可选择*是否复制书目记录下属的册、期、订购、实体记录和对象资源)\r\n\r\n将选定的书目记录复制到:";
+                else
+                {
+                    dlg.MessageText += "\r\n\r\n注：\r\n1) 当前执行的是移动而不是复制操作;\r\n2) 书目记录下属的册、期、订购、实体记录和对象资源会被一并移动到目标位置";
+                    dlg.EnableCopyChildRecords = false;
+                }
+
+                if (bCopy)
+                    dlg.EnableCompressTailNo = false;
+
+                // TODO: 要让记录ID为问号，并且不可改动
+
+                dlg.CurrentBiblioRecPath = "";  // 源记录路径？ 但是批处理情况下源记录路径并不确定阿
+                Program.MainForm.AppInfo.LinkFormState(dlg, "BiblioSearchform_BiblioSaveToDlg_state");
+                dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            });
 
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -10111,19 +10113,15 @@ out string strError)
 
             LibraryChannel channel = this.GetChannel();
 
-            /*
-            _stop.Style = StopStyle.EnableHalfStop;
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在" + strActionName + "书目记录到数据库 ...");
-            _stop.BeginLoop();
-            */
             var looping = BeginLoop(this.DoStop, "正在" + strActionName + "书目记录到数据库 ...", "halfstop");
 
             this.EnableControlsInSearching(false);
-            this.listView_records.Enabled = false;
+            this.TryInvoke(() =>
+            {
+                this.listView_records.Enabled = false;
+            });
             try
             {
-
                 var items = this.TryGet(() =>
                 {
                     return this.listView_records.SelectedItems
@@ -10148,7 +10146,7 @@ out string strError)
                 // foreach (ListViewItem item in this.listView_records.SelectedItems)
                 foreach (LoaderItem l_item in loader)
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    // Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -10234,7 +10232,6 @@ out strError);
                         }
                     }
 
-
                     looping.Progress.SetMessage("正在" + strActionName + "书目记录 '" + strRecPath + "' 到 '" + dlg.RecPath + "' ...");
 
                     // 2016/3/23
@@ -10250,13 +10247,16 @@ out strError);
                         {
                             if (bHideMessageBox1 == false)
                             {
-                                copy_result = MessageDialog.Show(this,
+                                copy_result = this.TryGet(() =>
+                                {
+                                    return MessageDialog.Show(this,
                 "不能移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "'(注: 可以用复制方式保存)。\r\n\r\n是否改为复制方式保存? (Yes 改为复制方式保存; No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxDefaultButton.Button1,
                 "不再出现此对话框",
                 ref bHideMessageBox1,
                 new string[] { "改为复制方式", "跳过此条继续", "放弃" });
+                                });
                             }
 
                             if (copy_result == System.Windows.Forms.DialogResult.Yes)
@@ -10336,27 +10336,22 @@ out strError);
                     }
                     if (lRet == -1)
                     {
-                        /*
-                        DialogResult result = MessageBox.Show(this,
-        "复制或移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "' 时出现错误: " + strError + "。\r\n\r\n是否重试? (Yes 重试；No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
-        "BiblioSearchForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-        */
                         DialogResult result = DialogResult.Cancel;
 
                         if (bHideMessageBox == false)
                         {
                             // TODO: 提示中出现书目记录的摘要信息？
                             string temp = strError;
-                            result = MessageDialog.Show(this,
+                            result = this.TryGet(() =>
+                            {
+                                return MessageDialog.Show(this,
             "复制或移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "' 时出现错误: " + temp + "。\r\n\r\n是否重试? (Yes 重试；No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
             MessageBoxButtons.YesNoCancel,
             MessageBoxDefaultButton.Button1,
             "不再出现此对话框",
             ref bHideMessageBox,
             new string[] { "重试", "跳过此条继续", "放弃" });
+                            });
                         }
                         else
                             result = DialogResult.No;
@@ -10372,30 +10367,31 @@ out strError);
                     if (bCopy == false)
                         moved_items.Add(item);
 
-                    CONTINUE:
+                CONTINUE:
                     looping.Progress.SetProgressValue(++i);
                 }
 
-                foreach (ListViewItem item in moved_items)
+                this.TryInvoke(() =>
                 {
-                    item.Remove();
-                }
+                    foreach (ListViewItem item in moved_items)
+                    {
+                        item.Remove();
+                    }
+                });
+
             }
             finally
             {
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                _stop.HideProgress();
-                _stop.Style = StopStyle.None;
-                */
                 EndLoop(looping);
 
                 this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
-                this.listView_records.Enabled = true;
+
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = true;
+                });
 
                 genData.Dispose();
             }
@@ -10409,49 +10405,78 @@ out strError);
         // 保存到其它书目库
         void menu_saveBiblioRecToAnotherDatabase_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = 0;
+            _ = Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        string strError = "";
+                        int nRet = 0;
 
-            // 保存到其它书目库
-            // parameters:
-            //      bCopy   是否为复制。如果是 false，表示移动
-            // return:
-            //      -1  出错
-            //      0   放弃
-            //      1   成功
-            nRet = CopyToAnotherDatabase(
-                true,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+                        // 保存到其它书目库
+                        // parameters:
+                        //      bCopy   是否为复制。如果是 false，表示移动
+                        // return:
+                        //      -1  出错
+                        //      0   放弃
+                        //      1   成功
+                        nRet = CopyToAnotherDatabase(
+                            true,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
 
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+                        return;
+                    ERROR1:
+                        this.MessageBoxShow(strError);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.MessageBoxShow($"CopyToAnotherDatabase() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
         }
 
         // 移动到其它书目库
         void menu_moveBiblioRecToAnotherDatabase_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = 0;
+            _ = Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        string strError = "";
+                        int nRet = 0;
 
-            // 保存到其它书目库
-            // parameters:
-            //      bCopy   是否为复制。如果是 false，表示移动
-            // return:
-            //      -1  出错
-            //      0   放弃
-            //      1   成功
-            nRet = CopyToAnotherDatabase(
-                false,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+                        // 保存到其它书目库
+                        // parameters:
+                        //      bCopy   是否为复制。如果是 false，表示移动
+                        // return:
+                        //      -1  出错
+                        //      0   放弃
+                        //      1   成功
+                        nRet = CopyToAnotherDatabase(
+                            false,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
 
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+                        return;
+                    ERROR1:
+                        this.MessageBoxShow(strError);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.MessageBoxShow($"CopyToAnotherDatabase() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
         }
 
         void menu_maskEmptySubItems_Click(object sender, EventArgs e)
@@ -14473,7 +14498,7 @@ out string error);
                             targetEncoding,
                             unimarc_modify_100 ? modify_100_style : "",
                             out string changed_marc);
-                        
+
                         changed_marc = changed_marc.Replace(dollar, subfieldDelemeter);
 
                         nRet = MarcUtil.CvtJineiToWorksheet(changed_marc,

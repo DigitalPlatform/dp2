@@ -44,7 +44,7 @@ namespace dp2Manager
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                this.MessageBoxShow(ExceptionUtil.GetAutoText(ex));
                 return;
             }
 

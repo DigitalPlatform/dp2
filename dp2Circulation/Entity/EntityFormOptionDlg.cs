@@ -48,7 +48,7 @@ namespace dp2Circulation
                      null,
                      out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 this.entityEditControl_normalRegisterDefault.SetReadOnly("librarian");
                 this.entityEditControl_normalRegisterDefault.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);
@@ -70,7 +70,7 @@ namespace dp2Circulation
                      null,
                      out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 this.entityEditControl_quickRegisterDefault.SetReadOnly("librarian");
                 this.entityEditControl_quickRegisterDefault.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);
@@ -90,7 +90,7 @@ namespace dp2Circulation
                      null,
                      out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 this.issueEditControl_normalRegisterDefault.SetReadOnly("librarian");
                 this.issueEditControl_normalRegisterDefault.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);
@@ -108,7 +108,7 @@ namespace dp2Circulation
                      null,
                      out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 this.issueEditControl_quickRegisterDefault.SetReadOnly("librarian");
                 this.issueEditControl_quickRegisterDefault.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);
@@ -127,7 +127,7 @@ namespace dp2Circulation
                      null,
                      out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 this.orderEditControl_normalRegisterDefault.SetReadOnly("librarian");
                 this.orderEditControl_normalRegisterDefault.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);
@@ -146,7 +146,7 @@ namespace dp2Circulation
                      null,
                      out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 this.commentEditControl1.SetReadOnly("librarian");
                 this.commentEditControl1.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);

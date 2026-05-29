@@ -9,6 +9,7 @@ using System.Xml;
 using System.Collections;
 using System.Diagnostics;
 
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
@@ -59,7 +60,7 @@ namespace dp2Circulation
             this.checkBox_quickMode.Checked = quick_mode;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void StartArriveMonitorDlg_FormClosed(object sender, FormClosedEventArgs e)

@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.IO;
+
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
@@ -60,7 +62,7 @@ namespace dp2Circulation
                 string strError = "";
                 int nRet = this.LoadCfgFile(this.CfgFileName, out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
             }
 
             LoadData();

@@ -809,7 +809,7 @@ namespace dp2Batch
             }
             catch (SerializationException ex)
             {
-                MessageBoxShow(ex.Message);
+                this.MessageBoxShow(ex.Message);
                 Servers = new ServerCollection();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
                 Servers.FileName = this.DataDir
@@ -826,7 +826,7 @@ namespace dp2Batch
             if (nRet == -1)
             {
                 if (IsFirstRun == false)
-                    MessageBoxShow(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
+                    this.MessageBoxShow(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
             cfgCache.TempDir = this.DataDir
                 + "\\cfgcache";
@@ -1045,7 +1045,7 @@ namespace dp2Batch
             string strError;
             int nRet = cfgCache.Save(null, out strError);
             if (nRet == -1)
-                MessageBoxShow(strError);
+                this.MessageBoxShow(strError);
 
 
             // 保存窗口尺寸状态
@@ -1240,7 +1240,7 @@ this.checkBox_import_fastMode.Checked);
 
             return;
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         public string StartNo
@@ -1558,7 +1558,7 @@ this.checkBox_import_fastMode.Checked);
                 filter.Assembly = null;
 
             if (string.IsNullOrEmpty(strError) == false)
-                MessageBoxShow(strError);
+                this.MessageBoxShow(strError);
 
             this.MarcFilter = null;
             return;
@@ -1570,9 +1570,10 @@ this.checkBox_import_fastMode.Checked);
                 filter.Assembly = null;
 
             this.MarcFilter = null;
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
+#if OLD
         public void MessageBoxShow(string strText)
         {
             if (this.IsHandleCreated)
@@ -1588,7 +1589,7 @@ this.checkBox_import_fastMode.Checked);
                     }
                 }));
         }
-
+#endif
 
         // 导入XML数据
         // parameter: 
@@ -3309,7 +3310,7 @@ this.checkBox_import_fastMode.Checked);
                 out strError);
             if (dlg.DbNameMap == null)
             {
-                MessageBoxShow(strError);
+                this.MessageBoxShow(strError);
                 return;
             }
 
@@ -3400,7 +3401,7 @@ this.checkBox_import_fastMode.Checked);
             {
                 if (strWarning == "")
                     goto ERROR1;
-                MessageBoxShow(strWarning);
+                this.MessageBoxShow(strWarning);
             }
 
             assemblyMain = Assembly.LoadFrom(strMainCsDllName);
@@ -3499,7 +3500,7 @@ this.checkBox_import_fastMode.Checked);
                     {
                         goto ERROR1;
                     }
-                    MessageBoxShow(strWarning);
+                    this.MessageBoxShow(strWarning);
                 }
 
 
@@ -3577,7 +3578,7 @@ this.checkBox_import_fastMode.Checked);
 
             if (string.IsNullOrEmpty(this.DbPath))
             {
-                MessageBoxShow("尚未选择源库...");
+                this.MessageBoxShow("尚未选择源库...");
                 return;
             }
 
@@ -3602,7 +3603,7 @@ this.checkBox_import_fastMode.Checked);
                         strDbName,
                         out strError);
                     if (nRet == -1)
-                        MessageBoxShow(strError);
+                        this.MessageBoxShow(strError);
                 }
                 else
                 {
@@ -3693,7 +3694,7 @@ this.checkBox_import_fastMode.Checked);
                 goto ERROR1;
 
 
-            SKIPASKFILENAME:
+        SKIPASKFILENAME:
 
             // 触发Script中OnBegin()代码
             // OnBegin()中仍然有修改MainForm面板的自由
@@ -3822,7 +3823,7 @@ this.checkBox_import_fastMode.Checked);
 
                         if (marcdlg.AddG01 == true)
                         {
-                            MessageBoxShow("您选择了在导出的ISO2709记录中加入-01字段。请注意dp2Batch在将来导入这样的ISO2709文件的时候，记录中-01字段***起不到***覆盖定位的作用。“加入-01字段”功能是为了将导出的ISO2709文件应用到dt1000系统而设计的。\r\n\r\n如果您这样做的目的是为了对dp2系统书目库中的数据进行备份，请改用.xml格式或.dp2bak格式。");
+                            this.MessageBoxShow("您选择了在导出的ISO2709记录中加入-01字段。请注意dp2Batch在将来导入这样的ISO2709文件的时候，记录中-01字段***起不到***覆盖定位的作用。“加入-01字段”功能是为了将导出的ISO2709文件应用到dt1000系统而设计的。\r\n\r\n如果您这样做的目的是为了对dp2系统书目库中的数据进行备份，请改用.xml格式或.dp2bak格式。");
                         }
 
                         strOutputFileName = marcdlg.FileName;
@@ -3858,7 +3859,7 @@ this.checkBox_import_fastMode.Checked);
             */
             if (nRet == -1)
                 goto ERROR1;
-            END1:
+        END1:
             // 触发Script的OnEnd()代码
             if (batchObj != null)
             {
@@ -3875,7 +3876,7 @@ this.checkBox_import_fastMode.Checked);
             this.MarcFilter = null;
 
             if (String.IsNullOrEmpty(strError) == false)
-                MessageBoxShow(strError);
+                this.MessageBoxShow(strError);
             return;
 
         ERROR1:
@@ -3885,7 +3886,7 @@ this.checkBox_import_fastMode.Checked);
                 filter.Assembly = null;
             this.MarcFilter = null;
 
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
 #if NNNNN
@@ -4386,7 +4387,7 @@ this.checkBox_import_fastMode.Checked);
                                 strDbName,
                                 out strError);
                             if (nRet == -1)
-                                MessageBoxShow(strError);
+                                this.MessageBoxShow(strError);
 
                             if (nRet == 0)
                             {
@@ -4632,7 +4633,7 @@ this.checkBox_import_fastMode.Checked);
                                         bNeedRetry = false; // 单库情况，也没有必要出现重试对话框
 
                                         WriteLog("打开对话框 '" + strError.Replace("\r\n", "\\n") + "'");
-                                        MessageBoxShow(strError);
+                                        this.MessageBoxShow(strError);
                                         WriteLog("关闭对话框 '" + strError.Replace("\r\n", "\\n") + "'");
                                         break;
                                     }
@@ -5402,7 +5403,7 @@ this.checkBox_import_fastMode.Checked);
                 if (stop != null)
                     stop.SetMessage("正在下载 " + strResPath + " 的数据体");
 
-                REDO_GETRES_1:
+            REDO_GETRES_1:
                 lRet = channel.GetRes(strResPath,
                     outputfile,
                     stop,
@@ -6284,7 +6285,7 @@ this.checkBox_import_fastMode.Checked);
             }
             catch (Exception ex)
             {
-                MessageBoxShow(ExceptionUtil.GetAutoText(ex));
+                this.MessageBoxShow(ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -6317,7 +6318,7 @@ this.checkBox_import_fastMode.Checked);
 
             if (this.DbPath == "")
             {
-                MessageBoxShow("尚未选择要重建检索点的数据库 ...");
+                this.MessageBoxShow("尚未选择要重建检索点的数据库 ...");
                 return;
             }
 
@@ -6375,7 +6376,7 @@ this.checkBox_import_fastMode.Checked);
                         strDbName,
                         out strError);
                     if (nRet == -1)
-                        MessageBoxShow(strError);
+                        this.MessageBoxShow(strError);
                 }
                 else
                 {
@@ -6449,7 +6450,7 @@ this.checkBox_import_fastMode.Checked);
                                 strDbName,
                                 out strError);
                             if (nRet == -1)
-                                MessageBoxShow(strError);
+                                this.MessageBoxShow(strError);
 
                             if (nRet == 0)
                             {
@@ -6626,7 +6627,7 @@ this.checkBox_import_fastMode.Checked);
                                     else
                                     {
                                         bNeedRetry = false; // 单库情况，也没有必要出现重试对话框
-                                        MessageBoxShow(strError);
+                                        this.MessageBoxShow(strError);
                                         break;
                                     }
                                 }
@@ -6751,11 +6752,11 @@ this.checkBox_import_fastMode.Checked);
 
             // END1:
 
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
             return;
 
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
@@ -7017,7 +7018,7 @@ this.checkBox_import_fastMode.Checked);
             }
             catch (Exception ex)
             {
-                MessageBoxShow(ExceptionUtil.GetAutoText(ex));
+                this.MessageBoxShow(ExceptionUtil.GetAutoText(ex));
             }
         }
     }

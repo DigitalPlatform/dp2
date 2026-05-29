@@ -188,7 +188,7 @@ namespace dp2rms
             }
             catch (SerializationException ex)
             {
-                MessageBox.Show(this, ex.Message);
+                this.MessageBoxShow(ex.Message);
                 Servers = new ServerCollection();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
                 Servers.FileName = this.DataDir
@@ -205,7 +205,7 @@ namespace dp2rms
             if (nRet == -1)
             {
                 if (IsFirstRun == false)
-                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
+                    this.MessageBoxShow(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
 
 
@@ -243,7 +243,7 @@ namespace dp2rms
 
             if (IsFirstRun == true && this.Servers.Count == 0)
             {
-                MessageBox.Show(this, "欢迎您安装使用dp2rms -- 资源管理。");
+                this.MessageBoxShow("欢迎您安装使用dp2rms -- 资源管理。");
                 ManageServers(true);
                 ManagePreference();
             }

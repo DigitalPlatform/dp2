@@ -102,7 +102,7 @@ namespace dp2Circulation
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void OrderFileDialog_FormClosing(object sender, FormClosingEventArgs e)

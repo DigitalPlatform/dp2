@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using static dp2Inventory.LibraryChannelUtil;
@@ -93,7 +94,7 @@ namespace dp2Inventory
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, $"BeginModifyDialog_Load() 装载数据出错: {ex.Message}");
+                this.MessageBoxShow($"BeginModifyDialog_Load() 装载数据出错: {ex.Message}");
                 this.Close();
             }
         }

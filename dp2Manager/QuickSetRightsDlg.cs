@@ -222,7 +222,7 @@ namespace dp2Manager
 			int nRet = FillList(out strError);
 			if (nRet == -1)
 			{
-				MessageBox.Show(this, strError);
+				this.MessageBoxShow(strError);
 				return ;
 			}
 

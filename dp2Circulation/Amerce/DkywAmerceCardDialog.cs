@@ -10,6 +10,7 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 
+using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -37,7 +38,7 @@ namespace dp2Circulation
             string strError = "";
             int nRet = this.StartChannel(out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             else
                 this.timer1.Start();
         }

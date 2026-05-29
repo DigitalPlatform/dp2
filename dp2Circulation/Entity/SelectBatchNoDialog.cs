@@ -166,7 +166,7 @@ TaskScheduler.Default);
             }
 
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             if (this._selectedBatchNo != null)
             {

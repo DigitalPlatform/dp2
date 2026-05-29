@@ -5,7 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
+using DigitalPlatform;
 using DigitalPlatform.Text;
 
 namespace dp2Circulation
@@ -97,11 +97,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.label_message.Text;
+                return this.TryGet(() =>
+                {
+                    return this.label_message.Text;
+                });
             }
             set
             {
-                this.label_message.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.label_message.Text = value;
+                });
             }
         }
 
@@ -109,20 +115,26 @@ namespace dp2Circulation
         {
             get
             {
-                return this.comboBox_biblioDbName.Text + "/" + this.textBox_recordID.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_biblioDbName.Text + "/" + this.textBox_recordID.Text;
+                });
             }
             set
             {
-                int nRet = value.IndexOf("/");
-                if (nRet == -1)
+                this.TryInvoke(() =>
                 {
-                    this.comboBox_biblioDbName.Text = value;
-                }
-                else
-                {
-                    this.comboBox_biblioDbName.Text = value.Substring(0, nRet);
-                    this.textBox_recordID.Text = value.Substring(nRet + 1);
-                }
+                    int nRet = value.IndexOf("/");
+                    if (nRet == -1)
+                    {
+                        this.comboBox_biblioDbName.Text = value;
+                    }
+                    else
+                    {
+                        this.comboBox_biblioDbName.Text = value.Substring(0, nRet);
+                        this.textBox_recordID.Text = value.Substring(nRet + 1);
+                    }
+                });
             }
         }
 
@@ -142,11 +154,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_buildLink.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_buildLink.Checked;
+                });
             }
             set
             {
-                this.checkBox_buildLink.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_buildLink.Checked = value;
+                });
             }
         }
 
@@ -154,11 +172,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_copyChildRecords.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_copyChildRecords.Checked;
+                });
             }
             set
             {
-                this.checkBox_copyChildRecords.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_copyChildRecords.Checked = value;
+                });
             }
         }
 
@@ -166,11 +190,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_copyChildRecords.Enabled;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_copyChildRecords.Enabled;
+                });
             }
             set
             {
-                this.checkBox_copyChildRecords.Enabled = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_copyChildRecords.Enabled = value;
+                });
             }
         }
 
@@ -178,11 +208,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_compressTailNo.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_compressTailNo.Checked;
+                });
             }
             set
             {
-                this.checkBox_compressTailNo.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_compressTailNo.Checked = value;
+                });
             }
         }
 
@@ -190,11 +226,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_compressTailNo.Enabled;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_compressTailNo.Enabled;
+                });
             }
             set
             {
-                this.checkBox_compressTailNo.Enabled = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_compressTailNo.Enabled = value;
+                });
             }
         }
 

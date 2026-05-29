@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -76,7 +77,7 @@ namespace dp2Circulation
             checkBox_startAtServerBreakPoint_CheckedChanged(this, null);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void StartTraceDtlpDlg_FormClosed(object sender, FormClosedEventArgs e)

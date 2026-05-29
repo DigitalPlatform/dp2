@@ -3,6 +3,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.IO;
 
 namespace dp2Circulation
@@ -62,7 +63,7 @@ namespace dp2Circulation
                     this.labelDefControl1.Xml = strContent;
                 }
                 else
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
             }
 
             if (string.IsNullOrEmpty(this.SampleLabelText) == true)

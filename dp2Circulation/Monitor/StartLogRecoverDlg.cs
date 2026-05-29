@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer.Common;
@@ -92,7 +93,7 @@ namespace dp2Circulation
             this.checkBox_clearBefore.Checked = bContinueWhenError;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void StartLogRecoverDlg_FormClosed(object sender, FormClosedEventArgs e)

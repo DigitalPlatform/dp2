@@ -512,7 +512,7 @@ Stack:
 
                 if (nRet == 1)
                     goto END1;  // 实际上 SkipAll 是要执行 OnEnd() 的，而 Error 才是不执行 OnEnd()
-                END1:
+            END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -1525,7 +1525,6 @@ Stack:
             Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;

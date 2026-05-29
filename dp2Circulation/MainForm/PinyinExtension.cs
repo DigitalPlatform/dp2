@@ -16,6 +16,9 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Data.Sql;
 
 namespace dp2Circulation
 {
@@ -61,11 +64,14 @@ namespace dp2Circulation
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public LibraryChannel GetExtChannel(string strServerUrl,
             string strUserName,
-            GetChannelStyle style = GetChannelStyle.None)
+            GetChannelStyle style = GetChannelStyle.None,
+            int timeout_seconds = -1)
         {
             LibraryChannel channel = this._channelPoolExt.GetChannel(strServerUrl, strUserName);
             if ((style & GetChannelStyle.GUI) != 0)
                 channel.Idle += channelExt_Idle;
+            if (timeout_seconds != -1)
+                channel.Timeout = TimeSpan.FromSeconds(timeout_seconds);
             _channelList.Add(channel);
             // TODO: 检查数组是否溢出
             return channel;
@@ -264,7 +270,10 @@ out string strError)
                 strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时。可配置为 http://dp2003.com/dp2library";
                 return -1;
             }
-            LibraryChannel channel = this.GetExtChannel(strPinyinServerUrl, "public");
+            LibraryChannel channel = this.GetExtChannel(strPinyinServerUrl, 
+                "public",
+                GetChannelStyle.None,
+                10);
 #endif
             // TODO: 可以用 BeginLoop 改造一下
             Stop new_stop = new DigitalPlatform.Stop();
@@ -272,7 +281,10 @@ out string strError)
 #if GCAT_SERVER
             new_stop.OnStop += new StopEventHandler(new_stop_OnStop);
 #else
-            new_stop.OnStop += new StopEventHandler(this.DoStop);
+            // new_stop.OnStop += new StopEventHandler(this.DoStop);
+            new_stop.OnStop += (s1, e1) => {
+                channel?.TryAbortIt();
+            };
 #endif
             new_stop.Initial("正在获得 '" + strText + "' 的拼音信息 (从服务器 " + this.PinyinServerUrl + ")...");
             new_stop.BeginLoop();
@@ -627,7 +639,7 @@ out string strError)
 #if GCAT_SERVER
                 new_stop.OnStop -= new StopEventHandler(new_stop_OnStop);
 #else
-                new_stop.OnStop -= new StopEventHandler(this.DoStop);
+                // new_stop.OnStop -= new StopEventHandler(this.DoStop);
 #endif
                 new_stop.Initial("");
                 new_stop.Unregister();
@@ -639,6 +651,49 @@ out string strError)
                 }
 #endif
             }
+        }
+
+        // 2026/3/19 允许 Stop 按钮显示出来和中断的新版本
+        public int SmartHanziTextToPinyinEx(
+            IWin32Window owner,
+            string strText,
+            PinyinStyle style,
+            string strDuoyinStyle,  // bool bAutoSel,
+            out string strPinyin,
+            out string strError)
+        {
+            int ret = 0;
+            string pinyin = "";
+            string error = "";
+
+            var task = Task.Factory.StartNew<int>(() =>
+            {
+                return SmartHanziTextToPinyin(
+            owner,
+            strText,
+            style,
+            strDuoyinStyle,
+            out pinyin,
+            out error);
+            },
+            default,
+            TaskCreationOptions.LongRunning,
+            TaskScheduler.Default);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+                Thread.Sleep(1);
+            }
+            Debug.Assert(task.IsCompleted == true);
+            ret = task.Result;
+            strError = error;
+            strPinyin = pinyin;
+            return ret;
+        }
+
+        public class PinyinResult : NormalResult
+        {
+            public string Pinyin { get; set; }
         }
 
 #if GCAT_SERVER
@@ -1014,6 +1069,7 @@ out string strError)
             }
             else
             {
+                /*
                 // 汉字字符串转换为拼音
                 // 如果函数中已经MessageBox报错，则strError第一字符会为空格
                 // return:
@@ -1027,6 +1083,14 @@ out string strError)
                     bAutoSel ? "auto,first" : "auto",
                     out strPinyin,
                     out strError);
+                */
+                nRet = this.SmartHanziTextToPinyinEx(
+    owner,
+    strHanzi,
+    style,
+    bAutoSel ? "auto,first" : "auto",
+    out strPinyin,
+    out strError);
             }
             if (nRet == -1)
                 return -1;
@@ -1123,7 +1187,7 @@ out string strError)
             {
                 string strCmd = StringUtil.GetLeadingCommand(strPrefix);
                 if (string.IsNullOrEmpty(strCmd) == false
-&& StringUtil.HasHead(strCmd, "cr:") == true)
+    && StringUtil.HasHead(strCmd, "cr:") == true)
                 {
                     strRuleParam = strCmd.Substring(3);
                 }
@@ -1373,7 +1437,7 @@ out string strError)
             {
                 string strCmd = StringUtil.GetLeadingCommand(strPrefix);
                 if (string.IsNullOrEmpty(strCmd) == false
-&& StringUtil.HasHead(strCmd, "cr:") == true)
+    && StringUtil.HasHead(strCmd, "cr:") == true)
                 {
                     strRuleParam = strCmd.Substring(3);
                 }

@@ -224,7 +224,7 @@ namespace DigitalPlatform.Script
         {
             if (listView1.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选择事项...");
+                this.MessageBoxShow( "尚未选择事项...");
                 return;
             }
 

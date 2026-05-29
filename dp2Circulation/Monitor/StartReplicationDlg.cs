@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Collections;
 
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
@@ -85,7 +86,7 @@ namespace dp2Circulation
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void StartReplicationDlg_FormClosed(object sender, FormClosedEventArgs e)

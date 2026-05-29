@@ -30,7 +30,7 @@ namespace dp2Circulation
             int nRet = LoadCaptionsXml(out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
         }
 

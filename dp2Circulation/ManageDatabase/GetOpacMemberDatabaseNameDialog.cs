@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-using System.Diagnostics;
 
+using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
@@ -41,7 +38,7 @@ namespace dp2Circulation
             int nRet = ListAllDatabases(this.AllDatabaseInfoXml,
                 out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
 
             // 选中第一个
             if (this.listView_databases.Items.Count > 0)

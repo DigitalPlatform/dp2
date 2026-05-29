@@ -365,7 +365,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                this.MessageBoxShow(ExceptionUtil.GetAutoText(ex));
             }
 
 #if SUPPORT_OLD_STOP

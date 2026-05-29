@@ -96,7 +96,6 @@ namespace dp2Catalog
             this.marcEditor1.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
             this.marcEditor1.NameTextColor = System.Drawing.Color.Blue;
             this.marcEditor1.ReadOnly = false;
-            this.marcEditor1.SelectionStart = -1;
             this.marcEditor1.Size = new System.Drawing.Size(239, 197);
             this.marcEditor1.TabIndex = 1;
             this.marcEditor1.Text = "marcEditor1";
@@ -149,7 +148,6 @@ namespace dp2Catalog
             this.marcEditor2.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
             this.marcEditor2.NameTextColor = System.Drawing.Color.Blue;
             this.marcEditor2.ReadOnly = true;
-            this.marcEditor2.SelectionStart = -1;
             this.marcEditor2.Size = new System.Drawing.Size(246, 172);
             this.marcEditor2.TabIndex = 1;
             this.marcEditor2.Text = "marcEditor2";

@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using System.Diagnostics;
 
+using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
@@ -455,7 +456,7 @@ namespace dp2Manager
 
             return;
             ERROR1:
-            MessageBox.Show(strError);
+            this.MessageBoxShow(strError);
             return;
 
         }

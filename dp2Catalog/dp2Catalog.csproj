@@ -14,7 +14,7 @@
     <ManifestCertificateThumbprint>24DDBB615697CE0F3C03216184C9DC9604C7FFFA</ManifestCertificateThumbprint>
     <ManifestKeyFile>dp2Catalog_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <SccProjectName>
     </SccProjectName>
     <SccLocalPath>

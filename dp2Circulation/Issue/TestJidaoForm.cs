@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using UpgradeUtil;
+
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -37,7 +35,7 @@ namespace dp2Circulation
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void button_OK_Click(object sender, EventArgs e)

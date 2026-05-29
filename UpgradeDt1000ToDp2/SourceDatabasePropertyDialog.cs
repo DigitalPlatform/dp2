@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.Text;
 
 namespace UpgradeDt1000ToDp2
@@ -136,7 +137,7 @@ namespace UpgradeDt1000ToDp2
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void button_OK_Click(object sender, EventArgs e)

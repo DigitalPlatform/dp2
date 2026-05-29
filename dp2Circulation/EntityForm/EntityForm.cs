@@ -246,7 +246,7 @@ namespace dp2Circulation
                     this.TryInvoke(() =>
                     {
                         this.m_marcEditor.MarcDefDom = null;
-                        this.m_marcEditor.Invalidate();   // TODO: ??
+                        // this.m_marcEditor.Invalidate();   // TODO: ??
                     });
                 }
 
@@ -3088,11 +3088,27 @@ true);
             }
         }
 
+        string _marcSyntax = null;
+
         // 2015/8/12
         public string MarcSyntax
         {
-            get;
-            set;
+            get
+            {
+                return _marcSyntax;
+            }
+            set
+            {
+                if (_marcSyntax != value)
+                {
+                    _marcSyntax = value;
+                    this.TryInvoke(() =>
+                    {
+                        this.m_marcEditor.MarcDefDom = null;
+                        // this.m_marcEditor.Invalidate();
+                    });
+                }
+            }
         }
 
         // 
@@ -6121,7 +6137,7 @@ TaskScheduler.Default);
                 if (_willCloseBrowseWindow == true)
                     CloseBrowseWindow();
 
-                END1:
+            END1:
                 this.TryInvoke(() =>
                 {
                     this.textBox_queryWord.SelectAll();
@@ -6438,7 +6454,7 @@ TaskScheduler.Default);
                 if (item != null)
                     item.BackColor = Color.LightGreen;
 
-                CONTINUE:
+            CONTINUE:
                 i++;
             }
 
@@ -13303,7 +13319,7 @@ out strError);
                         return;
                     if (Int16.TryParse(count_string, out short count) == false)
                     {
-                        MessageBox.Show(this, $"输入内容 '{count_string}' 不合法。应该是一个纯数字。请重新输入");
+                        this.MessageBoxShow($"输入内容 '{count_string}' 不合法。应该是一个纯数字。请重新输入");
                         goto REDO_INPUT;
                     }
                     if (count > 100)
@@ -17999,7 +18015,7 @@ out string error1);
             }
 
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         static bool Has049(MarcRecord record)
@@ -18292,7 +18308,7 @@ out string error1);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // return:
@@ -18447,7 +18463,7 @@ out strError);
             VerifyData(this, "verify", rule, false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void textBox_biblioRecPath_TextChanged(object sender, EventArgs e)
