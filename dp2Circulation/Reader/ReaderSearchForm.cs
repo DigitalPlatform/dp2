@@ -8841,12 +8841,19 @@ dlg.UiState);
                                 history_loader.Actions = "return,lost,transferIdTo:itemBarcode|readerBarcode";
                                 history_loader.Order = "descending";
 
+                                history_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                                history_loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+
                                 CacheableBiblioLoader summary_loader = new CacheableBiblioLoader();
                                 summary_loader.Channel = channel;
                                 summary_loader.Stop = looping.Progress;
                                 summary_loader.Format = "summary";
                                 summary_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                                 // summary_loader.RecPaths = biblio_recpaths;
+
+                                summary_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                                summary_loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                                 // 输出借阅历史表格
                                 // 可能会抛出异常，例如权限不够

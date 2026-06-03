@@ -4,6 +4,7 @@ using DigitalPlatform.Text;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 
@@ -11,6 +12,12 @@ namespace DigitalPlatform.LibraryClient
 {
     public class ChargingHistoryLoader : IEnumerable
     {
+        // 2026/6/3
+        /// <summary>
+        /// 提示框事件
+        /// </summary>
+        public event MessagePromptEventHandler Prompt = null;
+
         public string PatronBarcode { get; set; }
         public string TimeRange { get; set; }
         public string Actions { get; set; }
@@ -62,6 +69,7 @@ namespace DigitalPlatform.LibraryClient
             {
                 string strError = "";
                 ChargingItemWrapper[] temp_results = null;
+            REDO:
                 // 注: SearchCharging() API 需要较长的 channel 超时参数，比如 30 秒
                 long lRet = this.Channel.SearchCharging(
                     this.Stop,
@@ -73,8 +81,41 @@ namespace DigitalPlatform.LibraryClient
                     lLength,
                     out temp_results,
                     out strError);
+
+                // testing
+                // lRet = -1;
+                // strError = "test";
+
                 if (lRet == -1)
-                    throw new ChannelException(this.Channel.ErrorCode, strError);
+                {
+                    // TODO: 如果错误码为超时，尝试增加 channel.Timeout 并重试一次
+
+                    // 2026/6/3
+                    if (this.Prompt != null)
+                    {
+                        MessagePromptEventArgs e = new MessagePromptEventArgs
+                        {
+                            MessageText = $"获得借阅历史时发生错误： { strError }\r\nPatronBarcode='{this.PatronBarcode}', TimeRange='{this.TimeRange}', Actions='{this.Actions}', Order='{this.Order}'",
+                            Actions = "yes,no,cancel"
+                        };
+                        this.Prompt(this, e);
+                        if (e.ResultAction == "cancel")
+                            throw new ChannelException(Channel.ErrorCode, strError);
+                        else if (e.ResultAction == "yes")
+                            goto REDO;
+                        else
+                        {
+                            // no 也是抛出异常。因为继续下一批代价太大
+                            throw new ChannelException(Channel.ErrorCode, strError);
+                        }
+                    }
+                    else
+                        throw new ChannelException(Channel.ErrorCode, strError);
+                }
+
+                //if (lRet == -1)
+                //    throw new ChannelException(this.Channel.ErrorCode, strError);
+
                 lHitCount = lRet;
                 if (temp_results == null || temp_results.Length == 0)
                     break;
