@@ -1077,8 +1077,8 @@ COLUMN_CALLNUMBER);
         // 按照'.'等切割符号，从左到右逐段规范化为彼此等长
         static void CanonicalZhongcihaoString(ref string s1, ref string s2)
         {
-            string[] a1 = s1.Split(new char[] { '.', ',', '=', '-' });
-            string[] a2 = s2.Split(new char[] { '.', ',', '=', '-' });
+            string[] a1 = s1.Split(new char[] { '.', ',', '=', '-', ':' }); // 2026/6/3
+            string[] a2 = s2.Split(new char[] { '.', ',', '=', '-', ':' });
 
             string result1 = "";
             string result2 = "";
@@ -2112,7 +2112,7 @@ COLUMN_CALLNUMBER);
                 string access_no)
             {
                 var number = BuildNumber(
-                    location, 
+                    location,
                     access_no);
                 RemoveNumber(list, number);
             }
@@ -2819,7 +2819,7 @@ COLUMN_CALLNUMBER);
                         if (nRet == 0)
                             strTestNumber = ""; // "1"
 
-                        REDO_INPUT:
+                    REDO_INPUT:
                         // 此类从来没有过记录，当前是第一条
                         strNumber = InputDlg.GetInput(
                             this,
@@ -2939,7 +2939,7 @@ COLUMN_CALLNUMBER);
                         if (nRet == 0)
                             strTestNumber = ""; // "1"
 
-                        REDO_INPUT:
+                    REDO_INPUT:
                         // 此类从来没有过记录，当前是第一条
                         strNumber = InputDlg.GetInput(
                             this,

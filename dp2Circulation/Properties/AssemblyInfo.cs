@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.205.*")]
-[assembly: AssemblyFileVersion("3.205.0.0")]
+[assembly: AssemblyVersion("3.206.*")]
+[assembly: AssemblyFileVersion("3.206.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -287,3 +287,4 @@ using System.Runtime.InteropServices;
 // 3.204 2026/4/28  日志统计窗的“指定方案名”对话框打开时如果遇到报错，MessageBox 对话框会显示在看不见的地方，整个界面就被冻结了。此 bug 已经修正。另外，“统计方案管理”对话框中的上下文菜单“从 dp2003.com 安装”也有类似问题，也已经修正。
 // 3.205 2026/5/7   日志统计窗的“指定方案名”对话框打开时如果遇到报错，原有 MessageBox 对话框改进为直接在 TreeView 中显示报错信息。
 //                  改进自动保存和恢复对话框尺寸的机制，在对话框打开时，探测即将(以上次保存的)设置给对话框的位置和尺寸，如果会导致对话框在当前所有屏幕都不可见，则放弃主动设置这种位置和尺寸。
+// 3.206 2026/6/3   种次号维护窗中先前版本正规化索取号字符串的算法遗漏了冒号，导致一些有冒号的索取号被错误估计空号。此 bug 已经解决。
