@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Diagnostics;
 
+using Serilog;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 
@@ -170,7 +172,9 @@ namespace DigitalPlatform.Script
 
         private void GetProjectNameDlg_Load(object sender, System.EventArgs e)
 		{
-			treeView1.ImageList = imageList_projectNodeType;
+            debug_output("enter GetProjectNameDlg_Load()");
+
+            treeView1.ImageList = imageList_projectNodeType;
 			treeView1.PathSeparator = "/";
 			this.AcceptButton = this.button_OK;
 
@@ -200,19 +204,35 @@ namespace DigitalPlatform.Script
 
                 try
                 {
+                    debug_output("before FillTree()");
+
                     scriptManager.FillTree(this.treeView1);
+
+                    // testing
+                    // throw new Exception("test");
                 }
                 catch (Exception ex)
                 {
                     string error = "装载 " + scriptManager.CfgFilePath + " 文件失败，原因:" + ex.Message;
 
+                    debug_output("FillTree() catch exception: " + error);
+
+                    this.treeView1.ShowErrorOverlay(error);
+                    /*
+                    // this.MessageBoxShow(error);
                     this.BeginInvoke((Action)(() =>
                     {
-                        MessageBox.Show(this, error);
+                        debug_output("before MessageBoxShow()");
+
+                        this.MessageBoxShow(error);
+
+                        debug_output("after MessageBoxShow()");
+
                         this.DialogResult = DialogResult.Cancel;
                         this.Close();
                     }));
                     // throw new Exception("装载 " + scriptManager.CfgFilePath + " 文件失败，原因:" + ex.Message, ex);
+                    */
                 }
             }
 
@@ -233,7 +253,12 @@ namespace DigitalPlatform.Script
                 this.checkBox_noneProject.Enabled = false;
 		}
 
-		private void treeView1_AfterSelect(object sender, 
+        static void debug_output(string strText)
+        {
+            Log.Logger.Information(strText);
+        }
+
+        private void treeView1_AfterSelect(object sender, 
 			System.Windows.Forms.TreeViewEventArgs e)
 		{
 			if (e.Node == null)

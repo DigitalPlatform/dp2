@@ -414,6 +414,8 @@ null);
             if (bVisible == true)
                 form.Visible = false;
 
+            var old_bounds = form.Bounds;
+
             form.Width = this.GetInt(
                 strCfgTitle, "width", form.Width);
             form.Height = this.GetInt(
@@ -422,6 +424,11 @@ null);
             form.Location = new Point(
                 this.GetInt(strCfgTitle, "x", form.Location.X),
                 this.GetInt(strCfgTitle, "y", form.Location.Y));
+
+            // 2026/5/6
+            // 如果窗口在当前所有屏幕均不可见，则恢复为未修改前的位置和尺寸
+            if (IsFormCompletelyOffScreens(form.Bounds, false, 20, 0.1))
+                form.Bounds = old_bounds;
 
             string strState = this.GetString(
                 strCfgTitle,
@@ -443,9 +450,50 @@ null);
             /// form.Update();  // 2007/4/8
         }
 
+
+        public static bool IsFormCompletelyOffScreens(
+            Rectangle formRect,
+            // Form form,
+            bool useScreenBounds = false,   // true -> Screen.Bounds (包含任务栏)，false -> Screen.WorkingArea
+            int insetPixels = 0,            // 对窗体矩形做内缩，>0 表示要求更多面积必须在屏幕内
+            double minVisibleRatio = 0.0)   // 要求窗体至少有多少比例可见（0.0 表示有任意交集就算可见）
+        {
+            // Rectangle formRect = form.Bounds;
+
+            // 应用内缩（保证不会产生负宽高）
+            if (insetPixels != 0)
+            {
+                int w = Math.Max(0, formRect.Width - 2 * insetPixels);
+                int h = Math.Max(0, formRect.Height - 2 * insetPixels);
+                formRect = new Rectangle(formRect.X + insetPixels, formRect.Y + insetPixels, w, h);
+            }
+
+            foreach (var screen in Screen.AllScreens)
+            {
+                Rectangle screenArea = useScreenBounds ? screen.Bounds : screen.WorkingArea;
+                Rectangle intersection = Rectangle.Intersect(screenArea, formRect);
+                if (!intersection.IsEmpty)
+                {
+                    if (minVisibleRatio <= 0.0)
+                        return false; // 任意交集即视为可见
+
+                    double formArea = formRect.Width * (double)formRect.Height;
+                    if (formArea <= 0)
+                        return true; // 窗体无面积，认为不可见
+
+                    double intersectArea = intersection.Width * (double)intersection.Height;
+                    if (intersectArea / formArea >= minVisibleRatio)
+                        return false; // 达到最小可见比例
+                }
+            }
+
+            // 与所有显示器均无足够交集 -> 完全在屏幕之外
+            return true;
+        }
+
         // 装载MDI子窗口的最大化特性。需要在至少一个MDI子窗口打开后调用
         public void LoadFormMdiChildStates(Form form,
-            string strCfgTitle)
+                string strCfgTitle)
         {
             if (form.ActiveMdiChild == null)
                 return;

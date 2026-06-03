@@ -277,6 +277,9 @@ namespace DigitalPlatform.Script
                 try
                 {
                     scriptManager.FillTree(this.treeView1);
+
+                    // testing
+                    // throw new Exception("test");
                 }
                 catch (System.IO.FileNotFoundException ex)
                 {
@@ -288,7 +291,9 @@ namespace DigitalPlatform.Script
                     //return;
                     if (bDone == false)
                     {
+                        /*
                         this.MessageBoxShow("自动创建新文件 " + scriptManager.CfgFilePath);
+                        */
 
                         // 触发事件
                         if (this.CreateProjectXmlFile != null)
@@ -305,15 +310,24 @@ namespace DigitalPlatform.Script
                     }
                     else
                     {
+                        /*
                         this.MessageBoxShow(ExceptionUtil.GetAutoText(ex));
-                        return;
+                        */
+                        this.treeView1.ShowErrorOverlay(
+        "装载 " + scriptManager.CfgFilePath + " 文件失败(bDone==true)，原因:"
+        + ExceptionUtil.GetAutoText(ex)); return;
                     }
                 }
-                catch (System.Xml.XmlException ex)
+                catch (/*System.Xml.XmlException*/Exception ex)
                 {
+                    /*
                     this.MessageBoxShow(
                         "装载 " + scriptManager.CfgFilePath + " 文件失败，原因:"
                         + ex.Message);
+                    */
+                    this.treeView1.ShowErrorOverlay(
+    "装载 " + scriptManager.CfgFilePath + " 文件失败，原因:"
+    + ex.Message);
                     return;
                 }
             }
@@ -399,7 +413,7 @@ namespace DigitalPlatform.Script
             // 当前已选择的node
             if (treeView1.SelectedNode == null)
             {
-                MessageBox.Show(this, "尚未选择方案或者目录");
+                this.MessageBoxShow("尚未选择方案或者目录");
                 return;
             }
 
@@ -446,7 +460,7 @@ namespace DigitalPlatform.Script
                 out strLocate);
             if (nRet != 1)
             {
-                MessageBox.Show(this, "方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
+                this.MessageBoxShow("方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
                 return;
             }
 
@@ -748,7 +762,7 @@ namespace DigitalPlatform.Script
             // 当前已选择的node
             if (treeView1.SelectedNode == null)
             {
-                MessageBox.Show(this, "尚未选择方案或目录");
+                this.MessageBoxShow("尚未选择方案或目录");
                 return;
             }
 
@@ -780,7 +794,7 @@ namespace DigitalPlatform.Script
                     out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                     // return ;
                 }
 
@@ -865,11 +879,11 @@ namespace DigitalPlatform.Script
             return;
         CANCEL1:
             if (string.IsNullOrEmpty(strError) == false)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             return;
 
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         }
 
@@ -1282,10 +1296,10 @@ namespace DigitalPlatform.Script
                 this.EnableControls(true);
             }
 
-            MessageBox.Show(this, "共安装方案 " + nInstallCount.ToString() + " 个");
+            this.MessageBoxShow("共安装方案 " + nInstallCount.ToString() + " 个");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 从 dp2003.com 安装方案
@@ -1409,10 +1423,10 @@ namespace DigitalPlatform.Script
             }
 
 
-            MessageBox.Show(this, "共安装方案 " + nInstallCount.ToString() + " 个");
+            this.MessageBoxShow("共安装方案 " + nInstallCount.ToString() + " 个");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void treeView1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -1434,7 +1448,7 @@ namespace DigitalPlatform.Script
             // 当前已选择的node
             if (treeView1.SelectedNode == null)
             {
-                MessageBox.Show(this, "尚未选择方案或目录");
+                this.MessageBoxShow("尚未选择方案或目录");
                 return;
             }
 
@@ -1474,7 +1488,7 @@ namespace DigitalPlatform.Script
 
             if (nRet == 2)
             {
-                MessageBox.Show(this, "已经到头了，不能移动了...");
+                this.MessageBoxShow("已经到头了，不能移动了...");
             }
             return;
         }
@@ -1610,12 +1624,12 @@ namespace DigitalPlatform.Script
                 out strSourceLocate);
             if (nRet == -1)
             {
-                MessageBox.Show(this, "source GetProjectData() " + strSourceProjectName + " error...");
+                this.MessageBoxShow("source GetProjectData() " + strSourceProjectName + " error...");
                 return;
             }
             if (nRet == 0)
             {
-                MessageBox.Show(this, "source project " + strSourceProjectName + " not found error...");
+                this.MessageBoxShow("source project " + strSourceProjectName + " not found error...");
                 return;
             }
 
@@ -1641,7 +1655,7 @@ namespace DigitalPlatform.Script
                 out strTargetLocate);
             if (nRet == -1)
             {
-                MessageBox.Show(this, "target GetProjectData() " + strSourceProjectName + " error...");
+                this.MessageBoxShow("target GetProjectData() " + strSourceProjectName + " error...");
                 return;
             }
 
@@ -1740,12 +1754,12 @@ namespace DigitalPlatform.Script
                 strSourceProjectName,
                 '/');
 
-            MessageBox.Show(this, "外部方案 '" + strSourceProjectName + "' 已经成功导入本系统。");
+            this.MessageBoxShow("外部方案 '" + strSourceProjectName + "' 已经成功导入本系统。");
             return;
         END2:
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         }
 
@@ -1767,7 +1781,7 @@ namespace DigitalPlatform.Script
 
             if (node == null)
             {
-                MessageBox.Show(this, "请先选定要导出的方案...");
+                this.MessageBoxShow("请先选定要导出的方案...");
                 return;
             }
 
@@ -1786,12 +1800,12 @@ namespace DigitalPlatform.Script
                 out strSourceLocate);
             if (nRet == -1)
             {
-                MessageBox.Show(this, "source GetProjectData() " + strSourceProjectName + " error...");
+                this.MessageBoxShow("source GetProjectData() " + strSourceProjectName + " error...");
                 return;
             }
             if (nRet == 0)
             {
-                MessageBox.Show(this, "source project " + strSourceProjectName + " not found error...");
+                this.MessageBoxShow("source project " + strSourceProjectName + " not found error...");
                 return;
             }
 
@@ -1837,7 +1851,7 @@ namespace DigitalPlatform.Script
                 out strTargetLocate);
             if (nRet == -1)
             {
-                MessageBox.Show(this, "target GetProjectData() " + strSourceProjectName + " error...");
+                this.MessageBoxShow("target GetProjectData() " + strSourceProjectName + " error...");
                 return;
             }
 
@@ -1923,14 +1937,12 @@ namespace DigitalPlatform.Script
         END1:
 
             newScriptManager.Save();
-            MessageBox.Show(this, "方案 '" + strSourceProjectName
-                + "' \r\n已经成功导出到文件 \r\n'"
-                + newScriptManager.CfgFilePath + "' \r\n所管理的外部方案集内。");
+            this.MessageBoxShow("方案 '" + strSourceProjectName + "' \r\n已经成功导出到文件 \r\n'" + newScriptManager.CfgFilePath + "' \r\n所管理的外部方案集内。");
             return;
         END2:
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         }
 
@@ -1941,7 +1953,7 @@ namespace DigitalPlatform.Script
             // 当前已选择的node
             if (treeView1.SelectedNode == null)
             {
-                MessageBox.Show(this, "尚未选择方案或者目录");
+                this.MessageBoxShow("尚未选择方案或者目录");
                 return;
             }
 
@@ -1967,7 +1979,7 @@ namespace DigitalPlatform.Script
                     out strLocate);
                 if (nRet != 1)
                 {
-                    MessageBox.Show(this, "方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
+                    this.MessageBoxShow("方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
                     return;
                 }
 
@@ -1980,7 +1992,7 @@ namespace DigitalPlatform.Script
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, "MakeProject error : " + ex.Message);
+                    this.MessageBoxShow("MakeProject error : " + ex.Message);
                     return;
                 }
 
@@ -1999,7 +2011,7 @@ namespace DigitalPlatform.Script
             // 当前已选择的node
             if (treeView1.SelectedNode == null)
             {
-                MessageBox.Show(this, "尚未选择方案或者目录");
+                this.MessageBoxShow("尚未选择方案或者目录");
                 return;
             }
 
@@ -2025,7 +2037,7 @@ namespace DigitalPlatform.Script
                     out strLocate);
                 if (nRet != 1)
                 {
-                    MessageBox.Show(this, "方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
+                    this.MessageBoxShow("方案 " + strProjectNamePath + " 在ScriptManager中没有找到");
                     return;
                 }
 
@@ -2047,7 +2059,7 @@ namespace DigitalPlatform.Script
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, "MakeProject error : " + ex.Message);
+                    this.MessageBoxShow("MakeProject error : " + ex.Message);
                     return;
                 }
 
@@ -2057,7 +2069,7 @@ namespace DigitalPlatform.Script
                     && strHostName != this.HostName)
                 {
                     string strError = "拟导出的方案其(在metadata.xml定义的)宿主名为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。拒绝导出";
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                     return;
                 }
 
@@ -2206,7 +2218,7 @@ Stack:
                 && strHostName != this.HostName)
                 {
                     strError = "拟导入方案 '" + project.NamePath + "' 其宿主为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。被拒绝导入。";
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                     continue;
                 }
 
@@ -2220,7 +2232,7 @@ Stack:
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 将Project对象Paste到管理界面中
@@ -2405,7 +2417,7 @@ strLastModified);
                 && strHostName != this.HostName)
             {
                 strError = "警告：拟粘贴的方案其宿主为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。请注意在粘贴完成后修改其宿主名(位于metadata.xml中)";
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
 
             int nRet = PasteProject(project,
@@ -2417,7 +2429,7 @@ strLastModified);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         }
 
@@ -2429,7 +2441,7 @@ strLastModified);
             if (iData == null
                 || iData.GetDataPresent(typeof(Project)) == false)
             {
-                MessageBox.Show(this, "剪贴板中尚不存在Project类型数据");
+                this.MessageBoxShow("剪贴板中尚不存在Project类型数据");
                 return;
             }
 
@@ -2446,7 +2458,7 @@ strLastModified);
                 && strHostName != this.HostName)
             {
                 strError = "警告：拟粘贴的方案其宿主为 '" + GetHostNameCaption(strHostName) + "', 不符合当前窗口的宿主名 '" + GetHostNameCaption(this.HostName) + "'。请注意在粘贴完成后修改其宿主名(位于metadata.xml中)";
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             }
 
             int nRet = PasteProject(project,
@@ -2458,7 +2470,7 @@ strLastModified);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         }
 
@@ -2589,15 +2601,15 @@ strLastModified);
             }
 
             if (string.IsNullOrEmpty(strWarning) == false)
-                MessageBox.Show(this, strWarning);
+                this.MessageBoxShow(strWarning);
 
             if (string.IsNullOrEmpty(strUpdateInfo) == false)
-                MessageBox.Show(this, "下列方案已经更新:\r\n" + strUpdateInfo);
+                this.MessageBoxShow("下列方案已经更新:\r\n" + strUpdateInfo);
             else
-                MessageBox.Show(this, "没有发现更新");
+                this.MessageBoxShow("没有发现更新");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 从 dp2003.com 检查更新
@@ -2639,15 +2651,15 @@ strLastModified);
             }
 
             if (string.IsNullOrEmpty(strWarning) == false)
-                MessageBox.Show(this, strWarning);
+                this.MessageBoxShow(strWarning);
 
             if (string.IsNullOrEmpty(strUpdateInfo) == false)
-                MessageBox.Show(this, "下列方案已经更新:\r\n" + strUpdateInfo);
+                this.MessageBoxShow("下列方案已经更新:\r\n" + strUpdateInfo);
             else
-                MessageBox.Show(this, "没有发现更新");
+                this.MessageBoxShow("没有发现更新");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
 #if NO

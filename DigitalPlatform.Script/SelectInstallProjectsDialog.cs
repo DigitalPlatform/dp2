@@ -42,10 +42,10 @@ namespace DigitalPlatform.Script
             int nRet = FillList(out strError);
             if (nRet == -1)
             {
-                // MessageBox.Show(this, strError);
+                // this.MessageBoxShow(strError); 
                 this.BeginInvoke((Action)(() =>
                 {
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                     this.DialogResult = DialogResult.Cancel;
                     this.Close();
                 }));

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace DigitalPlatform
 {
@@ -113,6 +114,74 @@ namespace DigitalPlatform
                 form.Invoke((Action)(method));
             else
                 method.Invoke();
+        }
+
+        /// <summary>
+        /// 在指定控件上覆盖显示一个新的只读 TextBox，用来显示报错信息。
+        /// 新 TextBox 的大小、字体与被覆盖控件一致，并放到被覆盖控件之上。
+        /// 返回新创建的 TextBox 控件。
+        /// </summary>
+        /// <param name="target">要被覆盖的控件</param>
+        /// <param name="errorText">要显示的错误文本</param>
+        /// <returns>新创建并显示的 TextBox</returns>
+        public static TextBox ShowErrorOverlay(this Control target, string errorText)
+        {
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
+
+            TextBox overlay = null;
+
+            // Ensure run on UI thread of the target
+            target.TryInvoke(() =>
+            {
+                Control parent = target.Parent;
+                Point location;
+
+                if (parent == null)
+                {
+                    // fall back to form if parent is null
+                    Form form = target.FindForm();
+                    if (form != null)
+                    {
+                        parent = form;
+                        // translate target location to form client coordinates
+                        Point screen = target.PointToScreen(Point.Empty);
+                        location = form.PointToClient(screen);
+                    }
+                    else
+                    {
+                        // ultimate fallback
+                        parent = target;
+                        location = target.Location;
+                    }
+                }
+                else
+                {
+                    // location relative to parent
+                    location = target.Location;
+                }
+
+                overlay = new TextBox();
+                overlay.Multiline = true;
+                overlay.ReadOnly = true;
+                overlay.Text = errorText ?? string.Empty;
+                overlay.Font = target.Font;
+                overlay.Size = target.Size;
+                overlay.Location = location;
+                overlay.Anchor = target.Anchor;
+                overlay.Dock = DockStyle.None;
+                overlay.BorderStyle = BorderStyle.FixedSingle;
+                overlay.BackColor = Color.DarkRed;  //  Color.MistyRose;
+                overlay.ForeColor = Color.White;    //  Color.Black;
+                overlay.TabStop = false;
+                overlay.Name = "errorOverlay_" + Guid.NewGuid().ToString("N");
+
+                // make sure overlay is placed above the target
+                parent.Controls.Add(overlay);
+                overlay.BringToFront();
+            });
+
+            return overlay;
         }
 
         // 根据 uiThread 是否为 true，决定是否要确保在 UI 线程调用
